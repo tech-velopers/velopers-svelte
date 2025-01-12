@@ -6,6 +6,7 @@
   import CategoryList from "$lib/components/main/CategoryList.svelte";
   import PostList from "$lib/components/main/PostList.svelte";
   import Sidebar from "$lib/components/sidebar/Sidebar.svelte";
+  import { getApiUrl, API_ENDPOINTS } from '$lib/config';
 
   // 태그 타입 정의
   interface Tag {
@@ -40,7 +41,7 @@
   // API에서 태그 목록 가져오기
   async function fetchTags() {
     try {
-      const response = await fetch('http://144.24.81.210:8080/api/tags');
+      const response = await fetch(getApiUrl(API_ENDPOINTS.tags));
       const data = await response.json();
       allTags = data.sort((a: Tag, b: Tag) => a.tagName.localeCompare(b.tagName));
     } catch (error) {
@@ -52,7 +53,7 @@
   async function fetchPosts() {
     isLoading = true;
     try {
-      const response = await fetch('http://localhost:8080/api/posts', {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.posts), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
