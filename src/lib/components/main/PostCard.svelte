@@ -64,8 +64,22 @@
   }
 </script>
 
-<div on:click={handlePostClick} class="w-full text-left cursor-pointer">
-  <article class="bg-white dark:bg-gray-900 p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex gap-4 md:gap-6 dark:ring-1 dark:ring-gray-800 group">
+<button 
+  on:click={handlePostClick} 
+  type="button"
+  class="w-full text-left cursor-pointer">
+  <article class="bg-white dark:bg-gray-900 p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-4 md:gap-6 dark:ring-1 dark:ring-gray-800 group">
+    <div class="md:hidden w-full h-48 flex-shrink-0 rounded-lg overflow-hidden relative order-first">
+      {#if !loadedImages.has(post.imageUrl)}
+        <Skeleton class="w-full h-full" />
+      {/if}
+      <img 
+        src={post.imageUrl} 
+        alt="Post thumbnail" 
+        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 {!loadedImages.has(post.imageUrl) ? 'opacity-0' : 'opacity-100'}"
+        on:load={() => handleImageLoad(post.imageUrl)}
+      />
+    </div>
     <div class="flex-1 flex flex-col">
       <div class="cursor-pointer">
         <h2 class="text-base md:text-lg font-semibold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300">{post.title}</h2>
@@ -87,7 +101,7 @@
           {/each}
         </div>
       </div>
-      <div class="mt-auto">
+      <div class="mt-4 md:mt-6">
         <div class="flex items-center text-xs md:text-sm text-gray-500 dark:text-gray-400">
           <HoverCard.Root openDelay={500}>
             <HoverCard.Trigger class="flex items-center hover:text-blue-500 transition-colors">
@@ -152,7 +166,7 @@
         </div>
       </div>
     </div>
-    <div class="w-20 h-20 md:w-36 md:h-36 flex-shrink-0 rounded-lg overflow-hidden relative">
+    <div class="hidden md:block w-36 h-36 flex-shrink-0 rounded-lg overflow-hidden relative">
       {#if !loadedImages.has(post.imageUrl)}
         <Skeleton class="w-full h-full" />
       {/if}
@@ -164,4 +178,4 @@
       />
     </div>
   </article>
-</div> 
+</button> 

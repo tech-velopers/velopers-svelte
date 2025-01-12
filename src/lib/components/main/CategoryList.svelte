@@ -60,7 +60,7 @@
           hover:-translate-y-0.5"
         on:click={() => selectCategory(category)}
       >
-        <span>{category}</span>
+        <span class="{category === 'Architecture' ? 'text-[11px] md:text-sm' : ''}">{category}</span>
         {#if loading}
           <span class="ml-1 {currentCategory === category ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500'} text-xs font-normal">
             (<div class="inline-block animate-pulse w-5 h-3 bg-gray-300 dark:bg-gray-600 rounded"></div>)
