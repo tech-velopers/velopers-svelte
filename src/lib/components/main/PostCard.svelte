@@ -64,9 +64,11 @@
   }
 </script>
 
-<button 
-  on:click={handlePostClick} 
-  type="button"
+<div 
+  on:click={handlePostClick}
+  on:keydown={e => e.key === 'Enter' && handlePostClick()}
+  role="button"
+  tabindex="0" 
   class="w-full text-left cursor-pointer">
   <article class="bg-white dark:bg-gray-900 p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-4 md:gap-6 dark:ring-1 dark:ring-gray-800 group">
     <div class="md:hidden w-full h-48 flex-shrink-0 rounded-lg overflow-hidden relative order-first">
@@ -178,4 +180,4 @@
       />
     </div>
   </article>
-</button> 
+</div> 

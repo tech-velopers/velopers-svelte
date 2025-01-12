@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   
   export let currentCategory: string;
   export let selectCategory: (category: string) => void;
@@ -24,7 +25,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/categories', {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.categories), {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
