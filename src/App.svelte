@@ -38,6 +38,37 @@
   let selectedBlogs: string[] = [];
   let loadedImages = new Set<string>();
 
+  // URL에서 파라미터 가져오기
+  function getParamsFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = parseInt(urlParams.get('page') || '1');
+    const category = urlParams.get('category') || 'All';
+    return {
+      page: isNaN(page) ? 1 : page,
+      category
+    };
+  }
+
+  // URL 업데이트
+  function updateUrl(page: number, category: string) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page.toString());
+    url.searchParams.set('category', category);
+    window.history.pushState({}, '', url.toString());
+  }
+
+  // 페이지 변경 시 데이터 가져오기
+  function goToPage(page: number) {
+    currentPage = page;
+    updateUrl(page, currentCategory);
+    fetchPosts();
+    // 부드러운 스크롤 애니메이션으로 페이지 상단으로 이동
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
   // API에서 태그 목록 가져오기
   async function fetchTags() {
     try {
@@ -63,13 +94,12 @@
           tags: selectedTags,
           blogs: selectedBlogs,
           size: 10,
-          page: currentPage
+          page: currentPage - 1
         })
       });
       const data = await response.json();
       posts = data.content;
       totalPages = data.totalPages;
-      currentPage = data.number + 1;
     } catch (error) {
       console.error('포스트를 가져오는데 실패했습니다:', error);
     } finally {
@@ -81,6 +111,9 @@
   let isDarkMode = false;
   
   onMount(() => {
+    const { page, category } = getParamsFromUrl();
+    currentPage = page;
+    currentCategory = category;
     fetchTags();
     fetchPosts();
     // 시스템 다크모드 설정 확인
@@ -109,6 +142,7 @@
   const selectCategory = (category: string) => {
     currentCategory = category;
     currentPage = 1;
+    updateUrl(currentPage, category);
     fetchPosts();
   };
 
@@ -142,12 +176,6 @@
     currentPage = 1;
     fetchPosts();
   };
-
-  // 페이지 변경 시 데이터 가져오기
-  function goToPage(page: number) {
-    currentPage = page;
-    fetchPosts();
-  }
 </script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-black transition-colors">

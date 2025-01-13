@@ -1,4 +1,5 @@
 <script lang="ts">
+  import * as HoverCard from "$lib/components/ui/hover-card";
   export let isDarkMode: boolean;
   export let toggleDarkMode: () => void;
 </script>
@@ -34,8 +35,27 @@
       </button>
       <div class="h-4 w-px mx-2 bg-gray-300 dark:bg-gray-700"></div>
       <div class="flex items-center space-x-2">
-        <a href="/login" class="p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">로그인</a>
-        <a href="/signup" class="hidden md:block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">회원가입</a>
+        <HoverCard.Root openDelay={500}>
+          <HoverCard.Trigger>
+            <button disabled class="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 cursor-not-allowed text-gray-400 dark:text-gray-500">로그인</button>
+          </HoverCard.Trigger>
+          <HoverCard.Content class="w-64">
+            <div class="p-4">
+              <p class="text-sm text-gray-600 dark:text-gray-300">아직 구현되지 않았어요</p>
+            </div>
+          </HoverCard.Content>
+        </HoverCard.Root>
+
+        <HoverCard.Root openDelay={500}>
+          <HoverCard.Trigger>
+            <button disabled class="hidden md:block px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg cursor-not-allowed">회원가입</button>
+          </HoverCard.Trigger>
+          <HoverCard.Content class="w-64">
+            <div class="p-4">
+              <p class="text-sm text-gray-600 dark:text-gray-300">아직 구현되지 않았어요</p>
+            </div>
+          </HoverCard.Content>
+        </HoverCard.Root>
       </div>
     </nav>
   </div>
