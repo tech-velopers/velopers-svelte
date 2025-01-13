@@ -118,14 +118,15 @@
     currentCategory = category;
     fetchTags();
     fetchPosts();
-    // 시스템 다크모드 설정 확인
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    // 저장된 다크모드 설정 확인
+    // 저장된 테마 설정 확인
     const savedTheme = localStorage.getItem('theme');
     
-    isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    // 초기 상태를 라이트 모드로 설정
+    isDarkMode = savedTheme === 'dark';
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
   });
 
