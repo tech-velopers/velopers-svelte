@@ -1,7 +1,7 @@
 // 개발 환경에서는 localhost:8080을, 프로덕션에서는 상대 경로를 사용
 export const API_BASE_URL = import.meta.env.DEV 
     ? 'http://localhost:8080'
-    : '';
+    : 'https://server.velopers.kr';
 
 // API 엔드포인트 함수들
 export const getApiUrl = (endpoint: string) => `${API_BASE_URL}${endpoint}`;

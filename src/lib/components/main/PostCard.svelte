@@ -8,7 +8,7 @@
   export let post: {
     id: number;
     title: string;
-    
+    url: string;
     preview: string;
     imageUrl: string;
     company: {
@@ -30,7 +30,7 @@
   }
 
   function handlePostClick() {
-    window.location.href = `/post/${post.id}`;
+    window.open(post.url, '_blank');
   }
 
   // 회사별 배경색 매핑

@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://velopers.kr/api/:path*"
+      "destination": "https://server.velopers.kr/api/:path*"
     },
     {
       "source": "/(.*)",

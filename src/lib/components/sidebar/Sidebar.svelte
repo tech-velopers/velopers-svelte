@@ -12,10 +12,11 @@
   export let toggleBlog: (blog: string) => void;
   export let searchWithSelected: () => void;
   export let resetSelected: () => void;
+  export let onSearch: (event: CustomEvent<{query: string}>) => void;
 </script>
 
 <aside class="w-full lg:w-80 space-y-6">
-  <SearchBox />
+  <SearchBox on:search={onSearch} />
   
   <SelectedItems
     {selectedTags}

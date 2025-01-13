@@ -37,6 +37,7 @@
   let selectedTags: string[] = [];
   let selectedBlogs: string[] = [];
   let loadedImages = new Set<string>();
+  let searchQuery = '';
 
   // URL에서 파라미터 가져오기
   function getParamsFromUrl() {
@@ -93,6 +94,7 @@
           category: currentCategory,
           tags: selectedTags,
           blogs: selectedBlogs,
+          query: searchQuery,
           size: 10,
           page: currentPage - 1
         })
@@ -142,6 +144,7 @@
   const selectCategory = (category: string) => {
     currentCategory = category;
     currentPage = 1;
+    searchQuery = '';
     updateUrl(currentPage, category);
     fetchPosts();
   };
@@ -165,6 +168,12 @@
   };
 
   // 검색 및 초기화 함수
+  const handleSearch = (event: CustomEvent<{query: string}>) => {
+    searchQuery = event.detail.query;
+    currentPage = 1;
+    fetchPosts();
+  };
+
   const searchWithSelected = () => {
     currentPage = 1;
     fetchPosts();
@@ -216,6 +225,7 @@
         {toggleBlog}
         {searchWithSelected}
         {resetSelected}
+        onSearch={handleSearch}
       />
     </div>
   </main>
