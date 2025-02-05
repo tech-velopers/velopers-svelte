@@ -7,8 +7,8 @@
     { length: totalPages }, 
     (_, i) => i + 1
   ).slice(
-    Math.max(0, currentPage - 3), 
-    Math.min(totalPages, currentPage + 2)
+    Math.max(0, currentPage - 4), 
+    Math.min(totalPages, currentPage + 4)
   );
 </script>
 

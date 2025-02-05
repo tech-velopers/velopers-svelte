@@ -96,7 +96,7 @@
           blogs: selectedBlogs,
           query: searchQuery,
           size: 10,
-          page: currentPage - 1
+          page: currentPage
         })
       });
       const data = await response.json();
