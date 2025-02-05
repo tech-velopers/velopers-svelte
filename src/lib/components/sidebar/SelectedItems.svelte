@@ -1,13 +1,48 @@
 <script lang="ts">
   import { slide, fade } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
+  import { getApiUrl, API_ENDPOINTS } from '$lib/config';
 
   export let selectedTags: string[];
   export let selectedBlogs: string[];
   export let toggleTag: (tag: string) => void;
   export let toggleBlog: (blog: string) => void;
-  export let searchWithSelected: () => void;
+  export let searchWithSelected: (data: any) => void;
   export let resetSelected: () => void;
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.posts), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          category: 'All',
+          blogs: selectedBlogs,
+          tags: selectedTags,
+          page: 1,
+          size: 10
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts');
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  const handleSearch = async () => {
+    const data = await fetchPosts();
+    if (data) {
+      searchWithSelected(data);
+    }
+  };
 </script>
 
 {#if selectedTags.length > 0 || selectedBlogs.length > 0}
@@ -19,7 +54,7 @@
       <h3 class="text-base font-medium dark:text-white">선택된 항목</h3>
       <div class="flex gap-2">
         <button 
-          on:click={searchWithSelected}
+          on:click={handleSearch}
           class="px-3 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
         >
           검색

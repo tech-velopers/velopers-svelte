@@ -175,9 +175,11 @@
     fetchPosts();
   };
 
-  const searchWithSelected = () => {
+  const searchWithSelected = (data: any) => {
     currentPage = 1;
-    fetchPosts();
+    posts = data.content;
+    totalPages = data.totalPages;
+    isLoading = false;
   };
 
   const resetSelected = () => {

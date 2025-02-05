@@ -1,5 +1,5 @@
-// 개발 환경에서는 localhost:8080을, 프로덕션에서는 상대 경로를 사용
-export const API_BASE_URL = import.meta.env.DEV 
+// 개발 환경에서는 localhost:8080을, QA와 프로덕션에서는 server.velopers.kr을 사용
+export const API_BASE_URL = import.meta.env.MODE === 'development'
     ? 'http://localhost:8080'
     : 'https://server.velopers.kr';
 

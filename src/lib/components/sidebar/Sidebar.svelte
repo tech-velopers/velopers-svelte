@@ -10,7 +10,7 @@
   export let selectedBlogs: string[];
   export let toggleTag: (tag: string) => void;
   export let toggleBlog: (blog: string) => void;
-  export let searchWithSelected: () => void;
+  export let searchWithSelected: (data: any) => void;
   export let resetSelected: () => void;
   export let onSearch: (event: CustomEvent<{query: string}>) => void;
 </script>
