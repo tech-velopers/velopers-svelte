@@ -83,11 +83,12 @@
       />
     </div>
     <div class="flex-1 flex flex-col">
-      <div class="cursor-pointer">
+      <div class="flex-grow">
         <h2 class="text-base md:text-lg font-semibold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300">{post.title}</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-2 flex-grow text-sm">{post.preview}</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-3 text-sm">{post.preview}</p>
       </div>
-      <div class="space-y-2">
+      
+      <div class="mt-auto space-y-3">
         <div class="flex flex-wrap gap-1.5">
           {#each post.tags as tag}
             <button 
@@ -102,14 +103,13 @@
             </button>
           {/each}
         </div>
-      </div>
-      <div class="mt-4 md:mt-6">
+
         <div class="flex items-center text-xs md:text-sm text-gray-500 dark:text-gray-400">
           <HoverCard.Root openDelay={500}>
             <HoverCard.Trigger class="flex items-center hover:text-blue-500 transition-colors">
               <Avatar.Root class="w-4 md:w-5 h-4 md:h-5">
                 <Avatar.Image 
-                  src={post.company.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${post.company.name}`} 
+                  src={`/icons/${post.company.avatar}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.company.name}`} 
                   alt={post.company.name} 
                 />
               </Avatar.Root>
@@ -120,7 +120,7 @@
                 <div class="flex justify-between space-x-3">
                   <Avatar.Root class="h-12 w-12">
                     <Avatar.Image 
-                      src={post.company.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${post.company.name}`} 
+                      src={`/icons/${post.company.avatar}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.company.name}`} 
                       alt={post.company.name}
                     />
                   </Avatar.Root>
@@ -134,10 +134,6 @@
                           포스트
                         </span>
                         <span class="mx-2">•</span>
-                        <span class="flex items-center">
-                          <span class="font-bold text-gray-900 dark:text-white mr-1">1.2k</span>
-                          구독자
-                        </span>
                       </div>
                     </div>
                   </div>

@@ -1,0 +1,41 @@
+# Velopers 프로젝트 라우팅 규칙
+
+## 라우팅 구조
+이 프로젝트는 SvelteKit 대신 Svelte와 커스텀 라우터를 사용합니다.
+
+### 라우터 구현
+- 라우터는 `src/lib/stores/router.ts`에 구현되어 있습니다.
+- Svelte store를 사용하여 현재 경로를 관리합니다.
+- `currentPath` store와 `navigate` 함수를 제공합니다.
+
+### 라우트 정의
+현재 지원하는 라우트:
+- `/`: 메인 페이지 (Home.svelte)
+- `/about`: 소개 페이지 (About.svelte)
+- 그 외 경로: 메인 페이지로 리다이렉트
+
+### 페이지 컴포넌트 위치
+- `src/lib/pages/`: 페이지 컴포넌트들이 위치한 디렉토리
+  - `Home.svelte`: 메인 페이지
+  - `About.svelte`: 소개 페이지
+
+### 네비게이션 사용법
+```typescript
+import { navigate } from "$lib/stores/router";
+
+// 페이지 이동
+navigate('/about');
+```
+
+### 현재 경로 구독
+```typescript
+import { currentPath } from "$lib/stores/router";
+
+// 현재 경로 사용
+$: console.log($currentPath);
+```
+
+## 주의사항
+1. `<a href>` 대신 `navigate` 함수를 사용하여 페이지 이동
+2. 외부 링크는 일반 `<a>` 태그 사용 가능
+3. 새로운 페이지 추가 시 App.svelte의 라우팅 조건문에 추가 필요 
