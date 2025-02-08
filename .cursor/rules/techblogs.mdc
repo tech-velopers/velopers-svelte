@@ -1,10 +1,8 @@
 ---
-description: 
-globs: 
+description: 테크블로그의 정보를 사용할 때 사용
+globs: src/lib/stores/techBlogs.ts
 ---
 # 테크블로그 정보 관리 규칙
-
-**적용 대상**: `src/lib/stores/techBlogs.ts`
 
 ## TechBlogs Store 사용
 

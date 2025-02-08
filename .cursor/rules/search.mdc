@@ -1,12 +1,8 @@
 ---
-description: 
-globs: 
+description: 블로그명, 태그, 쿼리, 카테고리 기준으로 게시글을 검색할 때 사용
+globs: src/lib/stores/search.ts, src/lib/components/sidebar/SearchBox.svelte
 ---
 # 검색 기능 규칙
-
-**적용 대상**:
-- `src/lib/stores/search.ts`
-- `src/lib/components/sidebar/SearchBox.svelte`
 
 ## 검색 Store 사용
 

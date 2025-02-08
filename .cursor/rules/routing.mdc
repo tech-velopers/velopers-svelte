@@ -1,12 +1,8 @@
 ---
-description: 
-globs: 
+description: 커스텀 라우팅, 다른 페이지 이동 시 사용
+globs: src/lib/stores/router.ts, src/lib/pages/*.svelte
 ---
  # 라우팅 규칙
-
-**적용 대상**: 
-- `src/lib/stores/router.ts`
-- `src/lib/pages/*.svelte`
 
 ## 커스텀 라우터 사용
 

@@ -1,13 +1,8 @@
 ---
-description: 
-globs: 
+description: 포스트 관련 모든 상태와 로직은 posts store에서 관리
+globs: src/lib/stores/posts.ts, src/lib/components/main/PostList.svelte, src/lib/components/main/PostCard.svelte
 ---
 # 포스트 관리 규칙
-
-**적용 대상**:
-- `src/lib/stores/posts.ts`
-- `src/lib/components/main/PostList.svelte`
-- `src/lib/components/main/PostCard.svelte`
 
 ## Posts Store 사용
 

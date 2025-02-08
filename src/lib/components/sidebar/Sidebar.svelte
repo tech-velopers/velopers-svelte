@@ -6,7 +6,7 @@
   import { isSidebarOpen, toggleSidebar, closeSidebar } from '$lib/stores/sidebar';
 
   export let allTags: { id: number; tagName: string; }[];
-  export let searchWithSelected: () => void;
+  export let searchWithSelected: (data: any) => void;
   export let onSearch: (event: CustomEvent<{query: string}>) => void;
   export let onReset: () => void;
 
@@ -24,7 +24,7 @@
 
   // 전체보기 이벤트 핸들러
   const handleSearchWithSelected = () => {
-    searchWithSelected();
+    searchWithSelected({ blogs: $selectedBlogs, tags: $selectedTags });
     closeSidebar();
   };
 </script>
@@ -43,7 +43,7 @@
 <!-- 데스크톱 사이드바 -->
 <aside class="hidden lg:block w-[352px] space-y-6">
   <SearchBox 
-    {searchWithSelected}
+    searchWithSelected={handleSearchWithSelected}
     on:search={handleSearch}
     {onReset}
   />
