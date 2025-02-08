@@ -3,6 +3,8 @@
   import { getApiUrl } from "$lib/config";
   import * as Avatar from "$lib/components/ui/avatar";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
+  import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+  import { navigate } from '$lib/stores/router';
 
   interface TechBlog {
     id: number;
@@ -15,8 +17,6 @@
   let blogs: TechBlog[] = [];
   let isLoading = true;
   let error: string | null = null;
-  let selectedBlogs: Array<{ name: string; avatar: string }> = [];
-  let selectedTags: string[] = [];
   let allTags: Array<{ id: number; tagName: string }> = [];
 
   onMount(async () => {
@@ -30,15 +30,6 @@
       isLoading = false;
     }
   });
-
-  function toggleBlog(blog: { name: string; avatar: string }) {
-    const index = selectedBlogs.findIndex(b => b.name === blog.name);
-    if (index === -1) {
-      selectedBlogs = [...selectedBlogs, blog];
-    } else {
-      selectedBlogs = selectedBlogs.filter((_, i) => i !== index);
-    }
-  }
 
   function handleBlogClick(blog: TechBlog) {
     window.open(blog.baseUrl, '_blank', 'noopener,noreferrer');
@@ -54,33 +45,15 @@
     console.log('Search query:', event.detail.query);
   }
 
-  function toggleTag(tagName: string) {
-    if (selectedTags.includes(tagName)) {
-      selectedTags = selectedTags.filter(t => t !== tagName);
-    } else {
-      selectedTags = [...selectedTags, tagName];
-    }
-  }
-
   function searchWithSelected(data: any) {
-    // TODO: 선택된 항목으로 검색 구현
-    console.log('Search with selected:', data);
-  }
-
-  function resetSelected() {
-    selectedTags = [];
-    selectedBlogs = [];
+    // ... existing code ...
+    navigate('/');
   }
 </script>
 
 <MainLayout
   {allTags}
-  {selectedTags}
-  {selectedBlogs}
-  {toggleTag}
-  {toggleBlog}
-  {searchWithSelected}
-  {resetSelected}
+  searchWithSelected={searchWithSelected}
   onSearch={handleSearch}
   showLogo={true}
 >
@@ -125,7 +98,7 @@
           <div class="flex gap-2 mt-4">
             <button 
               type="button"
-              class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {selectedBlogs.some(b => b.name === blog.techBlogName)
+              class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {$selectedBlogs.some(b => b.name === blog.techBlogName)
                 ? 'bg-red-500 hover:bg-red-600 text-white' 
                 : 'bg-blue-500 hover:bg-blue-600 text-white'}"
               on:click={(e) => {
@@ -133,7 +106,7 @@
                 toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
               }}
             >
-              {selectedBlogs.some(b => b.name === blog.techBlogName) ? '선택 해제' : '선택하기'}
+              {$selectedBlogs.some(b => b.name === blog.techBlogName) ? '선택 해제' : '선택하기'}
             </button>
             <button 
               type="button"

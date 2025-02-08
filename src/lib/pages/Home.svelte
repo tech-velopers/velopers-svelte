@@ -4,6 +4,7 @@
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { onMount } from 'svelte';
+  import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
 
   // 태그 타입 정의
   interface Tag {
@@ -31,10 +32,12 @@
   let totalPages = 1;
   let isLoading = false;
   let currentCategory = "All";
-  let selectedTags: string[] = [];
-  let selectedBlogs: Array<{ name: string; avatar: string; }> = [];
   let loadedImages = new Set<string>();
   let searchQuery = '';
+
+  // 상태 관리를 위한 로컬 변수
+  let localSelectedTags: string[] = [];
+  let localSelectedBlogs: Array<{ name: string; avatar: string }> = [];
 
   // URL에서 파라미터 가져오기
   function getParamsFromUrl() {
@@ -88,8 +91,8 @@
         },
         body: JSON.stringify({
           category: currentCategory,
-          tags: selectedTags,
-          blogs: selectedBlogs.map(blog => blog.name),
+          tags: localSelectedTags,
+          blogs: localSelectedBlogs.map(blog => blog.name),
           query: searchQuery,
           size: 10,
           page: currentPage
@@ -110,7 +113,22 @@
     currentPage = page;
     currentCategory = category;
     fetchTags();
+    
+    // 선택된 블로그와 태그 구독 - 로컬 상태만 업데이트
+    const unsubscribeBlogs = selectedBlogs.subscribe(blogs => {
+      localSelectedBlogs = blogs || [];
+    });
+
+    const unsubscribeTags = selectedTags.subscribe(tags => {
+      localSelectedTags = tags || [];
+    });
+
     fetchPosts();
+
+    return () => {
+      unsubscribeBlogs();
+      unsubscribeTags();
+    };
   });
 
   // 카테고리 변경 시 데이터 가져오기
@@ -124,21 +142,13 @@
   
 
   // 태그 토글
-  const toggleTag = (tagName: string) => {
-    if (selectedTags.includes(tagName)) {
-      selectedTags = selectedTags.filter(t => t !== tagName);
-    } else {
-      selectedTags = [...selectedTags, tagName];
-    }
+  const handleToggleTag = (tagName: string) => {
+    toggleTag(tagName);
   };
 
   // 블로그 토글
-  const toggleBlog = (blog: { name: string; avatar: string; }) => {
-    if (selectedBlogs.some(b => b.name === blog.name)) {
-      selectedBlogs = selectedBlogs.filter(b => b.name !== blog.name);
-    } else {
-      selectedBlogs = [...selectedBlogs, blog];
-    }
+  const handleToggleBlog = (blog: { name: string; avatar: string }) => {
+    toggleBlog(blog);
   };
 
   // 검색 및 초기화 함수
@@ -150,28 +160,34 @@
 
   const searchWithSelected = (data: any) => {
     currentPage = 1;
-    posts = data.content;
-    totalPages = data.totalPages;
-    isLoading = false;
+    // 검색 버튼을 눌렀을 때 fetchPosts 호출
+    fetchPosts();
   };
 
-  const resetSelected = () => {
-    selectedTags = [];
-    selectedBlogs = [];
+  const handleResetSelected = () => {
+    // store 초기화
+    resetSelected();
+    // 로컬 상태 초기화
+    localSelectedTags = [];
+    localSelectedBlogs = [];
+    // 검색어 초기화
+    searchQuery = '';
+    // 카테고리 초기화
+    currentCategory = 'All';
+    // 페이지 초기화
     currentPage = 1;
+    // URL 업데이트
+    updateUrl(currentPage, currentCategory);
+    // 전체 포스트 목록 가져오기
     fetchPosts();
   };
 </script>
 
 <MainLayout
   {allTags}
-  {selectedTags}
-  {selectedBlogs}
-  {toggleTag}
-  {toggleBlog}
   {searchWithSelected}
-  {resetSelected}
   onSearch={handleSearch}
+  onReset={handleResetSelected}
 >
   <CategoryList {currentCategory} {selectCategory} />
   <PostList
@@ -179,10 +195,10 @@
     {currentPage}
     {totalPages}
     {goToPage}
-    {toggleTag}
-    {toggleBlog}
-    {selectedTags}
-    {selectedBlogs}
+    toggleTag={handleToggleTag}
+    toggleBlog={handleToggleBlog}
+    selectedTags={localSelectedTags}
+    selectedBlogs={localSelectedBlogs}
     {loadedImages}
     loading={isLoading}
   />

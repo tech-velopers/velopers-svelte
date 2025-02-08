@@ -2,9 +2,7 @@
   import * as HoverCard from "$lib/components/ui/hover-card";
   import * as Avatar from "$lib/components/ui/avatar";
   import { navigate } from "$lib/stores/router";
-
-  export let selectedBlogs: Array<{ name: string; avatar: string; }>;
-  export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
+  import { selectedBlogs, toggleBlog } from '$lib/stores/search';
 
   const blogCategories = [
     {
@@ -53,7 +51,7 @@
                 <button 
                   on:click={() => toggleBlog(company)}
                   class="w-full flex items-center gap-3 group p-2 rounded-lg transition-colors
-                    {selectedBlogs.some(blog => blog.name === company.name)
+                    {$selectedBlogs.some(blog => blog.name === company.name)
                       ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
                       : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-white'}"
                 >
@@ -92,12 +90,12 @@
                   </div>
                   <div class="flex gap-2">
                     <button 
-                      class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {selectedBlogs.some(blog => blog.name === company.name)
+                      class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {$selectedBlogs.some(blog => blog.name === company.name)
                         ? 'bg-red-500 hover:bg-red-600 text-white' 
                         : 'bg-blue-500 hover:bg-blue-600 text-white'}"
                       on:click={() => toggleBlog(company)}
                     >
-                      {selectedBlogs.some(blog => blog.name === company.name) ? '선택 해제' : '선택하기'}
+                      {$selectedBlogs.some(blog => blog.name === company.name) ? '선택 해제' : '선택하기'}
                     </button>
                     <button 
                       class="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-center"

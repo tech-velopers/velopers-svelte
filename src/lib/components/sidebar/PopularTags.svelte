@@ -1,7 +1,7 @@
 <script lang="ts">
-  export let allTags: Array<{ id: number; tagName: string }>;
-  export let selectedTags: string[];
-  export let toggleTag: (tag: string) => void;
+  import { selectedTags, toggleTag } from '$lib/stores/search';
+
+  export let allTags: Array<{ id: number; tagName: string; }>;
   export let loading = false;
 </script>
 
@@ -22,11 +22,10 @@
     {:else}
       {#each allTags as tag}
         <button
+          class="px-3 py-1.5 text-sm rounded-lg transition-colors {$selectedTags.includes(tag.tagName)
+            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
           on:click={() => toggleTag(tag.tagName)}
-          class="px-2 py-1 rounded-md text-sm transition-all duration-200
-            {selectedTags.includes(tag.tagName) 
-              ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800' 
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:-translate-y-0.5'}"
         >
           {tag.tagName}
         </button>

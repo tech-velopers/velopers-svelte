@@ -4,16 +4,10 @@
   import { slide, fade } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
-  
-  export let selectedTags: string[] = [];
-  export let selectedBlogs: Array<{
-    name: string;
-    avatar: string;
-  }> = [];
-  export let toggleTag: (tag: string) => void;
-  export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
+  import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+
   export let searchWithSelected: (data: any) => void;
-  export let resetSelected: () => void;
+  export let onReset: () => void;
 
   let searchQuery = '';
   const dispatch: EventDispatcher<{search: {query: string}}> = createEventDispatcher();
@@ -27,8 +21,8 @@
         },
         body: JSON.stringify({
           category: 'All',
-          blogs: selectedBlogs.map(blog => blog.name),
-          tags: selectedTags,
+          blogs: $selectedBlogs.map(blog => blog.name),
+          tags: $selectedTags,
           page: 1,
           size: 10
         })
@@ -48,7 +42,7 @@
   async function handleSearch() {
     if (searchQuery.trim()) {
       dispatch('search', { query: searchQuery.trim() });
-    } else if (selectedTags.length > 0 || selectedBlogs.length > 0) {
+    } else if ($selectedTags.length > 0 || $selectedBlogs.length > 0) {
       const data = await fetchPosts();
       if (data) {
         searchWithSelected(data);
@@ -83,14 +77,18 @@
         class="absolute right-3 p-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
         aria-label="검색"
       >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+        </svg>
       </button>
     </div>
     <p class="text-sm text-gray-500 dark:text-gray-400 ml-3">블로그나 태그를 선택하여 검색할 수 있습니다</p>
   </div>
-  {#if selectedTags.length > 0 || selectedBlogs.length > 0}
+
+  {#if $selectedTags.length > 0 || $selectedBlogs.length > 0}
     <div 
-      class="mt-4"
-      transition:slide={{ duration: 300, easing: quintOut }}
+      transition:slide|local={{ duration: 300, easing: quintOut }}
+      class="overflow-hidden"
     >
       <div class="flex items-center justify-center my-3">
         <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
@@ -98,11 +96,11 @@
         <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
       </div>
 
-      {#if selectedBlogs.length > 0}
-        <div class="mb-4" transition:slide={{ duration: 200 }}>
+      {#if $selectedBlogs.length > 0}
+        <div class="my-3 overflow-hidden" transition:slide|local={{ duration: 200 }}>
           <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">선택된 블로그</h4>
           <div class="flex flex-wrap gap-2">
-            {#each selectedBlogs as blog (blog.name)}
+            {#each $selectedBlogs as blog (blog.name)}
               <button
                 transition:fade={{ duration: 200 }}
                 on:click={() => toggleBlog(blog)}
@@ -121,7 +119,7 @@
         </div>
       {/if}
 
-      {#if selectedBlogs.length > 0 && selectedTags.length > 0}
+      {#if $selectedBlogs.length > 0 && $selectedTags.length > 0}
         <div class="flex items-center justify-center my-3">
           <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
           <span class="px-4 text-sm font-medium text-gray-500 dark:text-gray-400">AND</span>
@@ -129,11 +127,11 @@
         </div>
       {/if}
 
-      {#if selectedTags.length > 0}
-        <div class="mb-4" transition:slide={{ duration: 200 }}>
+      {#if $selectedTags.length > 0}
+        <div class="mb-4 overflow-hidden" transition:slide={{ duration: 200 }}>
           <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">선택된 태그</h4>
           <div class="flex flex-wrap gap-2">
-            {#each selectedTags as tag (tag)}
+            {#each $selectedTags as tag (tag)}
               <button
                 transition:fade={{ duration: 200 }}
                 on:click={() => toggleTag(tag)}
@@ -146,11 +144,10 @@
           </div>
         </div>
       {/if}
-
-
     </div>
   {/if}
-  <div class="flex items-center justify-end gap-2 mt-6">
+
+  <div class="flex items-center justify-end gap-2 mt-4">
     <button 
       on:click={handleSearch}
       class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors shadow-sm hover:shadow-md"
@@ -158,7 +155,7 @@
       검색
     </button>
     <button 
-      on:click={resetSelected}
+      on:click={onReset}
       class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
     >
       초기화
