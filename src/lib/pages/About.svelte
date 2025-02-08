@@ -1,7 +1,3 @@
-<script>
-  import { onMount } from 'svelte';
-</script>
-
 <div class="container mx-auto px-4 py-8 max-w-4xl">
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
     <h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">Velopers 소개</h1>

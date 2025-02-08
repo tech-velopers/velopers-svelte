@@ -108,3 +108,41 @@ $: blogInfo = $techBlogMap[blogName];
 1. 페이지 이동 시 불필요한 API 호출을 피하기 위해 `fetchTechBlogs()`는 데이터가 없을 때만 호출
 2. 컴포넌트에서 구독 시 반드시 `onMount` 내에서 구독하고, 컴포넌트 언마운트 시 구독 해제
 3. 블로그 정보가 필요한 경우 company.name 대신 techBlogName 사용 
+
+## 포스트 관리
+
+### Posts Store
+- 포스트 관련 모든 상태와 로직은 `src/lib/stores/posts.ts`에서 중앙 집중적으로 관리됩니다.
+- 검색, 페이징, 카테고리 변경 등의 기능이 포함되어 있습니다.
+
+### Posts Store 사용법
+```typescript
+import { store as postsStore } from '$lib/stores/posts';
+
+// 포스트 상태 구독
+$: posts = $postsStore.posts;
+$: currentPage = $postsStore.currentPage;
+$: totalPages = $postsStore.totalPages;
+$: isLoading = $postsStore.isLoading;
+$: error = $postsStore.error;
+$: currentCategory = $postsStore.currentCategory;
+$: searchQuery = $postsStore.searchQuery;
+
+// 포스트 관련 액션
+postsStore.fetchPosts();  // 현재 상태로 포스트 조회
+postsStore.setCategory('Frontend');  // 카테고리 변경
+postsStore.setPage(2);  // 페이지 변경
+postsStore.setSearchQuery('검색어');  // 검색어 설정
+postsStore.reset();  // 상태 초기화
+```
+
+### Posts Store 주의사항
+1. 포스트 관련 상태 변경은 반드시 store의 메서드를 통해 수행
+2. 검색, 필터링 등의 로직은 컴포넌트에서 직접 구현하지 않고 store 사용
+3. URL 파라미터와 store 상태를 동기화해야 하는 경우 컴포넌트에서 처리
+4. 에러 처리는 store의 error 상태를 통해 확인 가능
+
+### Posts Store와 다른 Store의 연동
+- `selectedBlogs`와 `selectedTags` store의 값을 사용하여 검색
+- store 값이 변경될 때마다 자동으로 포스트 목록 업데이트
+- 검색 조건은 AND 조건으로 적용됨 

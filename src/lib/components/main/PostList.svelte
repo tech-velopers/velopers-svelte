@@ -9,8 +9,6 @@
   export let goToPage: (page: number) => void;
   export let toggleTag: (tag: string) => void;
   export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
-  export let selectedTags: string[];
-  export let selectedBlogs: Array<{ name: string; avatar: string; }>;
   export let loadedImages: Set<string>;
   export let loading = false;
 </script>
@@ -43,8 +41,6 @@
         {post}
         {toggleTag}
         {toggleBlog}
-        {selectedTags}
-        {selectedBlogs}
         {loadedImages}
       />
     {/each}

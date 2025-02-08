@@ -5,12 +5,16 @@
   import { quintOut } from 'svelte/easing';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+  import { store as postsStore } from '$lib/stores/posts';
 
-  export let searchWithSelected: (data: any) => void;
+  export let searchWithSelected: () => void;
   export let onReset: () => void;
 
+  const dispatch = createEventDispatcher<{
+    search: { query: string };
+  }>();
+
   let searchQuery = '';
-  const dispatch: EventDispatcher<{search: {query: string}}> = createEventDispatcher();
 
   const fetchPosts = async () => {
     try {
@@ -43,10 +47,7 @@
     if (searchQuery.trim()) {
       dispatch('search', { query: searchQuery.trim() });
     } else if ($selectedTags.length > 0 || $selectedBlogs.length > 0) {
-      const data = await fetchPosts();
-      if (data) {
-        searchWithSelected(data);
-      }
+      searchWithSelected();
     }
   }
 

@@ -12,21 +12,27 @@
   let error: string | null = null;
   let allTags: Array<{ id: number; tagName: string }> = [];
 
-  onMount(async () => {
-    try {
-      const unsubscribe = techBlogsStore.subscribe((value: TechBlog[]) => {
-        blogs = value;
-      });
-      await techBlogsStore.fetchTechBlogs();
-
-      return () => {
-        unsubscribe(); // 컴포넌트가 언마운트될 때 구독 정리
-      };
-    } catch (e) {
-      error = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
-    } finally {
-      isLoading = false;
+  onMount(() => {
+    let unsubscribe: () => void;
+    
+    async function init() {
+      try {
+        unsubscribe = techBlogsStore.subscribe((value: TechBlog[]) => {
+          blogs = value;
+        });
+        await techBlogsStore.fetchTechBlogs();
+      } catch (e) {
+        error = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
+      } finally {
+        isLoading = false;
+      }
     }
+
+    init();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   });
 
   function handleBlogClick(blog: TechBlog) {
@@ -119,7 +125,7 @@
                 handleBlogClick(blog);
               }}
             >
-              블로그로 가기
+              블로그로 이동
             </button>
           </div>
         </div>

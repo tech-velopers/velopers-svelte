@@ -4,6 +4,8 @@
   import * as Avatar from "$lib/components/ui/avatar";
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { techBlogMap } from '$lib/stores/techBlogs';
+  import { selectedBlogs, selectedTags } from '$lib/stores/search';
+  import { onMount } from "svelte";
 
   export let post: {
     id: number;
@@ -18,22 +20,44 @@
 
   export let toggleTag: (tag: string) => void;
   export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
-  export let selectedTags: string[];
-  export let selectedBlogs: Array<{ name: string; avatar: string; }>;
   export let loadedImages: Set<string>;
 
-  function handleImageLoad(imageUrl: string) {
-    loadedImages = loadedImages.add(imageUrl);
-  }
+  let imageLoaded = false;
 
-  function handlePostClick() {
-    window.open(post.url, '_blank');
-  }
+  $: isTagSelected = (tag: string) => $selectedTags.includes(tag);
+  $: isBlogSelected = (blogName: string) => $selectedBlogs.some(blog => blog.name === blogName);
 
   $: blogInfo = $techBlogMap[post.techBlogName] || {
     icon: `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`,
     postCnt: 0
   };
+
+  // 날짜 포맷팅 함수
+  function formatDate(date: number[]): string {
+    const [year, month, day] = date;
+    return new Date(year, month - 1, day).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  onMount(() => {
+    if (post.imageUrl && loadedImages.has(post.imageUrl)) {
+      imageLoaded = true;
+    }
+  });
+
+  function handleImageLoad() {
+    imageLoaded = true;
+    if (post.imageUrl) {
+      loadedImages.add(post.imageUrl);
+    }
+  }
+
+  function handlePostClick() {
+    window.open(post.url, '_blank');
+  }
 </script>
 
 <div 
@@ -44,14 +68,14 @@
   class="w-full text-left cursor-pointer">
   <article class="bg-white dark:bg-gray-900 p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-4 md:gap-6 dark:ring-1 dark:ring-gray-800 group">
     <div class="md:hidden w-full h-48 flex-shrink-0 rounded-lg overflow-hidden relative order-first">
-      {#if !loadedImages.has(post.imageUrl)}
+      {#if !imageLoaded}
         <Skeleton class="w-full h-full" />
       {/if}
       <img 
         src={post.imageUrl} 
         alt="Post thumbnail" 
-        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 {!loadedImages.has(post.imageUrl) ? 'opacity-0' : 'opacity-100'}"
-        on:load={() => handleImageLoad(post.imageUrl)}
+        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 {!imageLoaded ? 'opacity-0' : 'opacity-100'}"
+        on:load={() => handleImageLoad()}
       />
     </div>
     <div class="flex-1 flex flex-col">
@@ -67,7 +91,7 @@
               type="button"
               on:click|stopPropagation={() => toggleTag(tag)}
               class="px-2 py-0.5 rounded-md text-xs md:text-sm transition-all duration-200 hover:-translate-y-0.5 
-                {selectedTags.includes(tag) 
+                {isTagSelected(tag) 
                   ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800' 
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
             >
@@ -111,12 +135,12 @@
                 </div>
                 <div class="flex gap-2">
                   <button 
-                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {selectedBlogs.some(b => b.name === post.techBlogName)
+                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {isBlogSelected(post.techBlogName)
                       ? 'bg-red-500 hover:bg-red-600 text-white' 
                       : 'bg-blue-500 hover:bg-blue-600 text-white'}"
                     on:click|stopPropagation={() => toggleBlog({ name: post.techBlogName, avatar: blogInfo.icon })}
                   >
-                    {selectedBlogs.some(b => b.name === post.techBlogName) ? '선택 해제' : '선택하기'}
+                    {isBlogSelected(post.techBlogName) ? '선택 해제' : '선택하기'}
                   </button>
                   <a 
                     href={blogInfo.baseUrl} 
@@ -131,19 +155,19 @@
             </HoverCard.Content>
           </HoverCard.Root>
           <span class="mx-2">•</span>
-          <span>{new Date(post.createdAt[0], post.createdAt[1] - 1, post.createdAt[2]).toLocaleDateString()}</span>
+          <span>{formatDate(post.createdAt)}</span>
         </div>
       </div>
     </div>
     <div class="hidden md:block w-36 h-36 flex-shrink-0 rounded-lg overflow-hidden relative">
-      {#if !loadedImages.has(post.imageUrl)}
+      {#if !imageLoaded}
         <Skeleton class="w-full h-full" />
       {/if}
       <img 
         src={post.imageUrl} 
         alt="Post thumbnail" 
-        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 {!loadedImages.has(post.imageUrl) ? 'opacity-0' : 'opacity-100'}"
-        on:load={() => handleImageLoad(post.imageUrl)}
+        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 {!imageLoaded ? 'opacity-0' : 'opacity-100'}"
+        on:load={() => handleImageLoad()}
       />
     </div>
   </article>
