@@ -147,6 +147,11 @@
                     target="_blank" 
                     rel="noopener noreferrer" 
                     class="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-center"
+                    on:click|stopPropagation={() => {
+                      if (blogInfo.baseUrl) {
+                        window.open(blogInfo.baseUrl, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
                   >
                     블로그로 이동
                   </a>

@@ -3,32 +3,60 @@
   import * as Avatar from "$lib/components/ui/avatar";
   import { navigate } from "$lib/stores/router";
   import { selectedBlogs, toggleBlog } from '$lib/stores/search';
+  import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
+  import { onMount } from 'svelte';
 
-  const blogCategories = [
-    {
-      name: "네이버 • 카카오",
-      companies: [
-        { name: "네이버 D2", avatar: "naver.ico" },
-        { name: "네이버 플레이스", avatar: "naver-place.png" },
-        // { name: "네이버 클라우드 플랫폼", avatar: "naver-cloud-platform.ico" },
-        { name: "카카오", avatar: "kakao.ico" },
-        { name: "카카오뱅크", avatar: "kakaobank.png" },
-        { name: "카카오모빌리티", avatar: "kakaomobility.ico" },
-        { name: "카카오페이", avatar: "kakaopay.png" },
-        { name: "카카오엔터프라이즈", avatar: "kakao-enterprise.png" },
-      ]
-    },
-    {
-      name: "라쿠배당토",
-      companies: [
-        { name: "라인", avatar: "line.ico" },
-        { name: "쿠팡", avatar: "coupang.ico" },
-        { name: "우아한 형제들", avatar: "woowahan.ico" },
-        { name: "당근마켓", avatar: "daangn.ico" },
-        { name: "토스", avatar: "toss.ico" },
-      ]
+  const categoryGroups = {
+    "네이버 • 카카오": [
+      "네이버 D2",
+      "네이버 플레이스",
+      "카카오",
+      "카카오뱅크",
+      "카카오모빌리티",
+      "카카오페이",
+      "카카오엔터프라이즈"
+    ],
+    "라쿠배당토": [
+      "라인",
+      "쿠팡",
+      "우아한 형제들",
+      "당근마켓",
+      "토스"
+    ]
+  };
+
+  let blogCategories: Array<{
+    name: string;
+    companies: Array<{
+      name: string;
+      avatar: string;
+      url: string;
+      postCnt: number;
+    }>;
+  }> = [];
+
+  onMount(async () => {
+    await techBlogsStore.fetchTechBlogs();
+  });
+
+  $: {
+    if ($techBlogMap) {
+      blogCategories = Object.entries(categoryGroups).map(([categoryName, companyNames]) => ({
+        name: categoryName,
+        companies: companyNames
+          .map(name => {
+            const blog = $techBlogMap[name];
+            return blog ? {
+              name: blog.techBlogName,
+              avatar: blog.icon,
+              url: blog.baseUrl,
+              postCnt: blog.postCnt
+            } : null;
+          })
+          .filter((blog): blog is NonNullable<typeof blog> => blog !== null)
+      }));
     }
-  ];
+  }
 </script>
 
 <div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
@@ -81,7 +109,7 @@
                       <div class="flex items-center pt-2">
                         <div class="flex text-xs text-gray-500 dark:text-gray-400">
                           <span class="flex items-center">
-                            <span class="font-bold text-gray-900 dark:text-white mr-1">25</span>
+                            <span class="font-bold text-gray-900 dark:text-white mr-1">{company.postCnt}</span>
                             포스트
                           </span>
                         </div>
@@ -99,7 +127,11 @@
                     </button>
                     <button 
                       class="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-center"
-                      on:click={() => navigate('/all-blogs')}
+                      on:click|stopPropagation={() => {
+                        if (company.url) {
+                          window.open(company.url, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
                     >
                       블로그로 이동
                     </button>
