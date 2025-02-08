@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import type { EventDispatcher } from 'svelte';
-  import { slide, fade } from 'svelte/transition';
+  import { fade } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
@@ -87,8 +87,8 @@
 
   {#if $selectedTags.length > 0 || $selectedBlogs.length > 0}
     <div 
-      transition:slide|local={{ duration: 300, easing: quintOut }}
-      class="overflow-hidden"
+      transition:fade|local={{ duration: 200 }}
+      class="mt-4"
     >
       <div class="flex items-center justify-center my-3">
         <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
@@ -97,12 +97,12 @@
       </div>
 
       {#if $selectedBlogs.length > 0}
-        <div class="my-3 overflow-hidden" transition:slide|local={{ duration: 200 }}>
+        <div class="my-3" transition:fade|local={{ duration: 200 }}>
           <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">선택된 블로그</h4>
           <div class="flex flex-wrap gap-2">
             {#each $selectedBlogs as blog (blog.name)}
               <button
-                transition:fade={{ duration: 200 }}
+                transition:fade|local={{ duration: 200 }}
                 on:click={() => toggleBlog(blog)}
                 class="group flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all duration-200 shadow-sm hover:shadow"
               >
@@ -128,12 +128,12 @@
       {/if}
 
       {#if $selectedTags.length > 0}
-        <div class="mb-4 overflow-hidden" transition:slide={{ duration: 200 }}>
+        <div class="mb-4" transition:fade|local={{ duration: 200 }}>
           <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">선택된 태그</h4>
           <div class="flex flex-wrap gap-2">
             {#each $selectedTags as tag (tag)}
               <button
-                transition:fade={{ duration: 200 }}
+                transition:fade|local={{ duration: 200 }}
                 on:click={() => toggleTag(tag)}
                 class="group flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all duration-200 shadow-sm hover:shadow"
               >

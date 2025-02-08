@@ -31,7 +31,7 @@
   ];
 </script>
 
-<div class="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm dark:ring-1 dark:ring-gray-700">
+<div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
   <div class="flex justify-between items-center mb-3">
     <h3 class="text-base font-medium dark:text-white">인기 블로그</h3>
     <button 

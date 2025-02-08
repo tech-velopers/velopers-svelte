@@ -49,12 +49,17 @@
     // ... existing code ...
     navigate('/');
   }
+
+  function handleReset() {
+    resetSelected();
+  }
 </script>
 
 <MainLayout
   {allTags}
   searchWithSelected={searchWithSelected}
   onSearch={handleSearch}
+  onReset={handleReset}
   showLogo={true}
 >
   <h1 class="text-2xl font-bold mb-6 dark:text-white">기술 블로그 모음</h1>

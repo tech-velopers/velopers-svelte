@@ -18,7 +18,7 @@
       </div>
     {/if}
 
-    <div class="flex flex-col lg:flex-row gap-8">
+    <div class="flex flex-col lg:flex-row gap-6">
       <main class="flex-1">
         <slot />
       </main>
