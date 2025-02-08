@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+---
+ # 라우팅 규칙
+
+**적용 대상**: 
+- `src/lib/stores/router.ts`
+- `src/lib/pages/*.svelte`
+
+## 커스텀 라우터 사용
+
+### 페이지 이동
+페이지 이동은 반드시 `navigate` 함수를 사용해야 합니다.
+
+```typescript
+import { navigate } from '$lib/stores/router';
+navigate('/about');
+```
+
+### 현재 경로 구독
+현재 경로는 `currentPath` store를 구독하여 사용합니다.
+
+```typescript
+import { currentPath } from '$lib/stores/router';
+$: console.log($currentPath);
+```
+
+### 주의사항
+- `<a href>` 태그 대신 `navigate` 함수를 사용해야 합니다.
+- 외부 링크는 일반 `<a>` 태그를 사용할 수 있습니다.
+- 새로운 페이지 추가 시 `App.svelte`의 라우팅 조건문에 추가해야 합니다.

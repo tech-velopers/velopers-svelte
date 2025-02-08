@@ -1,0 +1,38 @@
+---
+description: 
+globs: 
+---
+# 검색 기능 규칙
+
+**적용 대상**:
+- `src/lib/stores/search.ts`
+- `src/lib/components/sidebar/SearchBox.svelte`
+
+## 검색 Store 사용
+
+### 검색 상태 관리
+검색 관련 모든 상태는 search store를 통해 관리해야 합니다.
+
+```typescript
+import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+
+// 블로그 토글
+toggleBlog({ name: 'blogName', avatar: 'avatar.png' });
+
+// 태그 토글
+toggleTag('tagName');
+
+// 선택 초기화
+resetSelected();
+
+// store 구독
+$: console.log($selectedBlogs, $selectedTags);
+```
+
+### 검색 조건
+- 선택된 블로그와 태그는 AND 조건으로 검색됩니다.
+- 검색어와 필터 조건이 모두 적용된 경우, 모든 조건을 만족하는 결과만 표시됩니다.
+
+### 주의사항
+- 검색 관련 상태 변경은 반드시 store의 메서드를 통해 수행해야 합니다.
+- 컴포넌트에서 직접 검색 상태를 관리하지 않습니다.

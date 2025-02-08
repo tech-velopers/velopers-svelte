@@ -1,0 +1,51 @@
+---
+description: 
+globs: 
+---
+# 포스트 관리 규칙
+
+**적용 대상**:
+- `src/lib/stores/posts.ts`
+- `src/lib/components/main/PostList.svelte`
+- `src/lib/components/main/PostCard.svelte`
+
+## Posts Store 사용
+
+### 포스트 상태 관리
+포스트 관련 모든 상태와 로직은 posts store에서 관리합니다.
+
+```typescript
+import { store as postsStore } from '$lib/stores/posts';
+
+// 포스트 상태 구독
+$: posts = $postsStore.posts;
+$: currentPage = $postsStore.currentPage;
+$: totalPages = $postsStore.totalPages;
+$: isLoading = $postsStore.isLoading;
+$: error = $postsStore.error;
+$: currentCategory = $postsStore.currentCategory;
+$: searchQuery = $postsStore.searchQuery;
+```
+
+### 포스트 액션
+모든 포스트 관련 액션은 store의 메서드를 통해 수행해야 합니다.
+
+```typescript
+// 포스트 관련 액션
+postsStore.fetchPosts();  // 현재 상태로 포스트 조회
+postsStore.setCategory('Frontend');  // 카테고리 변경
+postsStore.setPage(2);  // 페이지 변경
+postsStore.setSearchQuery('검색어');  // 검색어 설정
+postsStore.reset();  // 상태 초기화
+```
+
+### Store 통합
+- posts store는 `selectedBlogs`와 `selectedTags` store와 연동됩니다.
+- store 값이 변경될 때마다 자동으로 포스트 목록이 업데이트됩니다.
+- 검색 조건은 AND 조건으로 적용됩니다.
+
+### 주의사항
+1. 포스트 관련 상태 변경은 반드시 store의 메서드를 통해 수행해야 합니다.
+2. 검색, 필터링 등의 로직은 컴포넌트에서 직접 구현하지 않고 store를 사용합니다.
+3. URL 파라미터와 store 상태를 동기화해야 하는 경우 컴포넌트에서 처리합니다.
+4. 에러 처리는 store의 error 상태를 통해 확인합니다.
