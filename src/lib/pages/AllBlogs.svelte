@@ -1,18 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { getApiUrl } from "$lib/config";
   import * as Avatar from "$lib/components/ui/avatar";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
-  import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+  import { selectedBlogs, toggleBlog, resetSelected } from '$lib/stores/search';
   import { navigate } from '$lib/stores/router';
-
-  interface TechBlog {
-    id: number;
-    techBlogName: string;
-    icon: string;
-    baseUrl: string;
-    postCnt: number;
-  }
+  import { store as techBlogsStore } from '$lib/stores/techBlogs';
+  import type { TechBlog } from '$lib/stores/techBlogs';
 
   let blogs: TechBlog[] = [];
   let isLoading = true;
@@ -21,9 +14,14 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(getApiUrl("/api/techBlogs"));
-      if (!response.ok) throw new Error("블로그 정보를 불러오는데 실패했습니다.");
-      blogs = await response.json();
+      const unsubscribe = techBlogsStore.subscribe((value: TechBlog[]) => {
+        blogs = value;
+      });
+      await techBlogsStore.fetchTechBlogs();
+
+      return () => {
+        unsubscribe(); // 컴포넌트가 언마운트될 때 구독 정리
+      };
     } catch (e) {
       error = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
     } finally {

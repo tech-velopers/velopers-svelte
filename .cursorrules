@@ -79,3 +79,32 @@ $: console.log($selectedBlogs, $selectedTags);
 - `src/lib/components/sidebar/SearchBox.svelte`: 검색 UI 컴포넌트
 - 텍스트 검색과 블로그/태그 기반 필터링 기능 제공
 - 선택된 블로그와 태그는 AND 조건으로 검색됨 
+
+## 테크블로그 정보 관리
+
+### TechBlogs Store
+- 블로그 정보는 `src/lib/stores/techBlogs.ts`에서 중앙 집중적으로 관리됩니다.
+- 한 번 로드된 블로그 정보는 페이지 새로고침 전까지 유지됩니다.
+
+### TechBlogs Store 사용법
+```typescript
+import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
+
+// 컴포넌트 마운트 시 블로그 정보 로드
+onMount(async () => {
+  await techBlogsStore.fetchTechBlogs(); // 데이터가 없을 때만 API 호출
+});
+
+// 블로그 정보 구독
+techBlogsStore.subscribe((blogs) => {
+  // blogs 배열 사용
+});
+
+// 블로그 맵 사용 (블로그명으로 빠른 조회)
+$: blogInfo = $techBlogMap[blogName];
+```
+
+### TechBlogs Store 주의사항
+1. 페이지 이동 시 불필요한 API 호출을 피하기 위해 `fetchTechBlogs()`는 데이터가 없을 때만 호출
+2. 컴포넌트에서 구독 시 반드시 `onMount` 내에서 구독하고, 컴포넌트 언마운트 시 구독 해제
+3. 블로그 정보가 필요한 경우 company.name 대신 techBlogName 사용 

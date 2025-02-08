@@ -5,6 +5,7 @@
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { onMount } from 'svelte';
   import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+  import { store as techBlogsStore } from '$lib/stores/techBlogs';
 
   // 태그 타입 정의
   interface Tag {
@@ -17,10 +18,7 @@
     title: string;
     preview: string;
     imageUrl: string;
-    company: {
-      name: string;
-      avatar: string;
-    };
+    techBlogName: string;
     tags: string[];
     createdAt: any;
   }
@@ -113,6 +111,7 @@
     currentPage = page;
     currentCategory = category;
     fetchTags();
+    techBlogsStore.fetchTechBlogs();  // 데이터가 없을 때만 API 호출
     
     // 선택된 블로그와 태그 구독 - 로컬 상태만 업데이트
     const unsubscribeBlogs = selectedBlogs.subscribe(blogs => {

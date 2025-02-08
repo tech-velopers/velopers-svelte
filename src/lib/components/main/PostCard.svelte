@@ -3,6 +3,7 @@
   import * as HoverCard from "$lib/components/ui/hover-card";
   import * as Avatar from "$lib/components/ui/avatar";
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+  import { techBlogMap } from '$lib/stores/techBlogs';
 
   export let post: {
     id: number;
@@ -10,10 +11,7 @@
     url: string;
     preview: string;
     imageUrl: string;
-    company: {
-      name: string;
-      avatar: string;
-    };
+    techBlogName: string;
     tags: string[];
     createdAt: any;
   };
@@ -32,6 +30,10 @@
     window.open(post.url, '_blank');
   }
 
+  $: blogInfo = $techBlogMap[post.techBlogName] || {
+    icon: `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`,
+    postCnt: 0
+  };
 </script>
 
 <div 
@@ -79,46 +81,45 @@
             <HoverCard.Trigger class="flex items-center hover:text-blue-500 transition-colors">
               <Avatar.Root class="w-4 md:w-5 h-4 md:h-5">
                 <Avatar.Image 
-                  src={`/icons/${post.company.avatar}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.company.name}`} 
-                  alt={post.company.name} 
+                  src={`/icons/${blogInfo.icon}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`} 
+                  alt={post.techBlogName} 
                 />
               </Avatar.Root>
-              <span class="font-medium ml-2">{post.company.name}</span>
+              <span class="font-medium ml-2">{post.techBlogName}</span>
             </HoverCard.Trigger>
             <HoverCard.Content class="w-72 p-4">
               <div class="flex flex-col space-y-3">
                 <div class="flex justify-between space-x-3">
                   <Avatar.Root class="h-12 w-12">
                     <Avatar.Image 
-                      src={`/icons/${post.company.avatar}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.company.name}`} 
-                      alt={post.company.name}
+                      src={`/icons/${blogInfo.icon}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`} 
+                      alt={post.techBlogName}
                     />
                   </Avatar.Root>
                   <div class="space-y-1 flex-1">
-                    <h4 class="text-sm font-semibold dark:text-white">{post.company.name}</h4>
+                    <h4 class="text-sm font-semibold dark:text-white">{post.techBlogName}</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-300">기술 블로그</p>
                     <div class="flex items-center pt-2">
                       <div class="flex text-xs text-gray-500 dark:text-gray-400">
                         <span class="flex items-center">
-                          <span class="font-bold text-gray-900 dark:text-white mr-1">25</span>
+                          <span class="font-bold text-gray-900 dark:text-white mr-1">{blogInfo.postCnt}</span>
                           포스트
                         </span>
-                        <span class="mx-2">•</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="flex gap-2">
                   <button 
-                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {selectedBlogs.some(b => b.name === post.company.name)
+                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {selectedBlogs.some(b => b.name === post.techBlogName)
                       ? 'bg-red-500 hover:bg-red-600 text-white' 
                       : 'bg-blue-500 hover:bg-blue-600 text-white'}"
-                    on:click|stopPropagation={() => toggleBlog(post.company)}
+                    on:click|stopPropagation={() => toggleBlog({ name: post.techBlogName, avatar: blogInfo.icon })}
                   >
-                    {selectedBlogs.some(b => b.name === post.company.name) ? '선택 해제' : '선택하기'}
+                    {selectedBlogs.some(b => b.name === post.techBlogName) ? '선택 해제' : '선택하기'}
                   </button>
                   <a 
-                    href="/blog/{post.company.name}" 
+                    href={blogInfo.baseUrl} 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     class="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-center"
