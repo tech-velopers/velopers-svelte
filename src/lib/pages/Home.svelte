@@ -1,7 +1,7 @@
 <script lang="ts">
   import CategoryList from "$lib/components/main/CategoryList.svelte";
   import PostList from "$lib/components/main/PostList.svelte";
-  import Sidebar from "$lib/components/sidebar/Sidebar.svelte";
+  import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { onMount } from 'svelte';
 
@@ -163,42 +163,27 @@
   };
 </script>
 
-<div class="container mx-auto px-4 py-8 max-w-7xl">
-  <!-- 로고 이미지 -->
-  <div class="mb-8">
-    <div class="bg-black rounded-2xl overflow-hidden dark:ring-1 dark:ring-gray-700">
-      <img src="/velopers.png" alt="Velopers 로고" class="w-full h-36 md:h-40 object-contain scale-[1.75] md:scale-100"/>
-    </div>
-  </div>
-
-  <div class="flex flex-col lg:flex-row gap-8">
-    <!-- 메인 컨텐츠 영역 -->
-    <div class="flex-1">
-      <CategoryList {currentCategory} {selectCategory} />
-      <PostList
-        {posts}
-        {currentPage}
-        {totalPages}
-        {goToPage}
-        {toggleTag}
-        {toggleBlog}
-        {selectedTags}
-        {selectedBlogs}
-        {loadedImages}
-        loading={isLoading}
-      />
-    </div>
-
-    <!-- 우측 사이드바 -->
-    <Sidebar
-      {allTags}
-      {selectedTags}
-      {selectedBlogs}
-      {toggleTag}
-      {toggleBlog}
-      {searchWithSelected}
-      {resetSelected}
-      onSearch={handleSearch}
-    />
-  </div>
-</div> 
+<MainLayout
+  {allTags}
+  {selectedTags}
+  {selectedBlogs}
+  {toggleTag}
+  {toggleBlog}
+  {searchWithSelected}
+  {resetSelected}
+  onSearch={handleSearch}
+>
+  <CategoryList {currentCategory} {selectCategory} />
+  <PostList
+    {posts}
+    {currentPage}
+    {totalPages}
+    {goToPage}
+    {toggleTag}
+    {toggleBlog}
+    {selectedTags}
+    {selectedBlogs}
+    {loadedImages}
+    loading={isLoading}
+  />
+</MainLayout> 

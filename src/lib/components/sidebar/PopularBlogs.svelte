@@ -1,13 +1,14 @@
 <script lang="ts">
   import * as HoverCard from "$lib/components/ui/hover-card";
   import * as Avatar from "$lib/components/ui/avatar";
+  import { navigate } from "$lib/stores/router";
 
   export let selectedBlogs: Array<{ name: string; avatar: string; }>;
   export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
 
   const blogCategories = [
     {
-      name: "네카라",
+      name: "네이버 • 카카오",
       companies: [
         { name: "네이버 D2", avatar: "naver.ico" },
         { name: "네이버 플레이스", avatar: "naver-place.png" },
@@ -17,12 +18,12 @@
         { name: "카카오모빌리티", avatar: "kakaomobility.ico" },
         { name: "카카오페이", avatar: "kakaopay.png" },
         { name: "카카오엔터프라이즈", avatar: "kakao-enterprise.png" },
-        { name: "라인", avatar: "line.ico" },
       ]
     },
     {
-      name: "쿠배당토",
+      name: "라쿠배당토",
       companies: [
+        { name: "라인", avatar: "line.ico" },
         { name: "쿠팡", avatar: "coupang.ico" },
         { name: "우아한 형제들", avatar: "woowahan.ico" },
         { name: "당근마켓", avatar: "daangn.ico" },
@@ -33,7 +34,14 @@
 </script>
 
 <div class="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm dark:ring-1 dark:ring-gray-700">
-  <h3 class="text-base font-medium mb-3 dark:text-white">인기 블로그</h3>
+  <div class="flex justify-between items-center mb-3">
+    <h3 class="text-base font-medium dark:text-white">인기 블로그</h3>
+    <button 
+      on:click={() => navigate('/all-blogs')}
+      class="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
+      전체보기
+    </button>
+  </div>
   <div class="space-y-6">
     {#each blogCategories as category}
       <div class="space-y-3">
@@ -91,14 +99,12 @@
                     >
                       {selectedBlogs.some(blog => blog.name === company.name) ? '선택 해제' : '선택하기'}
                     </button>
-                    <a 
-                      href="#" 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <button 
                       class="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-center"
+                      on:click={() => navigate('/all-blogs')}
                     >
                       블로그로 이동
-                    </a>
+                    </button>
                   </div>
                 </div>
               </HoverCard.Content>

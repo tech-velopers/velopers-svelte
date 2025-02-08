@@ -5,6 +5,7 @@
   import Footer from "$lib/components/layout/Footer.svelte";
   import Home from "$lib/pages/Home.svelte";
   import About from "$lib/pages/About.svelte";
+  import AllBlogs from "$lib/pages/AllBlogs.svelte";
 
   // 다크모드 상태 관리
   let isDarkMode = false;
@@ -30,6 +31,8 @@
       <Home />
     {:else if $currentPath === '/about'}
       <About />
+    {:else if $currentPath === '/all-blogs'}
+      <AllBlogs />
     {:else}
       <Home />
     {/if}

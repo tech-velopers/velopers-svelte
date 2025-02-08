@@ -1,4 +1,16 @@
-# Velopers 프로젝트 라우팅 규칙
+# Velopers 프로젝트 규칙
+
+## 백엔드 요청
+
+### 백엔드 요청 개발
+- 백엔드 요청은 `src/lib/config.ts`에 구현된 `getApiUrl` 함수를 사용
+- 추가 백엔드 요청 관련 개발시 해당 파일에 추가 필요
+
+### 백엔드 요청 사용 방법 예시
+- import { getApiUrl } from "$lib/config";
+- const apiUrl = getApiUrl("/api/posts");
+- const response = await fetch(apiUrl);
+- const data = await response.json();
 
 ## 라우팅 구조
 이 프로젝트는 SvelteKit 대신 Svelte와 커스텀 라우터를 사용합니다.

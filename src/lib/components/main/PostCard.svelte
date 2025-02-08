@@ -3,7 +3,6 @@
   import * as HoverCard from "$lib/components/ui/hover-card";
   import * as Avatar from "$lib/components/ui/avatar";
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
-  import { onMount } from 'svelte';
 
   export let post: {
     id: number;
@@ -33,35 +32,6 @@
     window.open(post.url, '_blank');
   }
 
-  // 회사별 배경색 매핑
-  const companyColors: { [key: string]: string } = {
-    '네이버': 'bg-[#03C75A] text-white',
-    '카카오': 'bg-[#FEE500] text-black',
-    '토스': 'bg-[#0064FF] text-white',
-    '쿠팡': 'bg-[#F62F5E] text-white',
-    '라인': 'bg-[#00C300] text-white',
-    '당근': 'bg-[#FF7E36] text-white',
-    '배민': 'bg-[#2AC1BC] text-white'
-  };
-
-  // 기본 배경색 생성 함수
-  function getDefaultColor(companyName: string): string {
-    if (companyColors[companyName]) {
-      return companyColors[companyName];
-    }
-    // 회사 이름의 첫 글자를 기준으로 고유한 색상 생성
-    const colors = [
-      'bg-blue-500 text-white',
-      'bg-red-500 text-white',
-      'bg-green-500 text-white',
-      'bg-yellow-500 text-black',
-      'bg-purple-500 text-white',
-      'bg-pink-500 text-white',
-      'bg-indigo-500 text-white'
-    ];
-    const index = companyName.charCodeAt(0) % colors.length;
-    return colors[index];
-  }
 </script>
 
 <div 

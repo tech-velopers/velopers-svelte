@@ -94,6 +94,14 @@
       </div>
     {/if}
 
+    {#if selectedBlogs.length > 0 && selectedTags.length > 0}
+      <div class="flex items-center justify-center my-2">
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        <span class="px-3 text-sm text-gray-500 dark:text-gray-400">AND</span>
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+      </div>
+    {/if}
+
     {#if selectedTags.length > 0}
       <div transition:slide={{ duration: 200 }}>
         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">선택된 태그</h4>

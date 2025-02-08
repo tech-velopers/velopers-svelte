@@ -3,7 +3,6 @@
   import SelectedItems from './SelectedItems.svelte';
   import PopularBlogs from './PopularBlogs.svelte';
   import PopularTags from './PopularTags.svelte';
-  import PopularPosts from './PopularPosts.svelte';
 
   export let allTags: { id: number; tagName: string; }[];
   export let selectedTags: string[];
@@ -37,6 +36,4 @@
     {selectedTags}
     {toggleTag}
   />
-
-  <PopularPosts />
 </aside> 
