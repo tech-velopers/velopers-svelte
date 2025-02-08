@@ -1,6 +1,5 @@
 <script lang="ts">
   import SearchBox from './SearchBox.svelte';
-  import SelectedItems from './SelectedItems.svelte';
   import PopularBlogs from './PopularBlogs.svelte';
   import PopularTags from './PopularTags.svelte';
 
@@ -15,15 +14,14 @@
 </script>
 
 <aside class="w-full lg:w-80 space-y-6">
-  <SearchBox on:search={onSearch} />
-  
-  <SelectedItems
+  <SearchBox 
     {selectedTags}
     {selectedBlogs}
     {toggleTag}
     {toggleBlog}
     {searchWithSelected}
     {resetSelected}
+    on:search={onSearch}
   />
 
   <PopularBlogs
