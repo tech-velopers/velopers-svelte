@@ -7,9 +7,9 @@
 
   export let allTags: { id: number; tagName: string; }[];
   export let selectedTags: string[];
-  export let selectedBlogs: string[];
+  export let selectedBlogs: Array<{ name: string; avatar: string; }>;
   export let toggleTag: (tag: string) => void;
-  export let toggleBlog: (blog: string) => void;
+  export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
   export let searchWithSelected: (data: any) => void;
   export let resetSelected: () => void;
   export let onSearch: (event: CustomEvent<{query: string}>) => void;

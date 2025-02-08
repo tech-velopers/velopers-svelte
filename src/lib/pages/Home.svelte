@@ -32,7 +32,7 @@
   let isLoading = false;
   let currentCategory = "All";
   let selectedTags: string[] = [];
-  let selectedBlogs: string[] = [];
+  let selectedBlogs: Array<{ name: string; avatar: string; }> = [];
   let loadedImages = new Set<string>();
   let searchQuery = '';
 
@@ -89,7 +89,7 @@
         body: JSON.stringify({
           category: currentCategory,
           tags: selectedTags,
-          blogs: selectedBlogs,
+          blogs: selectedBlogs.map(blog => blog.name),
           query: searchQuery,
           size: 10,
           page: currentPage
@@ -121,6 +121,7 @@
     updateUrl(currentPage, category);
     fetchPosts();
   };
+  
 
   // 태그 토글
   const toggleTag = (tagName: string) => {
@@ -132,11 +133,11 @@
   };
 
   // 블로그 토글
-  const toggleBlog = (blogName: string) => {
-    if (selectedBlogs.includes(blogName)) {
-      selectedBlogs = selectedBlogs.filter(b => b !== blogName);
+  const toggleBlog = (blog: { name: string; avatar: string; }) => {
+    if (selectedBlogs.some(b => b.name === blog.name)) {
+      selectedBlogs = selectedBlogs.filter(b => b.name !== blog.name);
     } else {
-      selectedBlogs = [...selectedBlogs, blogName];
+      selectedBlogs = [...selectedBlogs, blog];
     }
   };
 
