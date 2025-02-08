@@ -4,9 +4,12 @@
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
 
   export let selectedTags: string[];
-  export let selectedBlogs: string[];
+  export let selectedBlogs: Array<{
+    name: string;
+    avatar: string;
+  }>;
   export let toggleTag: (tag: string) => void;
-  export let toggleBlog: (blog: string) => void;
+  export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
   export let searchWithSelected: (data: any) => void;
   export let resetSelected: () => void;
 
@@ -19,7 +22,7 @@
         },
         body: JSON.stringify({
           category: 'All',
-          blogs: selectedBlogs,
+          blogs: selectedBlogs.map(blog => blog.name),
           tags: selectedTags,
           page: 1,
           size: 10
@@ -72,14 +75,18 @@
       <div class="mb-4" transition:slide={{ duration: 200 }}>
         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">선택된 블로그</h4>
         <div class="flex flex-wrap gap-2">
-          {#each selectedBlogs as blog (blog)}
+          {#each selectedBlogs as blog (blog.name)}
             <button
               transition:fade={{ duration: 200 }}
               on:click={() => toggleBlog(blog)}
               class="group flex items-center gap-1.5 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md text-sm hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors duration-200"
             >
-              <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${blog}`} alt={blog} class="w-4 h-4 rounded-full" />
-              {blog}
+              <img 
+                src={`/icons/${blog.avatar}` || `https://api.dicebear.com/7.x/initials/svg?seed=${blog.name}`}
+                alt={blog.name} 
+                class="w-4 h-4 rounded-full" 
+              />
+              {blog.name}
               <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-200 dark:bg-blue-800 group-hover:bg-blue-300 dark:group-hover:bg-blue-700 text-blue-700 dark:text-blue-300 text-xs">×</span>
             </button>
           {/each}

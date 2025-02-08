@@ -20,9 +20,9 @@
   };
 
   export let toggleTag: (tag: string) => void;
-  export let toggleBlog: (blog: string) => void;
+  export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
   export let selectedTags: string[];
-  export let selectedBlogs: string[];
+  export let selectedBlogs: Array<{ name: string; avatar: string; }>;
   export let loadedImages: Set<string>;
 
   function handleImageLoad(imageUrl: string) {
@@ -140,12 +140,12 @@
                 </div>
                 <div class="flex gap-2">
                   <button 
-                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {selectedBlogs.includes(post.company.name) 
+                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {selectedBlogs.some(b => b.name === post.company.name)
                       ? 'bg-red-500 hover:bg-red-600 text-white' 
                       : 'bg-blue-500 hover:bg-blue-600 text-white'}"
-                    on:click={() => toggleBlog(post.company.name)}
+                    on:click|stopPropagation={() => toggleBlog(post.company)}
                   >
-                    {selectedBlogs.includes(post.company.name) ? '선택 해제' : '선택하기'}
+                    {selectedBlogs.some(b => b.name === post.company.name) ? '선택 해제' : '선택하기'}
                   </button>
                   <a 
                     href="/blog/{post.company.name}" 
