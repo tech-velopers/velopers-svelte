@@ -32,11 +32,11 @@
       <button 
         class="w-full px-4 py-2.5 rounded-xl border-2 transition-all duration-200
           text-sm font-medium shadow-sm hover:shadow text-center
-          {currentCategory === category 
+          {currentCategory === category.split(' ').slice(1).join(' ')
             ? 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600 hover:border-blue-600' 
             : 'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:border-blue-200 dark:hover:border-blue-800'} 
           hover:-translate-y-0.5"
-        on:click={() => selectCategory(category)}
+        on:click={() => selectCategory(category.split(' ').slice(1).join(' '))}
       >
         <span class="flex flex-col items-center gap-1 {category === 'Architecture' ? 'text-[13px]' : ''}">
           <span class="text-xl">{category.split(' ')[0]}</span>
