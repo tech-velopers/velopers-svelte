@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@sveltejs/kit": "^2.15.2",
+    "lucide-svelte": "^0.475.0",
     "shadcn-svelte": "^0.14.0",
     "svelte-routing": "^2.13.0"
   }
