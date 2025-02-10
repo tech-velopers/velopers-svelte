@@ -8,9 +8,9 @@
 <div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
   <div class="flex justify-between items-center mb-3">
     <h3 class="text-base font-medium dark:text-white">인기 태그</h3>
-    <button class="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
+    <!-- <button class="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
       전체보기
-    </button>
+    </button> -->
   </div>
   <div class="flex flex-wrap gap-2">
     {#if loading}

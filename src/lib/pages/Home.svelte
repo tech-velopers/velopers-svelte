@@ -75,13 +75,11 @@
   // 태그 토글
   const handleToggleTag = (tagName: string) => {
     toggleTag(tagName);
-    postsStore.fetchPosts();
   };
 
   // 블로그 토글
   const handleToggleBlog = (blog: { name: string; avatar: string }) => {
     toggleBlog(blog);
-    postsStore.fetchPosts();
   };
 
   // 검색 및 초기화 함수

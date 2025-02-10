@@ -1,5 +1,6 @@
 <script lang="ts">
   import "./app.css";
+  import { onMount } from "svelte";
   import { currentPath } from "$lib/stores/router";
   import Header from "$lib/components/layout/Header.svelte";
   import Footer from "$lib/components/layout/Footer.svelte";
@@ -9,6 +10,18 @@
 
   // 다크모드 상태 관리
   let isDarkMode = false;
+  
+  // 초기 테마 로드
+  onMount(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      isDarkMode = true;
+      document.documentElement.classList.add('dark');
+    } else {
+      isDarkMode = false;
+      document.documentElement.classList.remove('dark');
+    }
+  });
   
   // 테마 설정 함수
   const toggleDarkMode = () => {
