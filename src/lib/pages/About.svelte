@@ -35,6 +35,28 @@
       </div>
     </section>
 
+    <section class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">개발 TODO List</h2>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" disabled class="w-4 h-4 cursor-not-allowed" />
+          <span class="text-gray-600 dark:text-gray-300">원하는 블로그 & 태그 이메일 구독 서비스</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" disabled class="w-4 h-4 cursor-not-allowed" />
+          <span class="text-gray-600 dark:text-gray-300">게시글에 대한 vector 검색</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" disabled class="w-4 h-4 cursor-not-allowed" />
+          <span class="text-gray-600 dark:text-gray-300">주간, 월간 인기 게시글 기능</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" disabled class="w-4 h-4 cursor-not-allowed" />
+          <span class="text-gray-600 dark:text-gray-300">회원가입, 로그인 기반 소셜 기능</span>
+        </div>
+      </div>
+    </section>
+
     <section>
       <h2 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">연락처</h2>
       <p class="text-gray-600 dark:text-gray-300">
