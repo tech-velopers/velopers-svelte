@@ -1,15 +1,46 @@
 # Velopers Svelte robots.txt
 
-# 모든 검색엔진 크롤러에 대한 규칙
-User-agent: *
+# Google 검색엔진
+User-agent: Googlebot
+Allow: /
+Allow: /post/
+Allow: /all-blogs
+Allow: /about
+Disallow: /api/
+Disallow: /*.json$
 
-# 크롤링 딜레이 설정 (10초)
+# Google 이미지
+User-agent: Googlebot-Image
+Allow: /icons/
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.png$
+Allow: /*.webp$
+
+# Naver 검색엔진
+User-agent: Yeti
+Allow: /
+Allow: /post/
+Allow: /all-blogs
+Allow: /about
+Disallow: /api/
+Disallow: /*.json$
+
+# 기타 모든 검색엔진
+User-agent: *
+Allow: /
+Allow: /post/
+Allow: /all-blogs
+Allow: /about
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /private/
+Disallow: /admin/
+Disallow: /temp/
+
+# 크롤링 딜레이 설정
 Crawl-delay: 10
 
-# 주요 페이지 허용
-Allow: /
-Allow: /search
-Allow: /about
-Allow: /blogs/*
-Allow: /posts/*
-Allow: /tags/*
+# Sitemap 위치
+Sitemap: https://velopers.kr/sitemap.xml

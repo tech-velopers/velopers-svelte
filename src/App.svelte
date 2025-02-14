@@ -7,6 +7,7 @@
   import Home from "$lib/pages/Home.svelte";
   import About from "$lib/pages/About.svelte";
   import AllBlogs from "$lib/pages/AllBlogs.svelte";
+  import Post from "$lib/pages/Post.svelte";
 
   // 다크모드 상태 관리
   let isDarkMode = false;
@@ -46,6 +47,8 @@
       <About />
     {:else if $currentPath === '/all-blogs'}
       <AllBlogs />
+    {:else if $currentPath.startsWith('/post/')}
+      <Post />
     {:else}
       <Home />
     {/if}

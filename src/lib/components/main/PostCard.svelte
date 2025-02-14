@@ -6,6 +6,7 @@
   import { techBlogMap } from '$lib/stores/techBlogs';
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
+  import { navigate } from '$lib/stores/router';
 
   export let post: {
     id: number;
@@ -56,7 +57,7 @@
   }
 
   function handlePostClick() {
-    window.open(post.url, '_blank');
+    navigate(`/post/${post.id}`);
   }
 </script>
 

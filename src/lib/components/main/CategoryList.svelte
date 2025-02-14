@@ -22,30 +22,10 @@
   ];
 
   let categories: CategoryItem[] = defaultCategories;
-  let loading = false;
 
   onMount(() => {
     categories = defaultCategories;
   });
-
-  function getIconComponent(category: string) {
-    const [prefix] = category.split(':')[1].split(' ');
-    switch (prefix) {
-      case 'house': return Home;
-      case 'blend': return Palette;
-      case 'server': return Server;
-      case 'bot': return Bot;
-      case 'workflow': return GitBranch;
-      case 'network': return Network;
-      case 'wind': return Wind;
-      default: return null;
-    }
-  }
-
-  function getCategoryText(category: string) {
-    const [prefix, ...rest] = category.split(' ');
-    return rest.join(' ');
-  }
 </script>
 
 <div class="mb-6">
