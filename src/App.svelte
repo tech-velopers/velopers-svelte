@@ -8,15 +8,9 @@
   import About from "$lib/pages/About.svelte";
   import AllBlogs from "$lib/pages/AllBlogs.svelte";
   import Post from "$lib/pages/Post.svelte";
-  import { getApiUrl, API_ENDPOINTS } from "$lib/config";
 
   // 다크모드 상태 관리
   let isDarkMode = false;
-  
-  // sitemap.xml 리다이렉션 처리
-  $: if ($currentPath === '/sitemap.xml') {
-    window.location.href = getApiUrl(API_ENDPOINTS.sitemap);
-  }
   
   // 초기 테마 로드
   onMount(() => {
