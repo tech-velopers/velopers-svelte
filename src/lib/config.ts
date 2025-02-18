@@ -12,5 +12,4 @@ export const API_ENDPOINTS = {
     tags: '/api/tags',
     users: '/api/users',
     techBlogs: '/api/techBlogs',
-    sitemap: '/api/sitemap.xml',
 } as const; 

@@ -6,6 +6,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "https://server.velopers.kr/api/sitemap.xml"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://server.velopers.kr/api/:path*"
     },
