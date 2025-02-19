@@ -10,6 +10,10 @@
       "destination": "https://server.velopers.kr/api/sitemap.xml"
     },
     {
+      "source": "/rss.xml",
+      "destination": "https://server.velopers.kr/api/rss.xml"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://server.velopers.kr/api/:path*"
     },
