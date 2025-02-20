@@ -75,9 +75,12 @@
   function goToPage(page: number) {
     updateUrl(page, $postsStore.currentCategory);
     postsStore.setPage(page);
+    
+    // 모바일에서는 즉시 스크롤, 데스크톱에서는 부드럽게 스크롤
+    const isMobile = window.innerWidth < 1024; // lg 브레이크포인트
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: isMobile ? 'auto' : 'smooth'
     });
   }
 
