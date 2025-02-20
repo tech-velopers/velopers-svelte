@@ -6,6 +6,7 @@
   export let onSearch: (event: CustomEvent<{query: string}>) => void;
   export let onReset: () => void;
   export let showLogo = true;
+  export let showSidebar = true;
 </script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -22,12 +23,14 @@
       <main class="flex-1">
         <slot />
       </main>
-      <Sidebar
-        {allTags}
-        {searchWithSelected}
-        {onSearch}
-        {onReset}
-      />
+      {#if showSidebar}
+        <Sidebar
+          {allTags}
+          {searchWithSelected}
+          {onSearch}
+          {onReset}
+        />
+      {/if}
     </div>
   </div>
 </div>

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { slide, fade } from 'svelte/transition';
   import * as HoverCard from "$lib/components/ui/hover-card";
   import * as Avatar from "$lib/components/ui/avatar";
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
@@ -7,6 +6,8 @@
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
   import { navigate } from '$lib/stores/router';
+  import {SquareArrowOutUpRight } from 'lucide-svelte';
+
 
   export let post: {
     id: number;
@@ -136,25 +137,26 @@
                 </div>
                 <div class="flex gap-2">
                   <button 
-                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {isBlogSelected(post.techBlogName)
+                    class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center justify-center gap-1.5 {isBlogSelected(post.techBlogName)
                       ? 'bg-red-500 hover:bg-red-600 text-white' 
                       : 'bg-blue-500 hover:bg-blue-600 text-white'}"
                     on:click|stopPropagation={() => toggleBlog({ name: post.techBlogName, avatar: blogInfo.icon })}
                   >
-                    {isBlogSelected(post.techBlogName) ? '선택 해제' : '선택하기'}
+                    <span>{isBlogSelected(post.techBlogName) ? '선택 해제' : '선택하기'}</span>
                   </button>
                   <a 
                     href={blogInfo.baseUrl} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    class="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-center"
+                    class="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1.5"
                     on:click|stopPropagation={() => {
                       if (blogInfo.baseUrl) {
                         window.open(blogInfo.baseUrl, '_blank', 'noopener,noreferrer');
                       }
                     }}
                   >
-                    블로그로 이동
+                    <span>블로그</span>
+                    <SquareArrowOutUpRight class="h-3.5 w-3.5" />
                   </a>
                 </div>
               </div>

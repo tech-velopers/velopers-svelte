@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
   import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+  import { Search, RotateCcw } from 'lucide-svelte';
 
   export let searchWithSelected: () => void;
   export let onReset: () => void;
@@ -30,11 +31,7 @@
 <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
   <div class="relative">
     <div class="relative flex items-center mb-2">
-      <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-        </svg>
-      </div>
+      <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />
       <input
         type="search"
         bind:value={searchQuery}
@@ -42,15 +39,6 @@
         placeholder="검색어를 입력하세요"
         class="w-full pl-10 pr-4 py-3 border-2 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
       />
-      <button 
-        on:click={handleSearch}
-        class="absolute right-3 p-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-        aria-label="검색"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-        </svg>
-      </button>
     </div>
     <p class="text-sm text-gray-500 dark:text-gray-400 ml-3">블로그나 태그를 선택하여 검색할 수 있습니다</p>
   </div>
@@ -120,15 +108,17 @@
   <div class="flex items-center justify-end gap-2 mt-4">
     <button 
       on:click={handleSearch}
-      class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors shadow-sm hover:shadow-md"
+      class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors shadow-sm hover:shadow-md flex items-center gap-1.5"
     >
-      검색
+      <span>검색</span>
+      <Search class="h-3.5 w-3.5" />
     </button>
     <button 
       on:click={onReset}
-      class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
     >
-      초기화
+      <span>초기화</span>
+      <RotateCcw class="h-3.5 w-3.5" />
     </button>
   </div>
 </div>
