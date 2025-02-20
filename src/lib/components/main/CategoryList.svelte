@@ -29,7 +29,7 @@
 </script>
 
 <div class="mb-6">
-  <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
+  <div class="grid grid-cols-4 gap-3 md:grid-cols-4 lg:grid-cols-7">
     {#each categories as category}
       <button 
         class="w-full px-4 py-2.5 rounded-xl border-2 transition-all duration-200

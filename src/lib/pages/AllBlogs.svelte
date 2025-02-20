@@ -193,10 +193,10 @@
   {:else if error}
     <div class="text-red-500 text-center p-4">{error}</div>
   {:else}
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
       {#each filteredBlogs as blog (blog.id)}
         <div 
-          class="w-full text-left bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-lg dark:border-gray-700 cursor-pointer transition-all p-4 h-full flex flex-col"
+          class="w-full text-left bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-lg dark:border-gray-700 cursor-pointer transition-all p-2 sm:p-3 md:p-4 h-full flex flex-col"
           on:click={() => handleBlogClick(blog)}
           on:keydown={(e) => e.key === 'Enter' && handleBlogClick(blog)}
           role="button"

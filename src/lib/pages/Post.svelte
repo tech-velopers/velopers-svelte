@@ -33,6 +33,7 @@
       const response = await fetch(getApiUrl(`/api/post/${postId}`));
       if (!response.ok) throw new Error('포스트를 불러오는데 실패했습니다.');
       post = await response.json();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
       error = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
     } finally {

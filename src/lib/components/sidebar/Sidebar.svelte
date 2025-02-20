@@ -31,11 +31,11 @@
 
 <!-- 모바일 검색 버튼 -->
 <button 
-  class="fixed right-4 bottom-4 lg:hidden z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg"
+  class="fixed right-3 bottom-3 lg:right-4 lg:bottom-4 lg:hidden z-50 bg-blue-600 hover:bg-blue-700 text-white p-2 lg:p-3 rounded-full shadow-lg"
   on:click={toggleSidebar}
   aria-label="검색 메뉴 열기"
 >
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:h-6 lg:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
   </svg>
 </button>
@@ -63,28 +63,28 @@
   ></button>
   
   <!-- 팝업 컨테이너 -->
-  <div class="fixed inset-0 flex items-center justify-center p-4 z-50 lg:hidden">
+  <div class="fixed inset-0 flex items-center justify-center p-2 sm:p-4 z-50 lg:hidden">
     <div 
-      class="bg-white dark:bg-gray-800 w-full max-w-[90%] max-h-[80vh] rounded-xl shadow-2xl overflow-hidden transform transition-all duration-200 ease-out"
+      class="bg-white dark:bg-gray-800 w-full max-w-[95%] sm:max-w-[90%] max-h-[85vh] sm:max-h-[75vh] rounded-xl shadow-2xl overflow-hidden transform transition-all duration-200 ease-out"
       on:click|stopPropagation
       role="presentation"
     >
       <!-- 헤더 -->
-      <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">검색</h2>
+      <div class="flex justify-between items-center p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">검색</h2>
         <button 
           class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           on:click={closeSidebar}
           aria-label="검색 메뉴 닫기"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
       
       <!-- 컨텐츠 -->
-      <div class="p-4 overflow-y-auto space-y-6" style="max-height: calc(80vh - 65px);">
+      <div class="p-2 sm:p-3 overflow-y-auto space-y-3 sm:space-y-4" style="max-height: calc(85vh - 45px);">
         <SearchBox 
           searchWithSelected={handleSearchWithSelected}
           on:search={handleSearch}
