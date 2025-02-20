@@ -6,36 +6,30 @@
   import { navigate } from '$lib/stores/router';
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
+  import { store as tagsStore } from '$lib/stores/tags';
+  import type { Tag } from '$lib/stores/tags';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
 
   let blogs: TechBlog[] = [];
   let isLoading = true;
   let error: string | null = null;
-  let allTags: Array<{ id: number; tagName: string }> = [];
-
-  async function fetchTags() {
-    try {
-      const response = await fetch(getApiUrl(API_ENDPOINTS.tags));
-      if (!response.ok) throw new Error('태그를 불러오는데 실패했습니다.');
-      const data = await response.json();
-      allTags = data;
-    } catch (e) {
-      console.error('태그 로딩 실패:', e);
-      error = e instanceof Error ? e.message : "태그를 불러오는데 실패했습니다.";
-    }
-  }
+  let allTags: Tag[] = [];
 
   onMount(() => {
     let unsubscribe: () => void;
+    let tagsUnsubscribe: () => void;
     
     async function init() {
       try {
         unsubscribe = techBlogsStore.subscribe((value: TechBlog[]) => {
           blogs = value;
         });
+        tagsUnsubscribe = tagsStore.subscribe((value: Tag[]) => {
+          allTags = value;
+        });
         await Promise.all([
           techBlogsStore.fetchTechBlogs(),
-          fetchTags()
+          tagsStore.fetchTags()
         ]);
       } catch (e) {
         error = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
@@ -48,6 +42,7 @@
 
     return () => {
       if (unsubscribe) unsubscribe();
+      if (tagsUnsubscribe) tagsUnsubscribe();
     };
   });
 

@@ -25,7 +25,7 @@ interface PostsState {
 function createPostsStore() {
   const initialState: PostsState = {
     posts: [],
-    currentPage: 1,
+    currentPage: 0,
     totalPages: 1,
     isLoading: false,
     error: null,

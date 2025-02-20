@@ -7,16 +7,14 @@
   import { toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import { store as postsStore } from '$lib/stores/posts';
-
-  // 태그 타입 정의
-  interface Tag {
-    id: number;
-    tagName: string;
-  }
+  import { store as tagsStore } from '$lib/stores/tags';
+  import type { Tag } from '$lib/stores/tags';
+  import { currentUrl } from '$lib/stores/router';
 
   // 상태 관리
   let allTags: Tag[] = [];
   let loadedImages = new Set<string>();
+  let prevUrl = '';
 
   // URL에서 파라미터 가져오기
   function getParamsFromUrl() {
@@ -37,24 +35,35 @@
     window.history.pushState({}, '', url.toString());
   }
 
-  // API에서 태그 목록 가져오기
-  async function fetchTags() {
-    try {
-      const response = await fetch(getApiUrl(API_ENDPOINTS.tags));
-      const data = await response.json();
-      allTags = data.sort((a: Tag, b: Tag) => a.tagName.localeCompare(b.tagName));
-    } catch (error) {
-      console.error('태그 목록을 가져오는데 실패했습니다:', error);
+  onMount(() => {
+    const unsubscribe = tagsStore.subscribe((tags) => {
+      allTags = tags.sort((a: Tag, b: Tag) => a.tagName.localeCompare(b.tagName));
+    });
+    
+    tagsStore.fetchTags();
+    techBlogsStore.fetchTechBlogs();
+    // 초기 URL 상태 반영을 위해 currentUrl 값 설정
+    prevUrl = '';
+    currentUrl.set(window.location.href);
+
+    return () => {
+      unsubscribe();
+    };
+  });
+
+  $: {
+    if (prevUrl !== $currentUrl) {
+      const { page, category } = getParamsFromUrl();
+      // store의 현재 값과 다를 때만 업데이트
+      if (page !== $postsStore.currentPage || category !== $postsStore.currentCategory) {
+        postsStore.setPage(page);
+        postsStore.setCategory(category);
+        postsStore.fetchPosts();
+      }
+      
+      prevUrl = $currentUrl;
     }
   }
-
-  onMount(() => {
-    const { page, category } = getParamsFromUrl();
-    postsStore.setPage(page);
-    postsStore.setCategory(category);
-    fetchTags();
-    techBlogsStore.fetchTechBlogs();
-  });
 
   // 카테고리 변경 시 데이터 가져오기
   const selectCategory = (category: string) => {

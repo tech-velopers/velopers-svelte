@@ -23,6 +23,7 @@ interface TechBlogsStore {
 
 function createTechBlogsStore(): TechBlogsStore {
   const { subscribe, set, update } = writable<TechBlog[]>([]);
+  let isLoading = false;
   
   // 블로그 맵 store 생성
   const blogStore = { subscribe };
@@ -34,19 +35,22 @@ function createTechBlogsStore(): TechBlogsStore {
   });
 
   const fetchTechBlogs = async () => {
-    // 이미 데이터가 있는지 확인
+    // 이미 데이터가 있거나 로딩 중이면 리턴
     const currentValue = get(blogStore);
-    if (currentValue.length > 0) {
-      return; // 이미 데이터가 있으면 API 호출하지 않음
+    if (currentValue.length > 0 || isLoading) {
+      return;
     }
 
     try {
+      isLoading = true;
       const response = await fetch(getApiUrl(API_ENDPOINTS.techBlogs));
       if (!response.ok) throw new Error('Failed to fetch tech blogs');
       const data = await response.json();
       set(data);
     } catch (error) {
       console.error('Error fetching tech blogs:', error);
+    } finally {
+      isLoading = false;
     }
   };
 

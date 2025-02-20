@@ -1,11 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import type { EventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
-  import { quintOut } from 'svelte/easing';
-  import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
-  import { store as postsStore } from '$lib/stores/posts';
 
   export let searchWithSelected: () => void;
   export let onReset: () => void;
@@ -15,33 +11,6 @@
   }>();
 
   let searchQuery = '';
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch(getApiUrl(API_ENDPOINTS.posts), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          category: 'All',
-          blogs: $selectedBlogs.map(blog => blog.name),
-          tags: $selectedTags,
-          page: 1,
-          size: 10
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch posts');
-      }
-      
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-    }
-  };
 
   async function handleSearch() {
     if (searchQuery.trim()) {

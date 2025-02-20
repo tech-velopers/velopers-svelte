@@ -61,7 +61,7 @@
   }
 
   function handleBackClick() {
-    navigate('/');
+    window.history.back();
   }
 </script>
 
