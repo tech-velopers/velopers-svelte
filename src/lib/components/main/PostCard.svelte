@@ -105,7 +105,7 @@
         <div class="flex items-center text-xs md:text-sm text-gray-500 dark:text-gray-400">
           <HoverCard.Root openDelay={500}>
             <HoverCard.Trigger class="flex items-center hover:text-blue-500 transition-colors">
-              <Avatar.Root class="w-4 md:w-5 h-4 md:h-5">
+              <Avatar.Root class="w-5 md:w-6 h-5 md:h-6">
                 <Avatar.Image 
                   src={`/icons/${blogInfo.icon}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`} 
                   alt={post.techBlogName} 
