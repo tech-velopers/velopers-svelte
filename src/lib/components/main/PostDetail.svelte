@@ -6,30 +6,7 @@
         date: '',
         content: ''
     };
-
-    // 현재 URL을 가져오기 위한 변수
-    let currentUrl = '';
-    if (typeof window !== 'undefined') {
-        currentUrl = window.location.href;
-    }
-
-    // content에서 첫 160자를 추출하여 description으로 사용
-    $: description = post.content?.slice(0, 160) || '';
 </script>
-
-<svelte:head>
-    <title>{post.title} - Velopers</title>
-    <meta property="og:title" content={post.title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={post.imageUrl} />
-    <meta property="og:url" content={currentUrl} />
-    <meta property="og:type" content="article" />
-    <meta property="og:site_name" content="Velopers" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={post.title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={post.imageUrl} />
-</svelte:head>
 
 <div class="post-detail">
     {#if post.imageUrl}

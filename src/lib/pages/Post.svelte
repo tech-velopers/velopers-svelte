@@ -85,11 +85,17 @@
     <meta name="description" content={post.preview} />
     <meta property="og:title" content={`${post.title} - ${post.techBlogName}`} />
     <meta property="og:description" content={post.preview} />
-    <meta property="og:image" content={post.imageUrl} />
+    <meta property="og:image" content={post.imageUrl.startsWith('http') ? post.imageUrl : `https://www.velopers.kr${post.imageUrl}`} />
     <meta property="og:type" content="article" />
+    <meta property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
+    <meta property="og:site_name" content="Velopers" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${post.title} - ${post.techBlogName}`} />
+    <meta name="twitter:description" content={post.preview} />
+    <meta name="twitter:image" content={post.imageUrl.startsWith('http') ? post.imageUrl : `https://www.velopers.kr${post.imageUrl}`} />
     <meta name="keywords" content={post.tags.join(', ')} />
     <meta name="author" content={post.techBlogName} />
-    <link rel="canonical" href={`https://velopers.kr/post/${post.id}`} />
+    <link rel="canonical" href={`https://www.velopers.kr/post/${post.id}`} />
   {/if}
 </svelte:head>
 
