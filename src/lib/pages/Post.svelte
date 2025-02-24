@@ -82,13 +82,12 @@
 <svelte:head>
   {#if post}
     <title>{post.title} - {post.techBlogName} | Velopers</title>
-    <meta name="description" content={post.preview} />
-    <meta property="og:title" content={`${post.title} - ${post.techBlogName}`} />
-    <meta property="og:description" content={post.preview} />
-    <meta property="og:image" content={post.imageUrl.startsWith('http') ? post.imageUrl : `https://www.velopers.kr${post.imageUrl}`} />
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
-    <meta property="og:site_name" content="Velopers" />
+    <meta name="title" property="og:title" content={`${post.title} - ${post.techBlogName}`} />
+    <meta name="description" property="og:description" content={post.preview} />
+    <meta name="image" property="og:image" content={post.imageUrl.startsWith('http') ? post.imageUrl : `https://www.velopers.kr${post.imageUrl}`} />
+    <meta name="type" property="og:type" content="article" />
+    <meta name="url" property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
+    <meta name="site_name" property="og:site_name" content="Velopers" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${post.title} - ${post.techBlogName}`} />
     <meta name="twitter:description" content={post.preview} />
