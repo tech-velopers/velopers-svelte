@@ -9,7 +9,7 @@
   import { store as postsStore } from '$lib/stores/posts';
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
-  import { currentUrl } from '$lib/stores/router';
+  import { currentUrl, visitedPosts } from '$lib/stores/router';
 
   // 상태 관리
   let allTags: Tag[] = [];

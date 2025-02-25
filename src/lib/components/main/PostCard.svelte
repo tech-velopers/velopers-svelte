@@ -5,8 +5,8 @@
   import { techBlogMap } from '$lib/stores/techBlogs';
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
-  import { navigate } from '$lib/stores/router';
-  import {SquareArrowOutUpRight } from 'lucide-svelte';
+  import { navigate, visitedPosts, markPostAsVisited } from '$lib/stores/router';
+  import {SquareArrowOutUpRight, Check } from 'lucide-svelte';
 
 
   export let post: {
@@ -28,6 +28,7 @@
 
   $: isTagSelected = (tag: string) => $selectedTags.includes(tag);
   $: isBlogSelected = (blogName: string) => $selectedBlogs.some(blog => blog.name === blogName);
+  $: isVisited = $visitedPosts.includes(post.id);
 
   $: blogInfo = $techBlogMap[post.techBlogName] || {
     icon: `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`,
@@ -58,9 +59,50 @@
   }
 
   function handlePostClick() {
+    markPostAsVisited(post.id);
     navigate(`/post/${post.id}`);
   }
 </script>
+
+<style>
+  .visited-post {
+    background-color: #f3f4f6 !important; /* gray-100 */
+  }
+  
+  :global(.dark) .visited-post {
+    background-color: #1f2937 !important; /* gray-800 - 더 어두운 색상으로 변경 */
+  }
+  
+  .visited-title {
+    color: #6b7280 !important; /* gray-500 */
+  }
+  
+  :global(.dark) .visited-title {
+    color: #9ca3af !important; /* gray-400 - 더 어두운 색상으로 변경 */
+  }
+  
+  .visited-text {
+    color: #9ca3af !important; /* gray-400 */
+  }
+  
+  :global(.dark) .visited-text {
+    color: #6b7280 !important; /* gray-500 - 더 어두운 색상으로 변경 */
+  }
+  
+  .visited-tag {
+    background-color: #e5e7eb !important; /* gray-200 */
+    color: #4b5563 !important; /* gray-600 */
+  }
+  
+  :global(.dark) .visited-tag {
+    background-color: #1f2937 !important; /* gray-800 - 더 어두운 색상으로 변경 */
+    color: #9ca3af !important; /* gray-400 - 더 어두운 색상으로 변경 */
+  }
+  
+  .unvisited-article {
+    @apply dark:ring-2;
+  }
+</style>
 
 <div 
   on:click={handlePostClick}
@@ -68,7 +110,9 @@
   role="button"
   tabindex="0" 
   class="w-full text-left cursor-pointer">
-  <article class="bg-white dark:bg-gray-900 p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-4 md:gap-6 dark:ring-1 dark:ring-gray-800 group">
+  <article 
+    class="bg-white dark:bg-gray-900 p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-4 md:gap-6 dark:ring-1 dark:ring-gray-800 group {isVisited ? 'visited-post' : 'unvisited-article'}"
+  >
     <div class="md:hidden w-full h-48 flex-shrink-0 rounded-lg overflow-hidden relative order-first">
       {#if !imageLoaded}
         <Skeleton class="w-full h-full" />
@@ -82,8 +126,12 @@
     </div>
     <div class="flex-1 flex flex-col">
       <div class="flex-grow">
-        <h2 class="text-base md:text-lg font-semibold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300">{post.title}</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-3 text-sm">{post.preview}</p>
+        <h2 
+          class="text-base md:text-lg font-semibold mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300 {isVisited ? 'visited-title' : ''}"
+        >{post.title}</h2>
+        <p 
+          class="text-gray-600 dark:text-gray-300 mb-3 text-sm {isVisited ? 'visited-text' : ''}"
+        >{post.preview}</p>
       </div>
       
       <div class="mt-auto space-y-3">
@@ -95,7 +143,9 @@
               class="px-2 py-0.5 rounded-md text-xs md:text-sm transition-all duration-200 hover:-translate-y-0.5 
                 {isTagSelected(tag) 
                   ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+                  : isVisited 
+                    ? 'visited-tag dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
             >
               {tag}
             </button>
@@ -164,6 +214,13 @@
           </HoverCard.Root>
           <span class="mx-2">•</span>
           <span>{formatDate(post.createdAt)}</span>
+          {#if isVisited}
+            <span class="mx-2">•</span>
+            <span class="text-gray-600 dark:text-gray-400 flex items-center">
+              읽음
+              <Check class="h-3.5 w-3.5 ml-1" />
+            </span>
+          {/if}
         </div>
       </div>
     </div>
