@@ -87,7 +87,7 @@
           <HoverCard.Trigger>
             <button
               disabled
-              class="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 cursor-not-allowed text-gray-400 dark:text-gray-500"
+              class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 cursor-not-allowed text-gray-400 dark:text-gray-500"
               >로그인</button
             >
           </HoverCard.Trigger>
