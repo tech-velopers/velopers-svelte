@@ -12,13 +12,13 @@
   }
 
   const defaultCategories: CategoryItem[] = [
-    { value: "All", icon: Home, label: "All" },
-    { value: "Frontend", icon: Palette, label: "Frontend" },
-    { value: "Backend", icon: Server, label: "Backend" },
-    { value: "AI", icon: Bot, label: "AI" },
-    { value: "DevOps", icon: GitBranch, label: "DevOps" },
-    { value: "Architecture", icon: Network, label: "Architecture" },
-    { value: "Else", icon: Wind, label: "Else" }
+    { value: "all", icon: Home, label: "All" },
+    { value: "frontend", icon: Palette, label: "Frontend" },
+    { value: "backend", icon: Server, label: "Backend" },
+    { value: "ai", icon: Bot, label: "AI" },
+    { value: "devops", icon: GitBranch, label: "DevOps" },
+    { value: "architecture", icon: Network, label: "Architecture" },
+    { value: "else", icon: Wind, label: "Else" }
   ];
 
   let categories: CategoryItem[] = defaultCategories;
