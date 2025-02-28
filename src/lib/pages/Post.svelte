@@ -5,7 +5,6 @@
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind } from 'lucide-svelte';
-  import type { Icon } from 'lucide-svelte';
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
 
@@ -26,7 +25,7 @@
   let error: string | null = null;
 
   // 카테고리별 아이콘 매핑
-  const categoryIcons: Record<string, Icon> = {
+  const categoryIcons: Record<string, any> = {
     "Frontend": Palette,
     "Backend": Server,
     "AI": Bot,
@@ -37,7 +36,7 @@
   };
 
   // 카테고리에 맞는 아이콘 컴포넌트 반환
-  function getCategoryIcon(category: string): Icon {
+  function getCategoryIcon(category: string): any {
     return categoryIcons[category] || Wind; // 기본값으로 Wind 아이콘 사용
   }
 
