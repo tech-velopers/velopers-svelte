@@ -25,6 +25,9 @@
 
   onMount(() => {
     categories = defaultCategories;
+    if (!currentCategory || currentCategory === '') {
+      currentCategory = 'all';
+    }
   });
 </script>
 

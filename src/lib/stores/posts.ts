@@ -33,7 +33,7 @@ function createPostsStore() {
     searchQuery: ''
   };
 
-  const { subscribe, set, update } = writable<PostsState>(initialState);
+  const { subscribe, update } = writable<PostsState>(initialState);
 
   async function fetchPosts() {
     update(state => ({ ...state, isLoading: true, error: null }));
@@ -73,19 +73,21 @@ function createPostsStore() {
     }
   }
 
-  function setCategory(category: string) {
-    update(state => ({ ...state, currentCategory: category, currentPage: 1, searchQuery: '' }));
-    fetchPosts();
+  function setCategory(category: string, resetPage: boolean = true) {
+    update(state => ({ 
+      ...state, 
+      currentCategory: category, 
+      currentPage: resetPage ? 1 : state.currentPage,
+      searchQuery: '' 
+    }));
   }
 
   function setPage(page: number) {
     update(state => ({ ...state, currentPage: page }));
-    fetchPosts();
   }
 
   function setSearchQuery(query: string) {
     update(state => ({ ...state, searchQuery: query, currentPage: 1 }));
-    fetchPosts();
   }
 
   function reset() {
@@ -95,7 +97,6 @@ function createPostsStore() {
       currentPage: 1,
       searchQuery: ''
     }));
-    fetchPosts();
   }
 
   return {
