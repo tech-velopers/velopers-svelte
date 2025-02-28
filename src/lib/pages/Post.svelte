@@ -4,7 +4,8 @@
   import { currentPath } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
-  import { Bot, SquareArrowOutUpRight, Undo2 } from 'lucide-svelte';
+  import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind } from 'lucide-svelte';
+  import type { ComponentType, SvelteComponent } from 'svelte';
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
 
@@ -16,12 +17,29 @@
     imageUrl: string;
     url: string;
     techBlogName: string;
+    category: string;
     tags: string[];
     createdAt: number[];
   } | null = null;
 
   let loading = true;
   let error: string | null = null;
+
+  // 카테고리별 아이콘 매핑
+  const categoryIcons: Record<string, ComponentType<SvelteComponent>> = {
+    "Frontend": Palette,
+    "Backend": Server,
+    "AI": Bot,
+    "DevOps": GitBranch,
+    "Architecture": Network,
+    "Else": Wind,
+    "All": Home
+  };
+
+  // 카테고리에 맞는 아이콘 컴포넌트 반환
+  function getCategoryIcon(category: string): ComponentType<SvelteComponent> {
+    return categoryIcons[category] || Wind; // 기본값으로 Wind 아이콘 사용
+  }
 
   onMount(() => {
     techBlogsStore.fetchTechBlogs();
@@ -130,17 +148,32 @@
           {post.title}
         </h1>
 
-        <div class="flex items-center space-x-4">
-          <div class="flex items-center">
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
             <img 
               src={`/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
               alt={post.techBlogName}
-              class="w-8 h-8 rounded-full mr-2"
+              class="w-6 h-6 rounded-full mr-2"
             />
-            <span class="text-gray-700 dark:text-gray-300">{post.techBlogName}</span>
+            <span class="text-gray-700 dark:text-gray-300 text-sm font-medium">{post.techBlogName}</span>
           </div>
-          <span class="text-gray-500">•</span>
-          <time class="text-gray-500">{formatDate(post.createdAt)}</time>
+          
+          {#if post.category}
+            <div class="bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg">
+              <span class="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 text-sm font-medium">
+                <svelte:component 
+                  this={getCategoryIcon(post.category)} 
+                  class="w-4 h-4" 
+                  strokeWidth={1.5}
+                />
+                {post.category}
+              </span>
+            </div>
+          {/if}
+          
+          <time class="text-gray-500 text-sm px-3 py-1.5">
+            {formatDate(post.createdAt)}
+          </time>
         </div>
 
         <div class="flex flex-wrap gap-2">
@@ -152,18 +185,30 @@
         </div>
       </header>
 
-      <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-4 mb-8">
-        <div class="flex items-center gap-2 mb-2 text-blue-600 dark:text-blue-400">
-          <Bot class="h-5 w-5" />
-          <span class="font-semibold">AI 요약</span>
+      {#if !post.gptSummary || post.gptSummary.length <= 10}
+        <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-6 mb-8">
+          <div class="flex items-center gap-2 mb-3 text-yellow-600 dark:text-yellow-400">
+            <Bot class="h-5 w-5" />
+            <span class="font-semibold">AI 요약 불가</span>
+          </div>
+          <p class="text-gray-700 dark:text-gray-300">
+            게시글에서 제공된 내용이 적어 요약이 불가능합니다. 원문 보기로 접속해서 읽어주세요.
+          </p>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          이 글은 AI가 원문을 분석하여 핵심 내용을 요약한 것입니다.
-        </p>
-        <div class="prose dark:prose-invert max-w-none">
-          {@html post.gptSummary}
+      {:else}
+        <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-4 mb-8">
+          <div class="flex items-center gap-2 mb-2 text-blue-600 dark:text-blue-400">
+            <Bot class="h-5 w-5" />
+            <span class="font-semibold">AI 요약</span>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            이 글은 AI가 원문을 분석하여 핵심 내용을 요약한 것입니다.
+          </p>
+          <div class="prose dark:prose-invert max-w-none">
+            {@html post.gptSummary}
+          </div>
         </div>
-      </div>
+      {/if}
 
       <div class="flex justify-center gap-4 pt-8">
         <button
