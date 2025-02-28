@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getApiUrl } from '$lib/config';
-  import { currentPath } from '$lib/stores/router';
+  import { currentPath, navigate } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind } from 'lucide-svelte';
@@ -91,6 +91,12 @@
     window.history.back();
   }
 
+  function handleCategoryClick(category: string | undefined) {
+    if (category) {
+      navigate(`/?page=1&category=${category.toLowerCase()}`);
+    }
+  }
+
   // 검색 관련 함수들
   const searchWithSelected = () => {};
   const onSearch = () => {};
@@ -159,7 +165,13 @@
           </div>
           
           {#if post.category}
-            <div class="bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div 
+              class="bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              on:click={() => post && post.category && handleCategoryClick(post.category)}
+              role="button"
+              tabindex="0"
+            >
               <span class="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 text-sm font-medium">
                 <svelte:component 
                   this={getCategoryIcon(post.category)} 
