@@ -62,6 +62,11 @@
     markPostAsVisited(post.id);
     navigate(`/post/${post.id}`);
   }
+
+  // 블로그 선택 함수 - 선택만 하고 검색은 하지 않음
+  function handleToggleBlog(blog: { name: string; avatar: string }) {
+    toggleBlog(blog);
+  }
 </script>
 
 <style>
@@ -193,7 +198,7 @@
                     class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center justify-center gap-1.5 {isBlogSelected(post.techBlogName)
                       ? 'bg-red-500 hover:bg-red-600 text-white' 
                       : 'bg-blue-500 hover:bg-blue-600 text-white'}"
-                    on:click|stopPropagation={() => toggleBlog({ name: post.techBlogName, avatar: blogInfo.icon })}
+                    on:click|stopPropagation={() => handleToggleBlog({ name: post.techBlogName, avatar: blogInfo.icon })}
                   >
                     <span>{isBlogSelected(post.techBlogName) ? '선택 해제' : '선택하기'}</span>
                   </button>
