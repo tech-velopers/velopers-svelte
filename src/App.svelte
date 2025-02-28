@@ -8,6 +8,7 @@
   import About from "$lib/pages/About.svelte";
   import AllBlogs from "$lib/pages/AllBlogs.svelte";
   import Post from "$lib/pages/Post.svelte";
+  import { Toaster } from "$lib/components/ui/sonner";
 
   // 다크모드 상태 관리
   let isDarkMode = false;
@@ -55,4 +56,5 @@
   </main>
 
   <Footer />
+  <Toaster />
 </div>

@@ -4,8 +4,9 @@
   import { currentPath, navigate } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
-  import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind } from 'lucide-svelte';
+  import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2 } from 'lucide-svelte';
   import type { ComponentType, SvelteComponent } from 'svelte';
+  import { toast } from "svelte-sonner";
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
 
@@ -94,6 +95,26 @@
   function handleCategoryClick(category: string | undefined) {
     if (category) {
       navigate(`/?page=1&category=${category.toLowerCase()}`);
+    }
+  }
+
+  // 공유 기능 추가
+  function handleShareClick() {
+    if (post) {
+      const shareUrl = `${window.location.origin}/post/${post.id}`;
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => {
+          toast.success("URL이 클립보드에 복사되었습니다.", {
+            description: "이 포스트를 다른 사람과 공유해보세요!",
+            duration: 3000
+          });
+        })
+        .catch(() => {
+          toast.error("URL 복사에 실패했습니다.", {
+            description: "다시 시도해주세요.",
+            duration: 3000
+          });
+        });
     }
   }
 
@@ -204,7 +225,7 @@
             <span class="font-semibold">AI 요약 불가</span>
           </div>
           <p class="text-gray-700 dark:text-gray-300">
-            게시글에서 제공된 내용이 적어 요약이 불가능합니다. 원문 보기로 접속해서 읽어주세요.
+            게시글에서 제공된 내용이 적어 요약이 불가능합니다. 하단의 원문 보기를 클릭해서 읽어주세요.
           </p>
         </div>
       {:else}
@@ -229,6 +250,13 @@
         >
           <Undo2 class="h-5 w-5" />
           <span>목록으로</span>
+        </button>
+        <button
+          on:click={handleShareClick}
+          class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2"
+        >
+          <Share2 class="h-5 w-5" />
+          <span>공유하기</span>
         </button>
         <button
           on:click={handleOriginalPostClick}
