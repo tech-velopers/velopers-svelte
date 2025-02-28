@@ -93,7 +93,7 @@ function createPostsStore() {
   function reset() {
     update(state => ({
       ...state,
-      currentCategory: 'All',
+      currentCategory: 'all',
       currentPage: 1,
       searchQuery: ''
     }));

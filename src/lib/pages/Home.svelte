@@ -285,8 +285,8 @@
 
   const handleResetSelected = () => {
     resetSelected();
-    updateUrl($postsStore.currentPage, $postsStore.currentCategory);
-    postsStore.reset();
+    postsStore.reset(); // 먼저 reset 호출하여 카테고리를 'all'로 설정
+    updateUrl(1, 'all'); // 페이지를 1로, 카테고리를 'all'로 명시적 설정
     postsStore.fetchPosts();
   };
 </script>
