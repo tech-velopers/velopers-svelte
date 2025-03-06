@@ -8,6 +8,7 @@
   import About from "$lib/pages/About.svelte";
   import AllBlogs from "$lib/pages/AllBlogs.svelte";
   import Post from "$lib/pages/Post.svelte";
+  import Changelog from "$lib/pages/Changelog.svelte";
   import { Toaster } from "$lib/components/ui/sonner";
 
   // 다크모드 상태 관리
@@ -48,6 +49,8 @@
       <About />
     {:else if $currentPath === '/all-blogs'}
       <AllBlogs />
+    {:else if $currentPath === '/changelog'}
+      <Changelog />
     {:else if $currentPath.startsWith('/post/')}
       <Post />
     {:else}

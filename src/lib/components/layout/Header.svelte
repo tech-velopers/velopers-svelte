@@ -47,6 +47,11 @@
           class="p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm sm:text-base"
           >소개</button
         >
+        <button
+          on:click={() => navigate("/changelog")}
+          class="p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm sm:text-base"
+          >변경사항</button
+        >
       </div>
       <button
         on:click={toggleDarkMode}
