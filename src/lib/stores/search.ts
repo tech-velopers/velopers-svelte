@@ -30,4 +30,14 @@ export function toggleTag(tag: string) {
 export function resetSelected() {
   selectedBlogs.set([]);
   selectedTags.set([]);
+}
+
+export function addBlogsGroup(blogs: Blog[]) {
+  selectedBlogs.update(currentBlogs => {
+    // 이미 선택된 블로그는 제외하고 새로운 블로그만 추가
+    const newBlogs = blogs.filter(blog => 
+      !currentBlogs.some(b => b.name === blog.name)
+    );
+    return [...currentBlogs, ...newBlogs];
+  });
 } 

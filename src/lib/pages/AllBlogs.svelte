@@ -2,9 +2,9 @@
   import { onMount } from "svelte";
   import * as Avatar from "$lib/components/ui/avatar";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
-  import { selectedBlogs, toggleBlog, resetSelected } from '$lib/stores/search';
+  import { selectedBlogs, toggleBlog, resetSelected, addBlogsGroup } from '$lib/stores/search';
   import { navigate } from '$lib/stores/router';
-  import { store as techBlogsStore } from '$lib/stores/techBlogs';
+  import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
@@ -27,6 +27,38 @@
   let open = false;
   let searchQuery = '';
 
+  // 네이버, 카카오, 네카라쿠배 그룹 정의
+  const naverCompanies = [
+    "네이버 D2",
+    "네이버 플레이스",
+    "네이버 페이",
+    "네이버 DnA"
+  ];
+
+  const kakaoCompanies = [
+    "카카오",
+    "카카오뱅크",
+    "카카오모빌리티",
+    "카카오페이",
+    "카카오엔터프라이즈",
+    "카카오엔터테인먼트FE",
+    "카카오헤어샵",
+    "카카오스타일"
+  ];
+
+  const nekarakuCompanies = [
+    "네이버 D2",
+    "네이버 플레이스",
+    "네이버 페이",
+    "네이버 DnA",
+    "카카오",
+    "라인",
+    "쿠팡",
+    "우아한 형제들",
+    "당근마켓",
+    "토스"
+  ];
+
   const sortOptions = [
     { value: 'name-asc', label: '이름순' },
     { value: 'name-desc', label: '이름역순' },
@@ -41,6 +73,20 @@
     tick().then(() => {
       document.getElementById(triggerId)?.focus();
     });
+  }
+
+  // 그룹 추가 함수
+  function addGroupBlogs(companyNames: string[]) {
+    if (!$techBlogMap) return;
+    
+    const blogsToAdd = companyNames
+      .map(name => {
+        const blog = $techBlogMap[name];
+        return blog ? { name: blog.techBlogName, avatar: blog.icon } : null;
+      })
+      .filter((blog): blog is NonNullable<typeof blog> => blog !== null);
+    
+    addBlogsGroup(blogsToAdd);
   }
 
   $: sortedBlogs = [...blogs].sort((a, b) => {
@@ -141,6 +187,26 @@
   <div class="flex flex-col gap-1 mb-6">
     <h1 class="text-2xl font-bold dark:text-white">모든 블로그</h1>
     <p class="text-sm text-gray-500 dark:text-gray-400">총 {blogs.length}개의 블로그가 존재해요</p>
+    
+    <!-- 그룹 추가 버튼 -->
+    <div class="flex gap-2 mt-3">
+      <button 
+        on:click={() => addGroupBlogs(naverCompanies)}
+        class="flex-1 px-3 py-1.5 text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+        네이버 전체 추가
+      </button>
+      <button 
+        on:click={() => addGroupBlogs(kakaoCompanies)}
+        class="flex-1 px-3 py-1.5 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
+        카카오 전체 추가
+      </button>
+      <button 
+        on:click={() => addGroupBlogs(nekarakuCompanies)}
+        class="flex-1 px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+        네카라쿠배 전체 추가
+      </button>
+    </div>
+    
     <div class="flex gap-4 items-center mt-4">
       <div class="relative flex-1">
         <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />

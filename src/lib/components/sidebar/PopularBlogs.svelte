@@ -2,7 +2,7 @@
   import * as HoverCard from "$lib/components/ui/hover-card";
   import * as Avatar from "$lib/components/ui/avatar";
   import { navigate } from "$lib/stores/router";
-  import { selectedBlogs, toggleBlog } from '$lib/stores/search';
+  import { selectedBlogs, toggleBlog, addBlogsGroup } from '$lib/stores/search';
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { onMount } from 'svelte';
 
@@ -30,6 +30,45 @@
     ]
   };
 
+  // 네이버, 카카오, 네카라쿠배 그룹 정의
+  const naverCompanies = [
+    "네이버 D2",
+    "네이버 플레이스",
+    "네이버 페이",
+    "네이버 DnA"
+  ];
+
+  const kakaoCompanies = [
+    "카카오",
+    "카카오뱅크",
+    "카카오모빌리티",
+    "카카오페이",
+    "카카오엔터프라이즈",
+    "카카오엔터테인먼트FE",
+    "카카오헤어샵",
+    "카카오스타일"
+  ];
+
+  const nekarakuCompanies = [
+    "네이버 D2",
+    "네이버 플레이스",
+    "네이버 페이",
+    "네이버 DnA",
+    "카카오",
+    "카카오뱅크",
+    "카카오모빌리티",
+    "카카오페이",
+    "카카오엔터프라이즈",
+    "카카오엔터테인먼트FE",
+    "카카오헤어샵",
+    "카카오스타일",
+    "라인",
+    "쿠팡",
+    "우아한 형제들",
+    "당근마켓",
+    "토스"
+  ];
+
   let blogCategories: Array<{
     name: string;
     companies: Array<{
@@ -43,6 +82,20 @@
   onMount(async () => {
     await techBlogsStore.fetchTechBlogs();
   });
+
+  // 그룹 추가 함수
+  function addGroupBlogs(companyNames: string[]) {
+    if (!$techBlogMap) return;
+    
+    const blogsToAdd = companyNames
+      .map(name => {
+        const blog = $techBlogMap[name];
+        return blog ? { name: blog.techBlogName, avatar: blog.icon } : null;
+      })
+      .filter((blog): blog is NonNullable<typeof blog> => blog !== null);
+    
+    addBlogsGroup(blogsToAdd);
+  }
 
   $: {
     if ($techBlogMap) {
@@ -73,6 +126,26 @@
       전체보기
     </button>
   </div>
+  
+  <!-- 그룹 추가 버튼 -->
+  <div class="flex gap-2 mb-4">
+    <button 
+      on:click={() => addGroupBlogs(naverCompanies)}
+      class="flex-1 px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+      네이버 전체
+    </button>
+    <button 
+      on:click={() => addGroupBlogs(kakaoCompanies)}
+      class="flex-1 px-2 py-1 text-xs bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
+      카카오 전체
+    </button>
+    <button 
+      on:click={() => addGroupBlogs(nekarakuCompanies)}
+      class="flex-1 px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+      네카라쿠배 전체    
+    </button>
+  </div>
+  
   <div class="space-y-6">
     {#each blogCategories as category}
       <div class="space-y-3">
