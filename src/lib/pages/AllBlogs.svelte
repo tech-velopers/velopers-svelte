@@ -23,7 +23,7 @@
   let isLoading = true;
   let error: string | null = null;
   let allTags: Tag[] = [];
-  let sortOption = 'name-asc';
+  let sortOption = 'recent-update';
   let open = false;
   let searchQuery = '';
 
@@ -64,6 +64,7 @@
     { value: 'name-desc', label: '이름역순' },
     { value: 'posts-desc', label: '게시글 많은순' },
     { value: 'posts-asc', label: '게시글 적은순' },
+    { value: 'recent-update', label: '최근 추가된 순' },
   ];
 
   $: selectedValue = sortOptions.find((option) => option.value === sortOption)?.label ?? "정렬 방식 선택";
@@ -99,6 +100,15 @@
         return b.postCnt - a.postCnt;
       case 'posts-asc':
         return a.postCnt - b.postCnt;
+      case 'recent-update':
+        // lastCreatedAt이 없는 경우 가장 오래된 것으로 처리
+        if (!a.lastCreatedAt) return 1;
+        if (!b.lastCreatedAt) return -1;
+        
+        // 날짜 비교
+        const dateA = new Date(a.lastCreatedAt[0], a.lastCreatedAt[1] - 1, a.lastCreatedAt[2]);
+        const dateB = new Date(b.lastCreatedAt[0], b.lastCreatedAt[1] - 1, b.lastCreatedAt[2]);
+        return dateB.getTime() - dateA.getTime();
       default:
         return 0;
     }
@@ -162,6 +172,93 @@
     toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
   }
 
+  // 블로그 카드 클릭 시 선택하기 기능
+  function handleCardClick(blog: TechBlog) {
+    toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
+  }
+
+  // 날짜 포맷팅 함수 개선
+  function formatDate(dateArray?: number[]): string {
+    if (!dateArray || dateArray.length < 3) return '정보 없음';
+    
+    const [year, month, day] = dateArray;
+    const date = new Date(year, month - 1, day);
+    const now = new Date();
+    
+    // 오늘 날짜인 경우
+    if (date.toDateString() === now.toDateString()) {
+      return '오늘';
+    }
+    
+    // 어제 날짜인 경우
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+      return '어제';
+    }
+    
+    // 일주일 이내인 경우
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(now.getDate() - 7);
+    if (date > oneWeekAgo) {
+      const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      return `${diffDays}일 전`;
+    }
+    
+    // 한달 이내인 경우
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+    if (date > oneMonthAgo) {
+      return `${Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 7))}주 전`;
+    }
+    
+    // 그 외의 경우
+    return `${year}년 ${month}월 ${day}일`;
+  }
+
+  // 날짜에 따른 클래스 결정 함수
+  function getDateClass(dateArray?: number[]): string {
+    if (!dateArray || dateArray.length < 3) return '';
+    
+    const [year, month, day] = dateArray;
+    const date = new Date(year, month - 1, day);
+    const now = new Date();
+    
+    // 일주일 이내인 경우
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(now.getDate() - 7);
+    if (date > oneWeekAgo) {
+      return 'text-green-600 dark:text-green-400 font-medium';
+    }
+    
+    // 한달 이내인 경우
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+    if (date > oneMonthAgo) {
+      return 'text-blue-600 dark:text-blue-400';
+    }
+    
+    return 'text-gray-500 dark:text-gray-400';
+  }
+
+  // 블로그 카드 스타일 결정 함수
+  function getBlogCardClass(dateArray?: number[]): string {
+    if (!dateArray || dateArray.length < 3) return '';
+    
+    const [year, month, day] = dateArray;
+    const date = new Date(year, month - 1, day);
+    const now = new Date();
+    
+    // 일주일 이내인 경우
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(now.getDate() - 7);
+    if (date > oneWeekAgo) {
+      return 'border-green-300 dark:border-green-700';
+    }
+    
+    return '';
+  }
+
   function handleSearch(event: CustomEvent<{query: string}>) {
     // TODO: 검색 기능 구현
     console.log('Search query:', event.detail.query);
@@ -175,6 +272,20 @@
   function handleReset() {
     resetSelected();
   }
+
+  // 최근 업데이트 여부 확인 함수
+  function isRecentlyUpdated(dateArray?: number[]): boolean {
+    if (!dateArray || dateArray.length < 3) return false;
+    
+    const [year, month, day] = dateArray;
+    const date = new Date(year, month - 1, day);
+    const now = new Date();
+    
+    // 2일 이내인 경우
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(now.getDate() - 2);
+    return date > twoDaysAgo;
+  }
 </script>
 
 <MainLayout
@@ -187,26 +298,6 @@
   <div class="flex flex-col gap-1 mb-6">
     <h1 class="text-2xl font-bold dark:text-white">모든 블로그</h1>
     <p class="text-sm text-gray-500 dark:text-gray-400">총 {blogs.length}개의 블로그가 존재해요</p>
-    
-    <!-- 그룹 추가 버튼 -->
-    <div class="flex gap-2 mt-3">
-      <button 
-        on:click={() => addGroupBlogs(naverCompanies)}
-        class="flex-1 px-3 py-1.5 text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
-        네이버 전체 추가
-      </button>
-      <button 
-        on:click={() => addGroupBlogs(kakaoCompanies)}
-        class="flex-1 px-3 py-1.5 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
-        카카오 전체 추가
-      </button>
-      <button 
-        on:click={() => addGroupBlogs(nekarakuCompanies)}
-        class="flex-1 px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
-        네카라쿠배 전체 추가
-      </button>
-    </div>
-    
     <div class="flex gap-4 items-center mt-4">
       <div class="relative flex-1">
         <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />
@@ -265,59 +356,63 @@
   {:else if error}
     <div class="text-red-500 text-center p-4">{error}</div>
   {:else}
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {#each filteredBlogs as blog (blog.id)}
         <div 
-          class="w-full text-left bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-lg dark:border-gray-700 cursor-pointer transition-all p-2 sm:p-3 md:p-4 h-full flex flex-col"
-          on:click={() => handleBlogClick(blog)}
-          on:keydown={(e) => e.key === 'Enter' && handleBlogClick(blog)}
+          class="w-full text-left bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-md dark:border-gray-700 cursor-pointer transition-all p-3 sm:p-4 md:p-5 flex flex-col {getBlogCardClass(blog.lastCreatedAt)} {$selectedBlogs.some(b => b.name === blog.techBlogName) ? 'ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-50 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}"
+          on:click={() => handleCardClick(blog)}
+          on:keydown={(e) => e.key === 'Enter' && handleCardClick(blog)}
           role="button"
           tabindex="0"
         >
-          <div class="flex items-start space-x-3">
-            <Avatar.Root class="h-10 w-10 flex-shrink-0">
+          <div class="flex items-start space-x-4">
+            <Avatar.Root class="h-12 w-12 flex-shrink-0">
               <Avatar.Image 
                 src={`/icons/${blog.icon}`} 
                 alt={blog.techBlogName} 
               />
             </Avatar.Root>
             <div class="flex-1 min-w-0">
-              <h3 class="text-base font-semibold dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors truncate">
-                {blog.techBlogName}
-              </h3>
-              <button
-                type="button"
-                class="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                on:click={(e) => handlePostCountClick(blog, e)}
-              >
-                게시글 {blog.postCnt}개
-              </button>
+              <div class="flex items-center">
+                <h3 class="text-lg font-semibold dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors truncate">
+                  {blog.techBlogName}
+                </h3>
+                {#if isRecentlyUpdated(blog.lastCreatedAt)}
+                  <span class="inline-block ml-2 px-1.5 py-0.5 text-xs leading-none font-bold bg-red-500 text-white rounded-full animate-pulse">NEW</span>
+                {/if}
+              </div>
+              <div class="mt-1.5 flex items-center overflow-hidden">
+                <span class="text-xs text-gray-500 dark:text-gray-400 mr-1">URL:</span>
+                <a 
+                  href={blog.baseUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 inline-flex items-center max-w-full group rounded px-1 py-0.5 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                  on:click={(e) => e.stopPropagation()}
+                >
+                  <span class="truncate">{blog.baseUrl}</span>
+                  <SquareArrowOutUpRight class="h-3 w-3 ml-1 flex-shrink-0 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
+                </a>
+              </div>
+              <div class="flex flex-col mt-2.5">
+                <div class="flex items-center">
+                  <span
+                    class="text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    게시글 {blog.postCnt}개
+                  </span>
+                  {#if $selectedBlogs.some(b => b.name === blog.techBlogName)}
+                    <span class="ml-2 px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium rounded-full">선택됨</span>
+                  {/if}
+                </div>
+                <div class="flex items-center mt-1">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">마지막 업데이트:</span>
+                  <span class="text-xs ml-1 {getDateClass(blog.lastCreatedAt)}">
+                    {formatDate(blog.lastCreatedAt)}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="flex gap-1.5 mt-3">
-            <button 
-              type="button"
-              class="flex-1 px-2.5 py-1 text-sm rounded-lg transition-colors flex items-center justify-center gap-1 {$selectedBlogs.some(b => b.name === blog.techBlogName)
-                ? 'bg-red-500 hover:bg-red-600 text-white' 
-                : 'bg-blue-500 hover:bg-blue-600 text-white'}"
-              on:click={(e) => {
-                e.stopPropagation();
-                toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
-              }}
-            >
-              <span>{$selectedBlogs.some(b => b.name === blog.techBlogName) ? '선택 해제' : '선택하기'}</span>
-            </button>
-            <button 
-              type="button"
-              class="flex-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1"
-              on:click={(e) => {
-                e.stopPropagation();
-                handleBlogClick(blog);
-              }}
-            >
-              <span>블로그</span>
-              <SquareArrowOutUpRight class="h-3 w-3" />
-            </button>
           </div>
         </div>
       {/each}
