@@ -65,8 +65,14 @@
     // 검색어가 비어있으면 모든 블로그 표시
     if (!query) return true;
 
-    // Hangul.js의 search 함수를 사용하여 검색
-    // 초성 검색과 일반 검색 모두 지원
+    // 영문 대소문자 구분 없이 검색하기 위해 소문자로 변환
+    const lowerBlogName = blogName.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    
+    // 일반 텍스트 검색 (대소문자 구분 없음)
+    if (lowerBlogName.includes(lowerQuery)) return true;
+    
+    // Hangul.js의 search 함수를 사용하여 한글 초성 검색
     return Hangul.search(blogName, query) >= 0;
   });
 

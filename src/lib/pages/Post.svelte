@@ -129,14 +129,14 @@
     <title>{post.title} - {post.techBlogName} | Velopers</title>
     <meta name="title" property="og:title" content={`${post.title} - ${post.techBlogName}`} />
     <meta name="description" property="og:description" content={post.preview} />
-    <meta name="image" property="og:image" content={post.imageUrl && post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg'} />
+    <meta name="image" property="og:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
     <meta name="type" property="og:type" content="article" />
     <meta name="url" property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
     <meta name="site_name" property="og:site_name" content="Velopers" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${post.title} - ${post.techBlogName}`} />
     <meta name="twitter:description" content={post.preview} />
-    <meta name="twitter:image" content={post.imageUrl && post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg'} />
+    <meta name="twitter:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
     <meta name="keywords" content={post.tags.join(', ')} />
     <meta name="author" content={post.techBlogName} />
     <link rel="canonical" href={`https://www.velopers.kr/post/${post.id}`} />
@@ -164,7 +164,7 @@
     <article class="max-w-4xl mx-auto p-4 space-y-6">
       <div class="w-full h-64 relative rounded-xl overflow-hidden">
         <img 
-          src={post.imageUrl || '/default-post-image.jpg'} 
+          src={post.imageUrl ? post.imageUrl : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
           alt={post.title}
           class="w-full h-full object-cover"
         />

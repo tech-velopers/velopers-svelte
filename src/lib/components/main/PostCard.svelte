@@ -48,6 +48,8 @@
   onMount(() => {
     if (post.imageUrl && loadedImages.has(post.imageUrl)) {
       imageLoaded = true;
+    } else if (!post.imageUrl && blogInfo.icon && loadedImages.has(`/icons/${blogInfo.icon}`)) {
+      imageLoaded = true;
     }
   });
 
@@ -55,6 +57,9 @@
     imageLoaded = true;
     if (post.imageUrl) {
       loadedImages.add(post.imageUrl);
+    } else if (blogInfo.icon) {
+      // 이미지 URL이 없을 경우 블로그 아이콘 경로를 캐시에 추가
+      loadedImages.add(`/icons/${blogInfo.icon}`);
     }
   }
 
@@ -123,7 +128,7 @@
         <Skeleton class="w-full h-full" />
       {/if}
       <img 
-        src={post.imageUrl} 
+        src={post.imageUrl ? post.imageUrl : `/icons/${blogInfo.icon}`} 
         alt="Post thumbnail" 
         loading="lazy"
         decoding="async"
@@ -237,7 +242,7 @@
         <Skeleton class="w-full h-full" />
       {/if}
       <img 
-        src={post.imageUrl} 
+        src={post.imageUrl ? post.imageUrl : `/icons/${blogInfo.icon}`} 
         alt="Post thumbnail" 
         loading="lazy"
         decoding="async"
