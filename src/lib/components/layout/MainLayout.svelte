@@ -10,11 +10,11 @@
 </script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-  <div class="container mx-auto px-4 py-8 max-w-7xl">
+  <div class="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
     {#if showLogo}
-      <div class="mb-8">
-        <div class="bg-black rounded-2xl overflow-hidden dark:ring-1 dark:ring-gray-700">
-          <img src="/velopers.png" alt="Velopers 로고" class="w-full h-36 md:h-40 object-contain scale-[1.75] md:scale-100"/>
+      <div class="mb-4 sm:mb-8">
+        <div class="bg-black rounded-xl sm:rounded-2xl overflow-hidden dark:ring-1 dark:ring-gray-700">
+          <img src="/velopers.png" alt="Velopers 로고" class="w-full h-28 sm:h-36 md:h-40 object-contain scale-[1.5] sm:scale-[1.75] md:scale-100"/>
         </div>
       </div>
     {/if}

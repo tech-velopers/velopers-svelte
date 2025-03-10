@@ -172,8 +172,14 @@
     toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
   }
 
-  // 블로그 카드 클릭 시 선택하기 기능
-  function handleCardClick(blog: TechBlog) {
+  // 블로그 카드 클릭 시 블로그 상세 페이지로 이동하는 함수
+  function navigateToBlog(blog: TechBlog) {
+    navigate(`/blog/${blog.id}`);
+  }
+
+  // 블로그 선택 함수 (별도 버튼용)
+  function handleToggleBlog(blog: TechBlog, event: MouseEvent) {
+    event.stopPropagation();
     toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
   }
 
@@ -202,14 +208,17 @@
     oneWeekAgo.setDate(now.getDate() - 7);
     if (date > oneWeekAgo) {
       const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-      return `${diffDays}일 전`;
+      // 음수 일수가 나오는 경우 '오늘'로 표시
+      return diffDays < 0 ? '오늘' : `${diffDays}일 전`;
     }
     
     // 한달 이내인 경우
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(now.getMonth() - 1);
     if (date > oneMonthAgo) {
-      return `${Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 7))}주 전`;
+      const diffWeeks = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 7));
+      // 음수 주수가 나오는 경우 '오늘'로 표시
+      return diffWeeks < 0 ? '오늘' : `${diffWeeks}주 전`;
     }
     
     // 그 외의 경우
@@ -359,9 +368,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {#each filteredBlogs as blog (blog.id)}
         <div 
-          class="w-full text-left bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-md dark:border-gray-700 cursor-pointer transition-all p-3 sm:p-4 md:p-5 flex flex-col {getBlogCardClass(blog.lastCreatedAt)} {$selectedBlogs.some(b => b.name === blog.techBlogName) ? 'ring-2 ring-blue-500 dark:ring-blue-400 bg-blue-50 dark:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}"
-          on:click={() => handleCardClick(blog)}
-          on:keydown={(e) => e.key === 'Enter' && handleCardClick(blog)}
+          class="w-full text-left bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-md dark:border-gray-700 cursor-pointer transition-all p-3 sm:p-4 md:p-5 flex flex-col {getBlogCardClass(blog.lastCreatedAt)}"
+          on:click={() => navigateToBlog(blog)}
+          on:keydown={(e) => e.key === 'Enter' && navigateToBlog(blog)}
           role="button"
           tabindex="0"
         >
@@ -380,6 +389,14 @@
                 {#if isRecentlyUpdated(blog.lastCreatedAt)}
                   <span class="inline-block ml-2 px-1.5 py-0.5 text-xs leading-none font-bold bg-red-500 text-white rounded-full animate-pulse">NEW</span>
                 {/if}
+                <button
+                  class="ml-auto px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center {$selectedBlogs.some(b => b.name === blog.techBlogName) 
+                    ? 'bg-red-500 hover:bg-red-600 text-white' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'}"
+                  on:click={(e) => handleToggleBlog(blog, e)}
+                >
+                  <span>{$selectedBlogs.some(b => b.name === blog.techBlogName) ? '선택 해제' : '선택하기'}</span>
+                </button>
               </div>
               <div class="mt-1.5 flex items-center overflow-hidden">
                 <span class="text-xs text-gray-500 dark:text-gray-400 mr-1">URL:</span>
@@ -401,9 +418,6 @@
                   >
                     게시글 {blog.postCnt}개
                   </span>
-                  {#if $selectedBlogs.some(b => b.name === blog.techBlogName)}
-                    <span class="ml-2 px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium rounded-full">선택됨</span>
-                  {/if}
                 </div>
                 <div class="flex items-center mt-1">
                   <span class="text-xs text-gray-500 dark:text-gray-400">마지막 업데이트:</span>

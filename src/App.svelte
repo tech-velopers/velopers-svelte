@@ -8,6 +8,7 @@
   import About from "$lib/pages/About.svelte";
   import AllBlogs from "$lib/pages/AllBlogs.svelte";
   import Post from "$lib/pages/Post.svelte";
+  import BlogDetail from "$lib/pages/BlogDetail.svelte";
   import Changelog from "$lib/pages/Changelog.svelte";
   import { Toaster } from "$lib/components/ui/sonner";
 
@@ -53,6 +54,8 @@
       <Changelog />
     {:else if $currentPath.startsWith('/post/')}
       <Post />
+    {:else if $currentPath.startsWith('/blog/')}
+      <BlogDetail />
     {:else}
       <Home />
     {/if}

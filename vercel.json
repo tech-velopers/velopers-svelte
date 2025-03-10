@@ -19,6 +19,10 @@
       "destination": "https://server.velopers.kr/api/rss.xml"
     },
     {
+      "source": "/blogs-sitemap.xml",
+      "destination": "https://server.velopers.kr/api/blogs-sitemap.xml"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://server.velopers.kr/api/:path*"
     },

@@ -98,6 +98,19 @@
     }
   }
 
+  // 블로그 상세 페이지로 이동하는 함수 추가
+  function navigateToBlog(blogName: string | undefined) {
+    if (blogName) {
+      // techBlogMap에서 블로그 ID 찾기
+      const blogInfo = $techBlogMap[blogName];
+      if (blogInfo && blogInfo.id) {
+        navigate(`/blog/${blogInfo.id}`);
+      } else {
+        console.error(`블로그 정보를 찾을 수 없음: ${blogName}`);
+      }
+    }
+  }
+
   // 공유 기능 추가
   function handleShareClick() {
     if (post) {
@@ -161,8 +174,8 @@
   </MainLayout>
 {:else if post}
   <MainLayout allTags={[]} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
-    <article class="max-w-4xl mx-auto p-4 space-y-6">
-      <div class="w-full h-64 relative rounded-xl overflow-hidden">
+    <article class="max-w-4xl mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6">
+      <div class="w-full h-48 sm:h-64 relative rounded-xl overflow-hidden">
         <img 
           src={post.imageUrl ? post.imageUrl : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
           alt={post.title}
@@ -170,33 +183,40 @@
         />
       </div>
 
-      <header class="space-y-4">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+      <header class="space-y-3 sm:space-y-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
           {post.title}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <!-- 블로그 이름 클릭 시 블로그 상세 페이지로 이동 -->
+          <div 
+            class="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            on:click={() => post && navigateToBlog(post.techBlogName)}
+            on:keydown={(e) => post && e.key === 'Enter' && navigateToBlog(post.techBlogName)}
+            role="button"
+            tabindex="0"
+          >
             <img 
               src={`/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
               alt={post.techBlogName}
-              class="w-6 h-6 rounded-full mr-2"
+              class="w-5 h-5 sm:w-6 sm:h-6 rounded-full mr-1.5 sm:mr-2"
             />
-            <span class="text-gray-700 dark:text-gray-300 text-sm font-medium">{post.techBlogName}</span>
+            <span class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-medium">{post.techBlogName}</span>
           </div>
           
           {#if post.category}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div 
-              class="bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              class="bg-blue-50 dark:bg-blue-900/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
               on:click={() => post && post.category && handleCategoryClick(post.category)}
               role="button"
               tabindex="0"
             >
-              <span class="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 text-sm font-medium">
+              <span class="flex items-center gap-1 sm:gap-1.5 text-blue-700 dark:text-blue-400 text-xs sm:text-sm font-medium">
                 <svelte:component 
                   this={getCategoryIcon(post.category)} 
-                  class="w-4 h-4" 
+                  class="w-3.5 h-3.5 sm:w-4 sm:h-4" 
                   strokeWidth={1.5}
                 />
                 {post.category}
@@ -204,14 +224,14 @@
             </div>
           {/if}
           
-          <time class="text-gray-500 text-sm px-3 py-1.5">
+          <time class="text-gray-500 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
             {formatDate(post.createdAt)}
           </time>
         </div>
 
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-1.5 sm:gap-2">
           {#each post.tags as tag}
-            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm">
+            <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs sm:text-sm">
               {tag}
             </span>
           {/each}
@@ -219,51 +239,51 @@
       </header>
 
       {#if !post.gptSummary || post.gptSummary.length <= 10}
-        <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-6 mb-8">
-          <div class="flex items-center gap-2 mb-3 text-yellow-600 dark:text-yellow-400">
-            <Bot class="h-5 w-5" />
-            <span class="font-semibold">AI 요약 불가</span>
+        <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-3 sm:p-6 mb-4 sm:mb-8">
+          <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 text-yellow-600 dark:text-yellow-400">
+            <Bot class="h-4 w-4 sm:h-5 sm:w-5" />
+            <span class="font-semibold text-sm sm:text-base">AI 요약 불가</span>
           </div>
-          <p class="text-gray-700 dark:text-gray-300">
+          <p class="text-gray-700 dark:text-gray-300 text-sm sm:text-base">
             게시글에서 제공된 내용이 적어 요약이 불가능합니다. 하단의 원문 보기를 클릭해서 읽어주세요.
           </p>
         </div>
       {:else}
-        <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-4 mb-8">
-          <div class="flex items-center gap-2 mb-2 text-blue-600 dark:text-blue-400">
-            <Bot class="h-5 w-5" />
-            <span class="font-semibold">AI 요약</span>
+        <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4 mb-4 sm:mb-8">
+          <div class="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-blue-600 dark:text-blue-400">
+            <Bot class="h-4 w-4 sm:h-5 sm:w-5" />
+            <span class="font-semibold text-sm sm:text-base">AI 요약</span>
           </div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 sm:mb-4">
             이 글은 AI가 원문을 분석하여 핵심 내용을 요약한 것입니다.
           </p>
-          <div class="prose dark:prose-invert max-w-none">
+          <div class="prose dark:prose-invert max-w-none prose-sm sm:prose-base">
             {@html post.gptSummary}
           </div>
         </div>
       {/if}
 
-      <div class="flex justify-center gap-4 pt-8">
+      <div class="flex justify-center gap-2 sm:gap-4 pt-4 sm:pt-8">
         <button
           on:click={handleBackClick}
-          class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2"
+          class="px-3 py-2 sm:px-6 sm:py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
         >
-          <Undo2 class="h-5 w-5" />
+          <Undo2 class="h-4 w-4 sm:h-5 sm:w-5" />
           <span>목록으로</span>
         </button>
         <button
           on:click={handleShareClick}
-          class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2"
+          class="px-3 py-2 sm:px-6 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
         >
-          <Share2 class="h-5 w-5" />
+          <Share2 class="h-4 w-4 sm:h-5 sm:w-5" />
           <span>공유하기</span>
         </button>
         <button
           on:click={handleOriginalPostClick}
-          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2"
+          class="px-3 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
         >
           <span>원문 보기</span>
-          <SquareArrowOutUpRight class="h-5 w-5" />
+          <SquareArrowOutUpRight class="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
       </div>
     </article>
