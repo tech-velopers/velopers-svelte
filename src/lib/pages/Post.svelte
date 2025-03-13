@@ -146,6 +146,16 @@
     <meta name="type" property="og:type" content="article" />
     <meta name="url" property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
     <meta name="site_name" property="og:site_name" content="Velopers" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="article:published_time" content={new Date(post.createdAt[0], post.createdAt[1] - 1, post.createdAt[2]).toISOString()} />
+    <meta property="article:section" content={post.category || '기술 블로그'} />
+    <meta property="article:publisher" content="https://www.velopers.kr" />
+    <meta property="article:author" content={post.techBlogName} />
+    {#if post.tags && post.tags.length > 0}
+      {#each post.tags as tag}
+        <meta property="article:tag" content={tag} />
+      {/each}
+    {/if}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${post.title} - ${post.techBlogName}`} />
     <meta name="twitter:description" content={post.preview} />

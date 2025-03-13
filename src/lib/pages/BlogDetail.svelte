@@ -254,6 +254,13 @@
     <meta name="type" property="og:type" content="website" />
     <meta name="url" property="og:url" content={`https://www.velopers.kr/blog/${blog.id}`} />
     <meta name="site_name" property="og:site_name" content="Velopers" />
+    <meta property="og:locale" content="ko_KR" />
+    {#if blog.lastCreatedAt}
+      <meta property="article:published_time" content={new Date(blog.lastCreatedAt[0], blog.lastCreatedAt[1] - 1, blog.lastCreatedAt[2]).toISOString()} />
+      <meta property="article:modified_time" content={new Date(blog.lastCreatedAt[0], blog.lastCreatedAt[1] - 1, blog.lastCreatedAt[2]).toISOString()} />
+    {/if}
+    <meta property="article:section" content="기술 블로그" />
+    <meta property="article:publisher" content="https://www.velopers.kr" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${blog.techBlogName} - 기술 블로그`} />
     <meta name="twitter:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
