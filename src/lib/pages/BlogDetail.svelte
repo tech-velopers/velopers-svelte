@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
-  import { currentPath, currentUrl, navigate } from '$lib/stores/router';
+  import { currentPath, currentUrl, navigate, updateMetaTags } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
@@ -120,6 +120,40 @@
           top: 0, 
           behavior: isMobile ? 'auto' : 'smooth' 
         });
+
+        // 메타태그 업데이트
+        updateMetaTags({
+          title: `${foundBlog.techBlogName} | Velopers`,
+          meta: [
+            { key: '1', property: 'og:title', content: `${foundBlog.techBlogName} - 기술 블로그` },
+            { key: '2', property: 'og:description', content: `${foundBlog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.` },
+            { key: '3', property: 'og:image', content: `/icons/${foundBlog.icon}` },
+            { key: '4', property: 'og:type', content: 'website' },
+            { key: '5', property: 'og:url', content: `https://www.velopers.kr/blog/${foundBlog.id}` },
+            { key: '6', property: 'og:site_name', content: 'Velopers' },
+            { key: '7', property: 'og:locale', content: 'ko_KR' },
+            { key: '8', property: 'article:section', content: '기술 블로그' },
+            { key: '9', property: 'article:publisher', content: 'https://www.velopers.kr' },
+            { key: '10', name: 'twitter:card', content: 'summary_large_image' },
+            { key: '11', name: 'twitter:title', content: `${foundBlog.techBlogName} - 기술 블로그` },
+            { key: '12', name: 'twitter:description', content: `${foundBlog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.` },
+            { key: '13', name: 'twitter:image', content: `/icons/${foundBlog.icon}` }
+          ],
+          links: [
+            { rel: 'canonical', href: `https://www.velopers.kr/blog/${foundBlog.id}` }
+          ]
+        });
+        
+        // 마지막 업데이트 날짜가 있으면 추가
+        if (foundBlog.lastCreatedAt) {
+          const publishedTime = new Date(foundBlog.lastCreatedAt[0], foundBlog.lastCreatedAt[1] - 1, foundBlog.lastCreatedAt[2]).toISOString();
+          updateMetaTags({
+            meta: [
+              { key: '14', property: 'article:published_time', content: publishedTime },
+              { key: '15', property: 'article:modified_time', content: publishedTime }
+            ]
+          });
+        }
       } else {
         error = '블로그를 찾을 수 없습니다.';
         console.error(`블로그를 찾을 수 없음: ID ${id}`);
@@ -244,30 +278,6 @@
   const onSearch = () => {};
   const onReset = () => {};
 </script>
-
-<svelte:head>
-  {#if blog}
-    <title>{blog.techBlogName} | Velopers</title>
-    <meta name="title" property="og:title" content={`${blog.techBlogName} - 기술 블로그`} />
-    <meta name="description" property="og:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
-    <meta name="image" property="og:image" content={`/icons/${blog.icon}`} />
-    <meta name="type" property="og:type" content="website" />
-    <meta name="url" property="og:url" content={`https://www.velopers.kr/blog/${blog.id}`} />
-    <meta name="site_name" property="og:site_name" content="Velopers" />
-    <meta property="og:locale" content="ko_KR" />
-    {#if blog.lastCreatedAt}
-      <meta property="article:published_time" content={new Date(blog.lastCreatedAt[0], blog.lastCreatedAt[1] - 1, blog.lastCreatedAt[2]).toISOString()} />
-      <meta property="article:modified_time" content={new Date(blog.lastCreatedAt[0], blog.lastCreatedAt[1] - 1, blog.lastCreatedAt[2]).toISOString()} />
-    {/if}
-    <meta property="article:section" content="기술 블로그" />
-    <meta property="article:publisher" content="https://www.velopers.kr" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={`${blog.techBlogName} - 기술 블로그`} />
-    <meta name="twitter:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
-    <meta name="twitter:image" content={`/icons/${blog.icon}`} />
-    <link rel="canonical" href={`https://www.velopers.kr/blog/${blog.id}`} />
-  {/if}
-</svelte:head>
 
 <MainLayout allTags={allTags} {searchWithSelected} {onSearch} {onReset} showLogo={true} showSidebar={false}>
   {#if loading}
