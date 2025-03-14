@@ -8,7 +8,7 @@
   import { store as postsStore } from '$lib/stores/posts';
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
-  import { currentUrl, updateMetaTags } from '$lib/stores/router';
+  import { currentUrl } from '$lib/stores/router';
   import { get } from 'svelte/store';
 
   // 상태 관리
@@ -72,32 +72,6 @@
     
     // 초기 URL 상태 반영
     prevUrl = window.location.href;
-    
-    // 홈페이지용 메타태그 리셋
-    updateMetaTags({
-      title: "Velopers - 개발자를 위한 IT 기술 블로그 모음",
-      meta: [
-        { key: '1', property: 'og:title', content: "Velopers - 개발자를 위한 IT 기술 블로그 모음" },
-        { key: '2', property: 'og:description', content: "당신을 위한 IT 기술 개발 블로그 모음 사이트입니다. 국내 다양한 테크 블로그들의 게시글을 모아놓았습니다." },
-        { key: '3', property: 'og:image', content: "https://www.velopers.kr/velopers.png" },
-        { key: '4', property: 'og:image:alt', content: "Velopers" },
-        { key: '5', property: 'og:type', content: "website" },
-        { key: '6', property: 'og:url', content: "https://www.velopers.kr" },
-        { key: '7', property: 'og:site_name', content: "Velopers" },
-        { key: '8', name: 'twitter:card', content: "summary" },
-        { key: '9', name: 'twitter:title', content: "Velopers - 개발자를 위한 IT 기술 블로그 모음" },
-        { key: '10', name: 'twitter:description', content: "당신을 위한 IT 기술 개발 블로그 모음 사이트입니다. 국내 다양한 테크 블로그들의 게시글을 모아놓았습니다." },
-        { key: '11', name: 'twitter:image', content: "https://www.velopers.kr/velopers.png" },
-        { key: '12', name: 'twitter:image:alt', content: "Velopers" },
-        { key: '13', name: 'twitter:site', content: "@Velopers" },
-        { key: '14', name: 'description', content: "당신을 위한 IT 기술 개발 블로그 모음 사이트입니다. 국내 다양한 테크 블로그들의 게시글을 모아놓았습니다." },
-        { key: '15', name: 'keywords', content: "개발자, 기술 블로그, IT 블로그, 테크 블로그, 개발 블로그, 프로그래밍, 기술 아티클, 개발 정보" },
-        { key: '16', name: 'author', content: "Velopers" }
-      ],
-      links: [
-        { rel: 'canonical', href: "https://www.velopers.kr" }
-      ]
-    });
     
     // 먼저 필요한 데이터를 가져옵니다
     Promise.all([

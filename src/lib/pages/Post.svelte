@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getApiUrl } from '$lib/config';
-  import { currentPath, navigate, updateMetaTags } from '$lib/stores/router';
+  import { currentPath, navigate } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2 } from 'lucide-svelte';
@@ -59,36 +59,6 @@
         top: 0, 
         behavior: isMobile ? 'auto' : 'smooth' 
       });
-
-      // 메타 태그 업데이트
-      if (post) {
-        updateMetaTags({
-          title: `${post.title} - ${post.techBlogName} | Velopers`,
-          meta: [
-            { key: '1', property: 'og:title', content: `${post.title} - ${post.techBlogName}` },
-            { key: '2', property: 'og:description', content: post.preview },
-            { key: '3', property: 'og:image', content: post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}` },
-            { key: '4', property: 'og:type', content: 'article' },
-            { key: '5', property: 'og:url', content: `https://www.velopers.kr/post/${post.id}` },
-            { key: '6', property: 'og:site_name', content: 'Velopers' },
-            { key: '7', property: 'og:locale', content: 'ko_KR' },
-            { key: '8', property: 'article:published_time', content: new Date(post.createdAt[0], post.createdAt[1] - 1, post.createdAt[2]).toISOString() },
-            { key: '9', property: 'article:section', content: post.category || '기술 블로그' },
-            { key: '10', property: 'article:publisher', content: 'https://www.velopers.kr' },
-            { key: '11', property: 'article:author', content: post.techBlogName },
-            { key: '12', name: 'twitter:card', content: 'summary_large_image' },
-            { key: '13', name: 'twitter:title', content: `${post.title} - ${post.techBlogName}` },
-            { key: '14', name: 'twitter:description', content: post.preview },
-            { key: '15', name: 'twitter:image', content: post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}` },
-            { key: '16', name: 'keywords', content: post.tags.join(', ') },
-            { key: '17', name: 'author', content: post.techBlogName },
-            ...post.tags.map((tag, i) => ({ key: `tag-${i}`, property: 'article:tag', content: tag }))
-          ],
-          links: [
-            { rel: 'canonical', href: `https://www.velopers.kr/post/${post.id}` }
-          ]
-        });
-      }
     } catch (e) {
       error = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
     } finally {
@@ -166,6 +136,35 @@
   const onSearch = () => {};
   const onReset = () => {};
 </script>
+
+<svelte:head>
+  {#if post}
+    <title>{post.title} - {post.techBlogName} | Velopers</title>
+    <meta name="title" property="og:title" content={`${post.title} - ${post.techBlogName}`} />
+    <meta name="description" property="og:description" content={post.preview} />
+    <meta name="image" property="og:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
+    <meta name="type" property="og:type" content="article" />
+    <meta name="url" property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
+    <meta name="site_name" property="og:site_name" content="Velopers" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="article:published_time" content={new Date(post.createdAt[0], post.createdAt[1] - 1, post.createdAt[2]).toISOString()} />
+    <meta property="article:section" content={post.category || '기술 블로그'} />
+    <meta property="article:publisher" content="https://www.velopers.kr" />
+    <meta property="article:author" content={post.techBlogName} />
+    {#if post.tags && post.tags.length > 0}
+      {#each post.tags as tag}
+        <meta property="article:tag" content={tag} />
+      {/each}
+    {/if}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${post.title} - ${post.techBlogName}`} />
+    <meta name="twitter:description" content={post.preview} />
+    <meta name="twitter:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
+    <meta name="keywords" content={post.tags.join(', ')} />
+    <meta name="author" content={post.techBlogName} />
+    <link rel="canonical" href={`https://www.velopers.kr/post/${post.id}`} />
+  {/if}
+</svelte:head>
 
 {#if loading}
   <MainLayout allTags={[]} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
