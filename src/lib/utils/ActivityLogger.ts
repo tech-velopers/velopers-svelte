@@ -7,10 +7,22 @@ import { getApiUrl } from '$lib/config';
 export class ActivityLogger {
   private endpoint: string;
   private sessionId: string;
+  private isDevelopment: boolean;
 
   constructor() {
     this.endpoint = getApiUrl('/api/activity/log');
     this.sessionId = this.getOrCreateSessionId();
+    
+    // 개발 환경 여부 확인 (Vite는 import.meta.env 사용)
+    this.isDevelopment = import.meta.env.MODE === 'dev' ||
+                         import.meta.env.MODE === 'development' ||
+                         import.meta.env.MODE === 'qa' ||
+                         window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1';
+                         
+    if (this.isDevelopment) {
+      console.log('[ActivityLogger] 개발 환경 감지: 로그는 로컬스토리지에만 저장되고 서버로 전송되지 않습니다.');
+    }
   }
 
   /**
@@ -63,14 +75,22 @@ export class ActivityLogger {
         extraData: activityData.extraData ? JSON.stringify(activityData.extraData) : null
       };
 
-      // API URL 확인 로깅
-      console.log('[ActivityLogger] API URL:', this.endpoint);
-      console.log('[ActivityLogger] 활동 로그:', payload);
-      
-      // 로컬스토리지에도 함께 저장 (백업 목적)
+      // 로컬스토리지에 저장 (모든 환경에서)
       this.saveToLocalStorage(payload);
       
-      // API 서버에 로그 전송
+      // 콘솔에 로깅 (모든 환경에서)
+      console.log('[ActivityLogger] 활동 로그:', payload);
+      
+      // 개발 환경에서는 API 전송 생략
+      if (this.isDevelopment) {
+        console.log('[ActivityLogger] 개발 환경: API 서버로 로그 전송 생략');
+        return;
+      }
+      
+      // API URL 확인 로깅
+      console.log('[ActivityLogger] API URL:', this.endpoint);
+      
+      // API 서버에 로그 전송 (개발 환경이 아닌 경우에만)
       try {
         const response = await fetch(this.endpoint, {
           method: 'POST',
@@ -94,7 +114,7 @@ export class ActivityLogger {
         }
       } catch (fetchError) {
         console.error('[ActivityLogger] 네트워크 요청 오류:', fetchError);
-        console.log('[ActivityLogger] 개발 서버(localhost:8080)가 실행 중인지 확인하세요');
+        console.log('[ActivityLogger] 서버가 실행 중인지 확인하세요');
       }
     } catch (error) {
       console.error('[ActivityLogger] 활동 로깅 중 오류 발생:', error);
