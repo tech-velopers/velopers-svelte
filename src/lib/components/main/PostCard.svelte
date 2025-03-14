@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import { navigate, visitedPosts, markPostAsVisited } from '$lib/stores/router';
   import {SquareArrowOutUpRight, Check } from 'lucide-svelte';
+  import logger from '$lib/utils/ActivityLogger';
 
 
   export let post: {
@@ -65,18 +66,56 @@
   }
 
   function handlePostClick() {
+    // 포스트 클릭 로깅
+    logger.logClick('POST_CARD', post.id, {
+      title: post.title,
+      techBlogName: post.techBlogName,
+      isVisited: isVisited
+    });
+    
     markPostAsVisited(post.id);
     navigate(`/post/${post.id}`);
   }
 
   // 블로그 선택 함수 - 선택만 하고 검색은 하지 않음
   function handleToggleBlog(blog: { name: string; avatar: string }) {
+    // 블로그 토글 상태 확인
+    const isSelected = isBlogSelected(blog.name);
+    
+    // 블로그 선택/해제 로깅
+    logger.logClick(isSelected ? 'BLOG_UNSELECT' : 'BLOG_SELECT', undefined, {
+      blogName: blog.name, 
+      from: 'post_card',
+      totalSelected: isSelected ? $selectedBlogs.length - 1 : $selectedBlogs.length + 1
+    });
+    
     toggleBlog(blog);
+  }
+
+  // 태그 클릭 핸들러 추가
+  function handleTagClick(tag: string) {
+    // 태그 토글 상태 확인
+    const isSelected = isTagSelected(tag);
+    
+    // 태그 클릭 로깅
+    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, {
+      tagName: tag,
+      from: 'post_card',
+      totalSelected: isSelected ? $selectedTags.length - 1 : $selectedTags.length + 1
+    });
+    
+    toggleTag(tag);
   }
 
   // 블로그 상세 페이지로 이동하는 함수 추가
   function navigateToBlog(blogName: string, event: Event) {
     event.stopPropagation(); // 포스트 클릭 이벤트 전파 방지
+    
+    // 블로그 클릭 로깅
+    logger.logClick('TECH_BLOG', undefined, {
+      blogName: blogName,
+      from: 'post_card'
+    });
     
     // techBlogMap에서 블로그 ID 찾기
     const blogInfo = $techBlogMap[blogName];
@@ -84,6 +123,22 @@
       navigate(`/blog/${blogInfo.id}`);
     } else {
       console.error(`블로그 정보를 찾을 수 없음: ${blogName}`);
+    }
+  }
+  
+  // 블로그 URL로 이동하는 함수
+  function openBlogUrl(url: string | undefined, event: Event) {
+    event.stopPropagation(); // 기본 이벤트 중지
+    
+    if (url) {
+      // 블로그 URL 방문 로깅
+      logger.logClick('BLOG_URL', undefined, {
+        blogName: post.techBlogName,
+        url: url,
+        from: 'post_card'
+      });
+      
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
 </script>
@@ -152,7 +207,7 @@
           {#each post.tags as tag}
             <button 
               type="button"
-              on:click|stopPropagation={() => toggleTag(tag)}
+              on:click|stopPropagation={() => handleTagClick(tag)}
               class="px-1.5 sm:px-2 py-0.5 rounded-md text-xs md:text-sm transition-all duration-200 hover:-translate-y-0.5 
                 {isTagSelected(tag) 
                   ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800' 
@@ -228,11 +283,7 @@
                     target="_blank" 
                     rel="noopener noreferrer" 
                     class="flex-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs sm:text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1 sm:gap-1.5"
-                    on:click|stopPropagation={() => {
-                      if (blogInfo.baseUrl) {
-                        window.open(blogInfo.baseUrl, '_blank', 'noopener,noreferrer');
-                      }
-                    }}
+                    on:click|stopPropagation={(e) => openBlogUrl(blogInfo.baseUrl, e)}
                   >
                     <span>블로그</span>
                     <SquareArrowOutUpRight class="h-3 w-3 sm:h-3.5 sm:w-3.5" />

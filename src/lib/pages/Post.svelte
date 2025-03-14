@@ -7,6 +7,7 @@
   import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2 } from 'lucide-svelte';
   import type { ComponentType, SvelteComponent } from 'svelte';
   import { toast } from "svelte-sonner";
+  import logger from '$lib/utils/ActivityLogger';
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
 
@@ -53,6 +54,11 @@
       if (!response.ok) throw new Error('포스트를 불러오는데 실패했습니다.');
       post = await response.json();
       
+      // 페이지 조회 로깅
+      if (post) {
+        logger.logPageView('POST', post.id);
+      }
+      
       // 모바일에서는 즉시 스크롤, 데스크톱에서는 부드럽게 스크롤
       const isMobile = window.innerWidth < 1024; // lg 브레이크포인트
       window.scrollTo({ 
@@ -84,16 +90,28 @@
 
   function handleOriginalPostClick() {
     if (post?.url) {
+      // 원문 클릭 로깅
+      logger.logClick('ORIGINAL_POST', post.id, { 
+        blogName: post.techBlogName,
+        title: post.title,
+        url: post.url
+      });
       window.open(post.url, '_blank', 'noopener,noreferrer');
     }
   }
 
   function handleBackClick() {
+    // 뒤로가기 클릭 로깅
+    if (post) {
+      logger.logClick('BACK_BUTTON', post.id, { page: 'post' });
+    }
     window.history.back();
   }
 
   function handleCategoryClick(category: string | undefined) {
     if (category) {
+      // 카테고리 클릭 로깅
+      logger.logClick('CATEGORY', undefined, { categoryName: category });
       navigate(`/?page=1&category=${category.toLowerCase()}`);
     }
   }
@@ -101,6 +119,9 @@
   // 블로그 상세 페이지로 이동하는 함수 추가
   function navigateToBlog(blogName: string | undefined) {
     if (blogName) {
+      // 블로그 이름 클릭 로깅
+      logger.logClick('TECH_BLOG', undefined, { blogName });
+      
       // techBlogMap에서 블로그 ID 찾기
       const blogInfo = $techBlogMap[blogName];
       if (blogInfo && blogInfo.id) {
@@ -114,6 +135,12 @@
   // 공유 기능 추가
   function handleShareClick() {
     if (post) {
+      // 공유하기 클릭 로깅
+      logger.logClick('SHARE_BUTTON', post.id, { 
+        title: post.title,
+        blogName: post.techBlogName
+      });
+      
       const shareUrl = `${window.location.origin}/post/${post.id}`;
       navigator.clipboard.writeText(shareUrl)
         .then(() => {
@@ -129,6 +156,12 @@
           });
         });
     }
+  }
+
+  // 태그 클릭 핸들러 추가
+  function handleTagClick(tag: string) {
+    logger.logClick('TAG', undefined, { tagName: tag, from: 'post_detail' });
+    navigate(`/?tags=${tag}`);
   }
 
   // 검색 관련 함수들
@@ -241,7 +274,13 @@
 
         <div class="flex flex-wrap gap-1.5 sm:gap-2">
           {#each post.tags as tag}
-            <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs sm:text-sm">
+            <span 
+              class="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs sm:text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              on:click={() => handleTagClick(tag)}
+              on:keydown={(e) => e.key === 'Enter' && handleTagClick(tag)}
+              role="button"
+              tabindex="0"
+            >
               {tag}
             </span>
           {/each}

@@ -10,6 +10,7 @@
   import type { Tag } from '$lib/stores/tags';
   import { currentUrl } from '$lib/stores/router';
   import { get } from 'svelte/store';
+  import logger from '$lib/utils/ActivityLogger';
 
   // 상태 관리
   let allTags: Tag[] = [];
@@ -126,6 +127,24 @@
       postsStore.fetchPosts();
       console.log('onMount fetchPosts');
       
+      // 페이지 조회 로깅
+      logger.logPageView('HOME', undefined);
+      
+      // 초기 URL 파라미터 로깅
+      if (category !== 'all' || page > 1 || blogs.length > 0 || tags.length > 0) {
+        logger.logActivity({
+          activityType: 'FILTER',
+          targetType: 'HOME',
+          extraData: {
+            category,
+            page,
+            blogCount: blogs.length,
+            tagCount: tags.length,
+            initialLoad: true
+          }
+        });
+      }
+      
       // 초기 로드 완료 표시
       initialLoadComplete = true;
       
@@ -152,12 +171,25 @@
         // 카테고리가 변경되었을 때 (페이지 초기화 없이)
         postsStore.setCategory(category.toLowerCase(), false);
         needsFetch = true; // 상태가 변경되었으므로 fetch 필요
+        
+        // 카테고리 변경 로깅
+        logger.logClick('CATEGORY', undefined, { 
+          category,
+          from: 'url_change'
+        });
       }
       
       if (page !== $postsStore.currentPage) {
         // 페이지가 변경되었을 때
         postsStore.setPage(page);
         needsFetch = true; // 상태가 변경되었으므로 fetch 필요
+        
+        // 페이지 변경 로깅
+        logger.logClick('PAGINATION', undefined, { 
+          previousPage: $postsStore.currentPage,
+          newPage: page,
+          from: 'url_change'
+        });
       }
       
       // 블로그나 태그 정보가 변경되었을 때 업데이트
@@ -181,6 +213,20 @@
         normalizedCurrentTags.some(tag => !normalizedTags.includes(tag));
       
       if (blogsChanged || tagsChanged) {
+        // 로깅 - 필터 변경
+        logger.logActivity({
+          activityType: 'FILTER_CHANGE',
+          targetType: 'HOME',
+          extraData: {
+            previousBlogCount: normalizedCurrentBlogs.length,
+            newBlogCount: normalizedBlogs.length,
+            previousTagCount: normalizedCurrentTags.length,
+            newTagCount: normalizedTags.length,
+            blogsChanged,
+            tagsChanged
+          }
+        });
+        
         // 블로그나 태그 정보가 변경되었을 때 상태 초기화 후 다시 설정
         resetSelected();
         
@@ -241,6 +287,13 @@
       return;
     }
     
+    // 카테고리 변경 로깅
+    logger.logClick('CATEGORY', undefined, { 
+      previousCategory: $postsStore.currentCategory,
+      newCategory: category,
+      from: 'category_list'
+    });
+    
     updateUrl(1, category);
     postsStore.setCategory(category, true);
     postsStore.fetchPosts();
@@ -248,6 +301,14 @@
 
   // 페이지 변경 시 데이터 가져오기
   function goToPage(page: number) {
+    // 페이지 변경 로깅
+    logger.logClick('PAGINATION', undefined, { 
+      previousPage: $postsStore.currentPage,
+      newPage: page,
+      category: $postsStore.currentCategory,
+      from: 'pagination_control'
+    });
+    
     updateUrl(page, $postsStore.currentCategory);
     postsStore.setPage(page);
     postsStore.fetchPosts();
@@ -262,6 +323,13 @@
 
   // 태그 토글
   const handleToggleTag = (tagName: string) => {
+    // 태그 토글 로깅
+    const isSelected = $selectedTags.includes(tagName);
+    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, {
+      tagName,
+      totalSelected: isSelected ? $selectedTags.length - 1 : $selectedTags.length + 1
+    });
+    
     toggleTag(tagName);
     updateUrl($postsStore.currentPage, $postsStore.currentCategory);
     postsStore.fetchPosts();
@@ -269,21 +337,45 @@
 
   // 블로그 토글
   const handleToggleBlog = (blog: { name: string; avatar: string }) => {
+    // 블로그 토글 로깅
+    const isSelected = $selectedBlogs.some(b => b.name === blog.name);
+    logger.logClick(isSelected ? 'BLOG_UNSELECT' : 'BLOG_SELECT', undefined, {
+      blogName: blog.name,
+      totalSelected: isSelected ? $selectedBlogs.length - 1 : $selectedBlogs.length + 1
+    });
+    
     toggleBlog(blog);
   };
 
   // 검색 및 초기화 함수
   const handleSearch = (event: CustomEvent<{query: string}>) => {
+    // 검색 로깅
+    logger.logSearch(event.detail.query, 'POSTS');
+    
     postsStore.setSearchQuery(event.detail.query);
     postsStore.fetchPosts();
   };
 
   const searchWithSelected = () => {
+    // 필터 적용 검색 로깅
+    logger.logClick('SEARCH_WITH_FILTERS', undefined, {
+      blogCount: $selectedBlogs.length,
+      tagCount: $selectedTags.length,
+      category: $postsStore.currentCategory
+    });
+    
     updateUrl($postsStore.currentPage, $postsStore.currentCategory);
     postsStore.fetchPosts();
   };
 
   const handleResetSelected = () => {
+    // 필터 초기화 로깅
+    logger.logClick('RESET_FILTERS', undefined, {
+      previousBlogCount: $selectedBlogs.length,
+      previousTagCount: $selectedTags.length,
+      previousCategory: $postsStore.currentCategory
+    });
+    
     resetSelected();
     postsStore.reset(); // 먼저 reset 호출하여 카테고리를 'all'로 설정
     updateUrl(1, 'all'); // 페이지를 1로, 카테고리를 'all'로 명시적 설정

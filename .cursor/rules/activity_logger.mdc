@@ -1,0 +1,163 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 사용자 활동 로깅 규칙
+
+## ActivityLogger 사용 방법
+
+### 기본 사용 패턴
+사용자 활동 로깅을 위해 모든 컴포넌트에서 `ActivityLogger`를 사용합니다.
+
+```typescript
+import logger from '$lib/utils/ActivityLogger';
+
+// 기본 활동 로깅
+logger.logActivity({
+  activityType: 'CLICK',  // 활동 유형 (CLICK, VIEW, SEARCH 등)
+  targetType: 'BUTTON',   // 대상 유형 (BUTTON, POST, TAG 등)
+  targetId: 1,            // 대상 ID (선택 사항)
+  extraData: { key: 'value' } // 추가 데이터 (선택 사항)
+});
+
+// 페이지 조회 로깅
+logger.logPageView('HOME');
+
+// 클릭 이벤트 로깅
+logger.logClick('BUTTON', 1, { action: 'toggle' });
+
+// 검색 이벤트 로깅
+logger.logSearch('검색어', 'TAG_SEARCH');
+```
+
+### 컴포넌트에 로깅 적용
+
+모든 컴포넌트에 다음과 같이 로깅 코드를 추가해야 합니다:
+
+```typescript
+// 1. 컴포넌트 최상단에 logger 임포트
+import logger from '$lib/utils/ActivityLogger';
+
+// 2. 이벤트 핸들러에 로깅 추가
+function handleClick() {
+  // 로깅 먼저 수행
+  logger.logClick('BUTTON_TYPE', buttonId, {
+    from: 'component_name',
+    action: 'specific_action',
+    // 기타 관련 정보
+  });
+  
+  // 이후 원래 로직 실행
+  // ...
+}
+
+// 3. onMount에 페이지 뷰 로깅 추가 (페이지 컴포넌트인 경우)
+onMount(() => {
+  logger.logPageView('PAGE_TYPE', pageId);
+});
+```
+
+## 액티비티 타입 표준화
+
+### 활동 유형 (activityType)
+일관된 로깅을 위해 다음 활동 유형을 사용합니다:
+
+- `VIEW`: 페이지 조회, 콘텐츠 조회
+- `CLICK`: 버튼, 링크 등 클릭 동작
+- `SEARCH`: 검색 관련 활동
+- `SCROLL`: 스크롤 관련 활동
+- `INTERACT`: 드래그, 드롭 등 복잡한 상호작용
+
+### 대상 유형 (targetType)
+대상 유형은 대문자와 언더스코어로 작성합니다:
+
+- 페이지: `HOME`, `POST`, `BLOG`, `TAG_LIST`, `ABOUT`
+- 요소: `POST_CARD`, `TAG`, `BUTTON`, `LINK`, `IMAGE`
+- 블로그 관련: `BLOG_SELECT`, `BLOG_UNSELECT`, `TECH_BLOG`, `BLOG_URL`
+- 태그 관련: `TAG_SELECT`, `TAG_UNSELECT`
+- 기타: `SEARCH_BAR`, `FILTER`, `DROPDOWN`, `MODAL`
+
+## 추가 데이터 표준화
+
+### 공통 필드
+모든 액티비티에 다음 정보를 포함하는 것이 좋습니다:
+
+```typescript
+{
+  from: 'component_name',   // 활동이 발생한 컴포넌트 이름
+  location: 'page_name',    // 활동이 발생한 페이지 위치
+  timestamp: Date.now()     // 클라이언트 타임스탬프 (선택 사항, 서버에서도 기록됨)
+}
+```
+
+### 상태 변경 기록
+상태 변화가 있는 경우 이전 상태와 새 상태를 기록합니다:
+
+```typescript
+{
+  previousState: boolean | string | number,
+  newState: boolean | string | number,
+  totalSelected: number  // 선택 항목 총 개수 (해당되는 경우)
+}
+```
+
+## 로깅 구현 예시
+
+### 포스트 카드 클릭 로깅
+```typescript
+function handlePostClick() {
+  logger.logClick('POST_CARD', post.id, {
+    title: post.title,
+    techBlogName: post.techBlogName,
+    isVisited: isVisited,
+    from: 'post_card'
+  });
+  
+  markPostAsVisited(post.id);
+  navigate(`/post/${post.id}`);
+}
+```
+
+### 태그 선택/해제 로깅
+```typescript
+function handleTagClick(tag: string) {
+  const isSelected = isTagSelected(tag);
+  
+  logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, {
+    tagName: tag,
+    from: 'tag_component',
+    totalSelected: isSelected ? selectedTags.length - 1 : selectedTags.length + 1
+  });
+  
+  toggleTag(tag);
+}
+```
+
+### 페이지 뷰 로깅
+```typescript
+onMount(() => {
+  logger.logPageView('HOME');
+  
+  // 또는 ID가 있는 경우
+  logger.logPageView('POST', postId);
+});
+```
+
+## 로깅 디버깅
+
+개발 시 로그 확인을 위해 다음 방법을 사용할 수 있습니다:
+
+```javascript
+// 브라우저 콘솔에서 모든 로그 확인
+const logs = JSON.parse(localStorage.getItem('activity_logs'));
+console.table(logs);
+
+// 특정 활동 유형 필터링
+const clickLogs = logs.filter(log => log.activityType === 'CLICK');
+console.table(clickLogs);
+
+// 특정 대상 유형 필터링
+const postLogs = logs.filter(log => log.targetType === 'POST_CARD');
+console.table(postLogs);
+``` 

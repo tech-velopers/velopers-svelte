@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import * as Avatar from "$lib/components/ui/avatar";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
-  import { selectedBlogs, toggleBlog, resetSelected, addBlogsGroup } from '$lib/stores/search';
+  import { selectedBlogs, toggleBlog, resetSelected, addBlogsGroup, selectedTags } from '$lib/stores/search';
   import { navigate } from '$lib/stores/router';
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
@@ -18,6 +18,7 @@
   import { Search, SquareArrowOutUpRight } from 'lucide-svelte';
   import { Input } from "$lib/components/ui/input";
   import * as Hangul from 'hangul-js';
+  import logger from '$lib/utils/ActivityLogger';
 
   let blogs: TechBlog[] = [];
   let isLoading = true;
@@ -88,6 +89,16 @@
       .filter((blog): blog is NonNullable<typeof blog> => blog !== null);
     
     addBlogsGroup(blogsToAdd);
+    
+    // 블로그 그룹 선택 로깅
+    logger.logClick('BLOG_GROUP', undefined, { 
+      group: companyNames[0].includes('네이버') 
+        ? 'NAVER' 
+        : companyNames[0].includes('카카오') 
+          ? 'KAKAO' 
+          : 'NEKARAKUBAE',
+      blogCount: blogsToAdd.length
+    });
   }
 
   $: sortedBlogs = [...blogs].sort((a, b) => {
@@ -148,6 +159,9 @@
           techBlogsStore.fetchTechBlogs(),
           tagsStore.fetchTags()
         ]);
+        
+        // 페이지 조회 로깅
+        logger.logPageView('ALL_BLOGS', undefined);
       } catch (e) {
         error = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
       } finally {
@@ -164,6 +178,11 @@
   });
 
   function handleBlogClick(blog: TechBlog) {
+    // 블로그 사이트 클릭 로깅
+    logger.logClick('BLOG_SITE', blog.id, {
+      blogName: blog.techBlogName,
+      url: blog.baseUrl
+    });
     window.open(blog.baseUrl, '_blank', 'noopener,noreferrer');
   }
 
@@ -174,12 +193,25 @@
 
   // 블로그 카드 클릭 시 블로그 상세 페이지로 이동하는 함수
   function navigateToBlog(blog: TechBlog) {
+    // 블로그 카드 클릭 로깅
+    logger.logClick('BLOG_CARD', blog.id, {
+      blogName: blog.techBlogName,
+      postCount: blog.postCnt
+    });
     navigate(`/blog/${blog.id}`);
   }
 
   // 블로그 선택 함수 (별도 버튼용)
   function handleToggleBlog(blog: TechBlog, event: MouseEvent) {
     event.stopPropagation();
+    
+    // 블로그 선택/해제 로깅
+    const isSelected = $selectedBlogs.some(b => b.name === blog.techBlogName);
+    logger.logClick(isSelected ? 'BLOG_UNSELECT' : 'BLOG_SELECT', blog.id, {
+      blogName: blog.techBlogName,
+      totalSelected: isSelected ? $selectedBlogs.length - 1 : $selectedBlogs.length + 1
+    });
+    
     toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
   }
 
@@ -268,13 +300,33 @@
     return '';
   }
 
-  function handleSearch(event: CustomEvent<{query: string}>) {
-    // TODO: 검색 기능 구현
-    console.log('Search query:', event.detail.query);
+  // 검색 기능
+  function handleSearch(event: CustomEvent<{query: string}> | null = null) {
+    const searchTerm = event?.detail?.query || searchQuery;
+    if (searchTerm && searchTerm.trim() !== '') {
+      // 블로그명 검색 로깅
+      logger.logSearch(searchTerm, 'BLOG_NAME');
+    }
+  }
+
+  // 검색어 입력 시 검색 업데이트
+  let prevSearchQuery = '';
+  $: {
+    if (searchQuery !== prevSearchQuery && typeof searchQuery === 'string' && searchQuery.trim() !== '') {
+      // 이전 검색어와 현재 검색어가 다를 때만 로깅
+      handleSearch(null);
+      prevSearchQuery = searchQuery;
+    }
   }
 
   function searchWithSelected(data: any) {
-    // ... existing code ...
+    // 필터링된 블로그로 검색 로깅
+    if ($selectedBlogs.length > 0 || $selectedTags.length > 0) {
+      logger.logClick('FILTERED_SEARCH', undefined, {
+        blogCount: $selectedBlogs.length,
+        tagCount: $selectedTags.length
+      });
+    }
     navigate('/');
   }
 

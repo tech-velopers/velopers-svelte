@@ -1,3 +1,13 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import logger from '$lib/utils/ActivityLogger';
+
+  onMount(() => {
+    // About 페이지 조회 로깅
+    logger.logPageView('ABOUT', undefined);
+  });
+</script>
+
 <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-4xl">
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8">
     <h1 class="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">Velopers 소개</h1>
@@ -61,7 +71,13 @@
       <h2 class="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 text-gray-800 dark:text-gray-200">연락처</h2>
       <p class="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
         문의사항이나 제안사항이 있으시다면 아래 이메일로 연락해주세요.<br>
-        Email: sm0514sm@gmail.com
+        Email: <a 
+          href="mailto:sm0514sm@gmail.com" 
+          class="text-blue-600 dark:text-blue-400 hover:underline"
+          on:click={() => logger.logClick('EMAIL_LINK', undefined, { type: 'contact' })}
+        >
+          sm0514sm@gmail.com
+        </a>
       </p>
     </section>
   </div>

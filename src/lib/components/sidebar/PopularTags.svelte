@@ -1,8 +1,25 @@
 <script lang="ts">
   import { selectedTags, toggleTag } from '$lib/stores/search';
+  import logger from '$lib/utils/ActivityLogger';
 
   export let allTags: Array<{ id: number; tagName: string; }>;
   export let loading = false;
+
+  // 태그 토글 함수
+  function handleTagToggle(tagName: string) {
+    // 태그 토글 상태 확인
+    const isSelected = $selectedTags.includes(tagName);
+    
+    // 태그 토글 로깅
+    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, {
+      tagName,
+      totalSelected: isSelected ? $selectedTags.length - 1 : $selectedTags.length + 1,
+      from: 'sidebar_popular_tags'
+    });
+    
+    // 태그 토글 실행
+    toggleTag(tagName);
+  }
 </script>
 
 <div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
@@ -25,7 +42,7 @@
           class="px-3 py-1.5 text-sm rounded-lg transition-colors {$selectedTags.includes(tag.tagName)
             ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
-          on:click={() => toggleTag(tag.tagName)}
+          on:click={() => handleTagToggle(tag.tagName)}
         >
           {tag.tagName}
         </button>
