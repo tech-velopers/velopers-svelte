@@ -56,6 +56,7 @@ export class ActivityLogger {
     targetType: string;
     targetId?: number;
     targetUrl?: string;
+    targetName?: string;
     searchQuery?: string;
     extraData?: Record<string, any>;
   }): Promise<void> {
@@ -69,6 +70,7 @@ export class ActivityLogger {
         activityType: activityData.activityType,
         targetType: activityData.targetType,
         targetId: activityData.targetId || undefined,
+        targetName: activityData.targetName || null,
         targetUrl: activityData.targetUrl || window.location.href,
         searchQuery: activityData.searchQuery || null,
         referrerUrl: referrerUrl,
@@ -182,13 +184,15 @@ export class ActivityLogger {
    * 클릭 활동을 로깅합니다.
    * @param targetType 클릭한 요소 유형
    * @param targetId 클릭한 요소 ID
+   * @param targetName 클릭한 요소 이름
    * @param extraData 추가 정보
    */
-  logClick(targetType: string, targetId?: number, extraData?: Record<string, any>): void {
+  logClick(targetType: string, targetId?: number, targetName?: string, extraData?: Record<string, any>): void {
     this.logActivity({
       activityType: 'CLICK',
       targetType: targetType,
       targetId: targetId,
+      targetName: targetName,
       extraData: extraData
     });
   }

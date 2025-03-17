@@ -68,10 +68,12 @@
   }
 </script>
 
-<div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
-  <div class="flex items-center gap-2 mb-4">
-    <TrendingUp class="text-red-500 dark:text-red-400" size={20} />
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">주간 인기 게시글</h3>
+<div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
+  <div class="flex justify-between items-center mb-3">
+    <h3 class="text-base font-medium dark:text-white flex items-center gap-2">
+      <TrendingUp class="text-red-500 dark:text-red-400" size={18} />
+      주간 인기 게시글
+    </h3>
   </div>
 
   {#if loading}
@@ -94,7 +96,7 @@
   {:else}
     <ul class="space-y-3">
       {#each weeklyPosts as post, index}
-        <li class="group">
+        <li>
           <div class="flex gap-2">
             <div class="flex-shrink-0 w-5 text-center">
               <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">{index + 1}</span>

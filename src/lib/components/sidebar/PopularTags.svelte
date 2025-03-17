@@ -11,8 +11,7 @@
     const isSelected = $selectedTags.includes(tagName);
     
     // 태그 토글 로깅
-    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, {
-      tagName,
+    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, tagName, {
       totalSelected: isSelected ? $selectedTags.length - 1 : $selectedTags.length + 1,
       from: 'sidebar_popular_tags'
     });

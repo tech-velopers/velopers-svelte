@@ -173,8 +173,7 @@
         needsFetch = true; // 상태가 변경되었으므로 fetch 필요
         
         // 카테고리 변경 로깅
-        logger.logClick('CATEGORY', undefined, { 
-          category,
+        logger.logClick('CATEGORY', undefined, category, { 
           from: 'url_change'
         });
       }
@@ -185,7 +184,7 @@
         needsFetch = true; // 상태가 변경되었으므로 fetch 필요
         
         // 페이지 변경 로깅
-        logger.logClick('PAGINATION', undefined, { 
+        logger.logClick('PAGINATION', undefined, `Page ${page}`, { 
           previousPage: $postsStore.currentPage,
           newPage: page,
           from: 'url_change'
@@ -288,9 +287,8 @@
     }
     
     // 카테고리 변경 로깅
-    logger.logClick('CATEGORY', undefined, { 
+    logger.logClick('CATEGORY', undefined, category, { 
       previousCategory: $postsStore.currentCategory,
-      newCategory: category,
       from: 'category_list'
     });
     
@@ -302,9 +300,8 @@
   // 페이지 변경 시 데이터 가져오기
   function goToPage(page: number) {
     // 페이지 변경 로깅
-    logger.logClick('PAGINATION', undefined, { 
+    logger.logClick('PAGINATION', undefined, `Page ${page}`, { 
       previousPage: $postsStore.currentPage,
-      newPage: page,
       category: $postsStore.currentCategory,
       from: 'pagination_control'
     });
@@ -325,8 +322,7 @@
   const handleToggleTag = (tagName: string) => {
     // 태그 토글 로깅
     const isSelected = $selectedTags.includes(tagName);
-    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, {
-      tagName,
+    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, tagName, {
       totalSelected: isSelected ? $selectedTags.length - 1 : $selectedTags.length + 1
     });
     
@@ -339,8 +335,7 @@
   const handleToggleBlog = (blog: { name: string; avatar: string }) => {
     // 블로그 토글 로깅
     const isSelected = $selectedBlogs.some(b => b.name === blog.name);
-    logger.logClick(isSelected ? 'BLOG_UNSELECT' : 'BLOG_SELECT', undefined, {
-      blogName: blog.name,
+    logger.logClick(isSelected ? 'BLOG_UNSELECT' : 'BLOG_SELECT', undefined, blog.name, {
       totalSelected: isSelected ? $selectedBlogs.length - 1 : $selectedBlogs.length + 1
     });
     
@@ -358,7 +353,7 @@
 
   const searchWithSelected = () => {
     // 필터 적용 검색 로깅
-    logger.logClick('SEARCH_WITH_FILTERS', undefined, {
+    logger.logClick('SEARCH_WITH_FILTERS', undefined, `Filters: ${$selectedBlogs.length} blogs, ${$selectedTags.length} tags`, {
       blogCount: $selectedBlogs.length,
       tagCount: $selectedTags.length,
       category: $postsStore.currentCategory
@@ -370,7 +365,7 @@
 
   const handleResetSelected = () => {
     // 필터 초기화 로깅
-    logger.logClick('RESET_FILTERS', undefined, {
+    logger.logClick('RESET_FILTERS', undefined, 'Reset all filters', {
       previousBlogCount: $selectedBlogs.length,
       previousTagCount: $selectedTags.length,
       previousCategory: $postsStore.currentCategory

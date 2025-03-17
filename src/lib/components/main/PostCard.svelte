@@ -68,8 +68,7 @@
 
   function handlePostClick() {
     // 포스트 클릭 로깅
-    logger.logClick('POST_CARD', post.id, {
-      title: post.title,
+    logger.logClick('POST_CARD', post.id, post.title, {
       techBlogName: post.techBlogName,
       isVisited: isVisited
     });
@@ -84,8 +83,7 @@
     const isSelected = isBlogSelected(blog.name);
     
     // 블로그 선택/해제 로깅
-    logger.logClick(isSelected ? 'BLOG_UNSELECT' : 'BLOG_SELECT', undefined, {
-      blogName: blog.name, 
+    logger.logClick(isSelected ? 'BLOG_UNSELECT' : 'BLOG_SELECT', undefined, blog.name, {
       from: 'post_card',
       totalSelected: isSelected ? $selectedBlogs.length - 1 : $selectedBlogs.length + 1
     });
@@ -99,8 +97,7 @@
     const isSelected = isTagSelected(tag);
     
     // 태그 클릭 로깅
-    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, {
-      tagName: tag,
+    logger.logClick(isSelected ? 'TAG_UNSELECT' : 'TAG_SELECT', undefined, tag, {
       from: 'post_card',
       totalSelected: isSelected ? $selectedTags.length - 1 : $selectedTags.length + 1
     });
@@ -113,8 +110,7 @@
     event.stopPropagation(); // 포스트 클릭 이벤트 전파 방지
     
     // 블로그 클릭 로깅
-    logger.logClick('TECH_BLOG', undefined, {
-      blogName: blogName,
+    logger.logClick('TECH_BLOG', undefined, blogName, {
       from: 'post_card'
     });
     
@@ -133,8 +129,7 @@
     
     if (url) {
       // 블로그 URL 방문 로깅
-      logger.logClick('BLOG_URL', undefined, {
-        blogName: post.techBlogName,
+      logger.logClick('BLOG_URL', undefined, post.techBlogName, {
         url: url,
         from: 'post_card'
       });

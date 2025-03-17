@@ -92,9 +92,8 @@
   function handleOriginalPostClick() {
     if (post?.url) {
       // 원문 클릭 로깅
-      logger.logClick('ORIGINAL_POST', post.id, { 
+      logger.logClick('ORIGINAL_POST', post.id, post.title, {   
         blogName: post.techBlogName,
-        title: post.title,
         url: post.url
       });
       window.open(post.url, '_blank', 'noopener,noreferrer');
@@ -104,7 +103,7 @@
   function handleBackClick() {
     // 뒤로가기 클릭 로깅
     if (post) {
-      logger.logClick('BACK_BUTTON', post.id, { page: 'post' });
+      logger.logClick('BACK_BUTTON', post.id, '뒤로가기', { page: 'post' });
     }
     window.history.back();
   }
@@ -112,7 +111,7 @@
   function handleCategoryClick(category: string | undefined) {
     if (category) {
       // 카테고리 클릭 로깅
-      logger.logClick('CATEGORY', undefined, { categoryName: category });
+      logger.logClick('CATEGORY', undefined, category, { from: 'post_detail' });
       navigate(`/?page=1&category=${category.toLowerCase()}`);
     }
   }
@@ -121,7 +120,7 @@
   function navigateToBlog(blogName: string | undefined) {
     if (blogName) {
       // 블로그 이름 클릭 로깅
-      logger.logClick('TECH_BLOG', undefined, { blogName });
+      logger.logClick('TECH_BLOG', undefined, blogName, { from: 'post_detail' });
       
       // techBlogMap에서 블로그 ID 찾기
       const blogInfo = $techBlogMap[blogName];
@@ -137,8 +136,7 @@
   function handleShareClick() {
     if (post) {
       // 공유하기 클릭 로깅
-      logger.logClick('SHARE_BUTTON', post.id, { 
-        title: post.title,
+      logger.logClick('SHARE_BUTTON', post.id, post.title, { 
         blogName: post.techBlogName
       });
       
@@ -161,7 +159,7 @@
 
   // 태그 클릭 핸들러 추가
   function handleTagClick(tag: string) {
-    logger.logClick('TAG', undefined, { tagName: tag, from: 'post_detail' });
+    logger.logClick('TAG', undefined, tag, { from: 'post_detail' });
     navigate(`/?tags=${tag}`);
   }
 
