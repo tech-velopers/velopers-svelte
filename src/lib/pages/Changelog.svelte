@@ -10,6 +10,21 @@
 
     <div class="flex gap-2 sm:gap-4">
       <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
+        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-03-17</p>
+      </div>
+      <Alert.Root class="flex-1">
+        <Alert.Title class="text-base sm:text-lg font-semibold">기능 업데이트 🎉</Alert.Title>
+        <Alert.Description>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            각 게시물의 조회수를 추가했어요 <br>
+          </p>
+          <br>
+        </Alert.Description>
+      </Alert.Root>
+    </div>
+
+    <div class="flex gap-2 sm:gap-4">
+      <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
         <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-03-10</p>
       </div>
       <Alert.Root class="flex-1">

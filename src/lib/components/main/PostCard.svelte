@@ -6,7 +6,7 @@
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
   import { navigate, visitedPosts, markPostAsVisited } from '$lib/stores/router';
-  import {SquareArrowOutUpRight, Check, Eye } from 'lucide-svelte';
+  import {SquareArrowOutUpRight, Eye } from 'lucide-svelte';
   import logger from '$lib/utils/ActivityLogger';
 
 
@@ -144,7 +144,7 @@
   }
 </script>
 
-<style>
+<style lang="postcss">
   .visited-post {
     background-color: #f3f4f6 !important; /* gray-100 */
   }
