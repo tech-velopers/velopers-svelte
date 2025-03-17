@@ -74,7 +74,7 @@
         Email: <a 
           href="mailto:sm0514sm@gmail.com" 
           class="text-blue-600 dark:text-blue-400 hover:underline"
-          on:click={() => logger.logClick('EMAIL_LINK', undefined, { type: 'contact' })}
+          on:click={() => logger.logClick('EMAIL_LINK', undefined, 'sm0514sm@gmail.com', { type: 'contact' })}
         >
           sm0514sm@gmail.com
         </a>
