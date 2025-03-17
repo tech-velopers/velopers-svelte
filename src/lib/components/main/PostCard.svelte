@@ -6,7 +6,7 @@
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
   import { navigate, visitedPosts, markPostAsVisited } from '$lib/stores/router';
-  import {SquareArrowOutUpRight, Eye } from 'lucide-svelte';
+  import {ExternalLink, Eye } from 'lucide-svelte';
   import logger from '$lib/utils/ActivityLogger';
 
 
@@ -282,7 +282,7 @@
                     on:click|stopPropagation={(e) => openBlogUrl(blogInfo.baseUrl, e)}
                   >
                     <span>블로그</span>
-                    <SquareArrowOutUpRight class="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    <ExternalLink class="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </a>
                 </div>
               </div>

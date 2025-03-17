@@ -6,7 +6,7 @@
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
   import { selectedBlogs } from '$lib/stores/search';
-  import { SquareArrowOutUpRight, Undo2, Share2, Calendar, FileText } from 'lucide-svelte';
+  import { ExternalLink, Undo2, Share2, Calendar, FileText } from 'lucide-svelte';
   import { toast } from "svelte-sonner";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import PostCard from "$lib/components/main/PostCard.svelte";
@@ -325,14 +325,14 @@
               
               <div class="mt-3 md:mt-6 flex flex-wrap gap-2 md:gap-3">
                 <a 
-                  href={blog.baseUrl} 
+                  href={blog?.url} 
                   target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="px-3 py-1.5 md:px-4 md:py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center text-sm md:text-base"
-                  on:click|stopPropagation={openBlogUrl}
+                  rel="noopener noreferrer"
+                  class="px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center text-xs md:text-sm"
+                  on:click={openBlogUrl}
                 >
                   <span>블로그 방문</span>
-                  <SquareArrowOutUpRight class="ml-1 md:ml-1.5 h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <ExternalLink class="ml-1 md:ml-1.5 h-3.5 w-3.5 md:h-4 md:w-4" />
                 </a>
                 
                 <button 

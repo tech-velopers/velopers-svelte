@@ -15,7 +15,7 @@
   import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
   import { cn } from "$lib/utils";
   import { tick } from "svelte";
-  import { Search, SquareArrowOutUpRight } from 'lucide-svelte';
+  import { Search, ExternalLink } from 'lucide-svelte';
   import { Input } from "$lib/components/ui/input";
   import * as Hangul from 'hangul-js';
   import logger from '$lib/utils/ActivityLogger';
@@ -447,12 +447,12 @@
                 <a 
                   href={blog.baseUrl} 
                   target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 inline-flex items-center max-w-full group rounded px-1 py-0.5 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
-                  on:click={(e) => e.stopPropagation()}
+                  rel="noopener noreferrer"
+                  class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center group transition-colors"
+                  on:click|stopPropagation={handleBlogClick(blog)}
                 >
-                  <span class="truncate">{blog.baseUrl}</span>
-                  <SquareArrowOutUpRight class="h-3 w-3 ml-1 flex-shrink-0 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
+                  <span>블로그 바로가기</span>
+                  <ExternalLink class="h-3 w-3 ml-1 flex-shrink-0 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
                 </a>
               </div>
               <div class="flex flex-col mt-2.5">

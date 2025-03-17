@@ -4,7 +4,7 @@
   import { currentPath, navigate } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
-  import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2, Eye } from 'lucide-svelte';
+  import { Bot, ExternalLink, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2, Eye } from 'lucide-svelte';
   import type { ComponentType, SvelteComponent } from 'svelte';
   import { toast } from "svelte-sonner";
   import logger from '$lib/utils/ActivityLogger';
@@ -338,7 +338,7 @@
           class="px-3 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
         >
           <span>원문 보기</span>
-          <SquareArrowOutUpRight class="h-4 w-4 sm:h-5 sm:w-5" />
+          <ExternalLink class="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
       </div>
     </article>
