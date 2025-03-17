@@ -6,7 +6,7 @@
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
   import { navigate, visitedPosts, markPostAsVisited } from '$lib/stores/router';
-  import {SquareArrowOutUpRight, Check } from 'lucide-svelte';
+  import {SquareArrowOutUpRight, Check, Eye } from 'lucide-svelte';
   import logger from '$lib/utils/ActivityLogger';
 
 
@@ -19,6 +19,7 @@
     techBlogName: string;
     tags: string[];
     createdAt: any;
+    viewCnt?: number;
   };
 
   export let toggleTag: (tag: string) => void;
@@ -293,13 +294,14 @@
             </HoverCard.Content>
           </HoverCard.Root>
           <span class="mx-1.5 sm:mx-2">•</span>
-          <span class="text-xs sm:text-sm">{formatDate(post.createdAt)}</span>
-          {#if isVisited}
+          <span>{formatDate(post.createdAt)}</span>
+          
+          {#if post.viewCnt !== undefined}
             <span class="mx-1.5 sm:mx-2">•</span>
-            <span class="text-gray-600 dark:text-gray-400 flex items-center text-xs sm:text-sm">
-              읽음
-              <Check class="h-3 w-3 sm:h-3.5 sm:w-3.5 ml-1" />
-            </span>
+            <div class="flex items-center">
+              <Eye class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" strokeWidth={1.5} />
+              <span>{post.viewCnt.toLocaleString()}</span>
+            </div>
           {/if}
         </div>
       </div>

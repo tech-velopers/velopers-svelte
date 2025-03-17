@@ -4,7 +4,7 @@
   import { currentPath, navigate } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
-  import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2 } from 'lucide-svelte';
+  import { Bot, SquareArrowOutUpRight, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2, Eye } from 'lucide-svelte';
   import type { ComponentType, SvelteComponent } from 'svelte';
   import { toast } from "svelte-sonner";
   import logger from '$lib/utils/ActivityLogger';
@@ -22,6 +22,7 @@
     category: string;
     tags: string[];
     createdAt: number[];
+    viewCnt?: number;
   } | null = null;
 
   let loading = true;
@@ -270,6 +271,13 @@
           <time class="text-gray-500 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
             {formatDate(post.createdAt)}
           </time>
+          
+          {#if post.viewCnt !== undefined}
+            <div class="flex items-center text-gray-500 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
+              <Eye class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" strokeWidth={1.5} />
+              <span>{post.viewCnt.toLocaleString()}</span>
+            </div>
+          {/if}
         </div>
 
         <div class="flex flex-wrap gap-1.5 sm:gap-2">
