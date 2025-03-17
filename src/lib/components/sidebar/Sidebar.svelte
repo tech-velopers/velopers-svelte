@@ -9,6 +9,7 @@
     toggleSidebar,
     closeSidebar,
   } from "$lib/stores/sidebar";
+  import WeeklyPopularPosts from "./WeeklyPopularPosts.svelte";
 
   export let allTags: { id: number; tagName: string }[];
   export let searchWithSelected: (data: any) => void;
@@ -51,6 +52,7 @@
     on:search={handleSearch}
     {onReset}
   />
+  <WeeklyPopularPosts />
   <PopularBlogs />
   <PopularTags {allTags} />
 </aside>
@@ -116,6 +118,7 @@
           on:search={handleSearch}
           onReset={handleReset}
         />
+        <WeeklyPopularPosts />
         <PopularBlogs />
         <PopularTags {allTags} />
       </div>

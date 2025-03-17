@@ -16,7 +16,14 @@
         <Alert.Title class="text-base sm:text-lg font-semibold">기능 업데이트 🎉</Alert.Title>
         <Alert.Description>
           <p class="mt-1 sm:mt-2 text-sm sm:text-base">
-            각 게시물의 조회수를 추가했어요 <br>
+            각 게시물의 조회수를 추가했어요. <br>
+          </p>
+          <br>
+        </Alert.Description>
+        <Alert.Title class="text-base sm:text-lg font-semibold">기능 업데이트 🎉</Alert.Title>
+        <Alert.Description>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            주간 인기 게시글을 추가했어요! <br>
           </p>
           <br>
         </Alert.Description>
