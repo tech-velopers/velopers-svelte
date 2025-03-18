@@ -5,6 +5,7 @@
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { TrendingUp } from 'lucide-svelte';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+  import logger from '$lib/utils/ActivityLogger';
 
   type WeeklyPost = {
     id: number;
@@ -43,7 +44,15 @@
   });
 
   // 게시글 상세 페이지로 이동
-  function navigateToPost(postId: number) {
+  function navigateToPost(postId: number, post: WeeklyPost) {
+    // 게시글 클릭 로깅
+    logger.logClick('POST_CARD', postId, post.title, {
+      techBlogName: post.techBlogName,
+      from: 'weekly_popular_posts',
+      viewCnt: post.viewCnt,
+      location: 'sidebar'
+    });
+    
     navigate(`/post/${postId}`);
   }
 
@@ -51,6 +60,12 @@
   function navigateToBlog(blogName: string) {
     const blogInfo = $techBlogMap[blogName];
     if (blogInfo && blogInfo.id) {
+      // 블로그 클릭 로깅
+      logger.logClick('TECH_BLOG', blogInfo.id, blogName, {
+        from: 'weekly_popular_posts',
+        location: 'sidebar'
+      });
+      
       navigate(`/blog/${blogInfo.id}`);
     }
   }
@@ -105,7 +120,7 @@
               <!-- 게시글 제목 (클릭 시 게시글 상세 페이지로 이동) -->
               <button 
                 class="text-sm text-left text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium line-clamp-2 transition-colors w-full"
-                on:click={() => navigateToPost(post.id)}
+                on:click={() => navigateToPost(post.id, post)}
               >
                 {post.title}
               </button>
