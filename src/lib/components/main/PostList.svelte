@@ -2,6 +2,7 @@
   import PostCard from './PostCard.svelte';
   import Pagination from './Pagination.svelte';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+  import logger from '$lib/utils/ActivityLogger';
 
   export let posts: any[];
   export let currentPage: number;
@@ -11,6 +12,15 @@
   export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
   export let loadedImages: Set<string>;
   export let loading = false;
+
+  function handleAdClick(position: number) {
+    logger.logClick('POST_AD', undefined, 'POST_AD', {
+      from: 'post_list',
+      position: position,
+      campaign: 'coupang_partners',
+      url: 'https://link.coupang.com/a/cj6d0H'
+    });
+  }
 </script>
 
 <div class="space-y-4">
@@ -50,13 +60,14 @@
           target="_blank" 
           referrerpolicy="unsafe-url"
           class="block w-full cursor-pointer"
+          on:click={() => handleAdClick(index + 1)}
         >
           <div 
-            class="bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-row gap-4 md:gap-4 lg:gap-6 dark:ring-1 dark:ring-gray-800"
+            class="bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-row gap-4 md:gap-4 lg:gap-6 dark:ring-1 dark:ring-gray-800 group"
           >
             <div class="flex-1 flex flex-col">
               <div class="flex-grow">
-                <h2 class="text-sm sm:text-base md:text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+                <h2 class="text-sm sm:text-base md:text-lg font-semibold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300">
                   개발자가 관심있어하는 상품은 뭘까?
                 </h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-3 text-xs sm:text-sm">
@@ -96,7 +107,7 @@
               <img 
                 src="https://ads-partners.coupang.com/banners/849057?subId=&traceId=V0-301-5f9bd61900e673c0-I849057&w=300&h=250" 
                 alt="광고 상품" 
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
             </div>
           </div>
