@@ -177,6 +177,15 @@
   .unvisited-article {
     @apply dark:ring-2;
   }
+
+  /* 모바일용 스타일 추가 */
+  @media (max-width: 639px) {
+    .mobile-meta-container {
+      order: 2;
+      width: 100%;
+      margin-top: -0.5rem;
+    }
+  }
 </style>
 
 <div 
@@ -186,7 +195,7 @@
   tabindex="0" 
   class="w-full text-left cursor-pointer">
   <article 
-    class="bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-row gap-4 md:gap-4 lg:gap-6 dark:ring-1 dark:ring-gray-800 group {isVisited ? 'visited-post' : 'unvisited-article'}"
+    class="bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-row flex-wrap sm:flex-nowrap gap-4 md:gap-4 lg:gap-6 dark:ring-1 dark:ring-gray-800 group {isVisited ? 'visited-post' : 'unvisited-article'}"
   >
     <div class="flex-1 flex flex-col">
       <div class="flex-grow">
@@ -194,11 +203,11 @@
           class="text-sm sm:text-base md:text-lg font-semibold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300 {isVisited ? 'visited-title' : ''}"
         >{post.title}</h2>
         <p 
-          class="text-gray-600 dark:text-gray-300 mb-3 text-xs sm:text-sm {isVisited ? 'visited-text' : ''}"
+          class="text-gray-600 dark:text-gray-300 mb-0 sm:mb-3 text-xs sm:text-sm {isVisited ? 'visited-text' : ''}"
         >{post.preview}</p>
       </div>
       
-      <div class="mt-auto space-y-3">
+      <div class="mt-auto space-y-3 hidden sm:block">
         <div class="flex flex-wrap gap-1 sm:gap-1.5">
           {#each post.tags as tag}
             <button 
@@ -314,6 +323,108 @@
         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 {!imageLoaded ? 'opacity-0' : 'opacity-100'}"
         on:load={() => handleImageLoad()}
       />
+    </div>
+    
+    <!-- 모바일에서만 보이는 태그와 메타 정보 영역 -->
+    <div class="mobile-meta-container hidden max-sm:block">
+      <div class="flex flex-wrap gap-1 mb-2">
+        {#each post.tags as tag}
+          <button 
+            type="button"
+            on:click|stopPropagation={() => handleTagClick(tag)}
+            class="px-1.5 py-0.5 rounded-md text-xs transition-all duration-200 hover:-translate-y-0.5 
+              {isTagSelected(tag) 
+                ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800' 
+                : isVisited 
+                  ? 'visited-tag dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+          >
+            {tag}
+          </button>
+        {/each}
+      </div>
+
+      <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+        <HoverCard.Root openDelay={500}>
+          <HoverCard.Trigger class="flex items-center hover:text-blue-500 transition-colors">
+            <Avatar.Root class="w-4 h-4">
+              <Avatar.Image 
+                src={`/icons/${blogInfo.icon}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`} 
+                alt={post.techBlogName} 
+              />
+            </Avatar.Root>
+            <span 
+              class="font-medium ml-1.5 cursor-pointer hover:underline text-xs" 
+              on:click={(e) => navigateToBlog(post.techBlogName, e)}
+              on:keydown={(e) => e.key === 'Enter' && navigateToBlog(post.techBlogName, e)}
+              role="button"
+              tabindex="0"
+            >{post.techBlogName}</span>
+          </HoverCard.Trigger>
+          <HoverCard.Content class="w-64 p-3">
+            <div class="flex flex-col space-y-2">
+              <div class="flex justify-between space-x-3">
+                <Avatar.Root class="h-10 w-10">
+                  <Avatar.Image 
+                    src={`/icons/${blogInfo.icon}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`} 
+                    alt={post.techBlogName}
+                  />
+                </Avatar.Root>
+                <div class="space-y-1 flex-1">
+                  <div 
+                    class="text-xs font-semibold dark:text-white cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 hover:underline"
+                    on:click={(e) => navigateToBlog(post.techBlogName, e)}
+                    on:keydown={(e) => e.key === 'Enter' && navigateToBlog(post.techBlogName, e)}
+                    role="button"
+                    tabindex="0"
+                  >{post.techBlogName}</div>
+                  <p class="text-xs text-gray-600 dark:text-gray-300">기술 블로그</p>
+                  <div class="flex items-center pt-1">
+                    <div class="flex text-xs text-gray-500 dark:text-gray-400">
+                      <span class="flex items-center">
+                        <span class="font-bold text-gray-900 dark:text-white mr-1">{blogInfo.postCnt}</span>
+                        포스트
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                {#if showBlogToggle}
+                <button 
+                  class="flex-1 px-2 py-1 text-xs rounded-lg transition-colors flex items-center justify-center gap-1 {isBlogSelected(post.techBlogName)
+                    ? 'bg-red-500 hover:bg-red-600 text-white' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'}"
+                  on:click|stopPropagation={() => handleToggleBlog({ name: post.techBlogName, avatar: blogInfo.icon })}
+                >
+                  <span>{isBlogSelected(post.techBlogName) ? '선택 해제' : '선택하기'}</span>
+                </button>
+                {/if}
+                <a 
+                  href={blogInfo.baseUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="flex-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-1"
+                  on:click|stopPropagation={(e) => openBlogUrl(blogInfo.baseUrl, e)}
+                >
+                  <span>블로그</span>
+                  <ExternalLink class="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          </HoverCard.Content>
+        </HoverCard.Root>
+        <span class="mx-1.5">•</span>
+        <span>{formatDate(post.createdAt)}</span>
+        
+        {#if post.viewCnt !== undefined}
+          <span class="mx-1.5">•</span>
+          <div class="flex items-center">
+            <Eye class="w-3 h-3 mr-1" strokeWidth={1.5} />
+            <span>{post.viewCnt.toLocaleString()}</span>
+          </div>
+        {/if}
+      </div>
     </div>
   </article>
 </div> 
