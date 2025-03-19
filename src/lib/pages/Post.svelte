@@ -216,7 +216,7 @@
   </MainLayout>
 {:else if post}
   <MainLayout allTags={[]} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
-    <article class="max-w-4xl mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6">
+    <article class="max-w-4xl mx-auto p-1 sm:p-4 space-y-3 sm:space-y-6">
       <div class="w-full h-48 sm:h-64 relative rounded-xl overflow-hidden">
         <img 
           src={post.imageUrl ? post.imageUrl : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
@@ -230,54 +230,62 @@
           {post.title}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-          <!-- 블로그 이름 클릭 시 블로그 상세 페이지로 이동 -->
-          <div 
-            class="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            on:click={() => post && navigateToBlog(post.techBlogName)}
-            on:keydown={(e) => post && e.key === 'Enter' && navigateToBlog(post.techBlogName)}
-            role="button"
-            tabindex="0"
-          >
-            <img 
-              src={`/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
-              alt={post.techBlogName}
-              class="w-5 h-5 sm:w-6 sm:h-6 rounded-full mr-1.5 sm:mr-2"
-            />
-            <span class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-medium">{post.techBlogName}</span>
-          </div>
-          
-          {#if post.category}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- PC에서는 블로그명/카테고리/날짜/조회수가 한 줄에 나오도록 수정 -->
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
+          <!-- 블로그명과 카테고리 그룹 -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <!-- 블로그 이름 클릭 시 블로그 상세 페이지로 이동 -->
             <div 
-              class="bg-blue-50 dark:bg-blue-900/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-              on:click={() => post && post.category && handleCategoryClick(post.category)}
+              class="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              on:click={() => post && navigateToBlog(post.techBlogName)}
+              on:keydown={(e) => post && e.key === 'Enter' && navigateToBlog(post.techBlogName)}
               role="button"
               tabindex="0"
             >
-              <span class="flex items-center gap-1 sm:gap-1.5 text-blue-700 dark:text-blue-400 text-xs sm:text-sm font-medium">
-                <svelte:component 
-                  this={getCategoryIcon(post.category)} 
-                  class="w-3.5 h-3.5 sm:w-4 sm:h-4" 
-                  strokeWidth={1.5}
-                />
-                {post.category}
-              </span>
+              <img 
+                src={`/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
+                alt={post.techBlogName}
+                class="w-5 h-5 sm:w-6 sm:h-6 rounded-full mr-1.5 sm:mr-2"
+              />
+              <span class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-medium">{post.techBlogName}</span>
             </div>
-          {/if}
+            
+            {#if post.category}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <div 
+                class="bg-blue-50 dark:bg-blue-900/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                on:click={() => post && post.category && handleCategoryClick(post.category)}
+                role="button"
+                tabindex="0"
+              >
+                <span class="flex items-center gap-1 sm:gap-1.5 text-blue-700 dark:text-blue-400 text-xs sm:text-sm font-medium">
+                  <svelte:component 
+                    this={getCategoryIcon(post.category)} 
+                    class="w-3.5 h-3.5 sm:w-4 sm:h-4" 
+                    strokeWidth={1.5}
+                  />
+                  {post.category}
+                </span>
+              </div>
+            {/if}
+          </div>
           
-          <time class="text-gray-500 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
-            {formatDate(post.createdAt)}
-          </time>
-          
-          {#if post.viewCnt !== undefined}
-            <div class="flex items-center text-gray-500 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
-              <Eye class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" strokeWidth={1.5} />
-              <span>{post.viewCnt.toLocaleString()}</span>
-            </div>
-          {/if}
+          <!-- 날짜와 조회수 그룹 -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <time class="text-gray-500 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
+              {formatDate(post.createdAt)}
+            </time>
+            
+            {#if post.viewCnt !== undefined}
+              <div class="flex items-center text-gray-500 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5">
+                <Eye class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" strokeWidth={1.5} />
+                <span>{post.viewCnt.toLocaleString()}</span>
+              </div>
+            {/if}
+          </div>
         </div>
 
+        <!-- 태그를 한 줄로 -->
         <div class="flex flex-wrap gap-1.5 sm:gap-2">
           {#each post.tags as tag}
             <span 
@@ -294,25 +302,25 @@
       </header>
 
       {#if !post.gptSummary || post.gptSummary.length <= 10}
-        <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-3 sm:p-6 mb-4 sm:mb-8">
+        <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-2 sm:p-6 mb-3 sm:mb-8">
           <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 text-yellow-600 dark:text-yellow-400">
             <Bot class="h-4 w-4 sm:h-5 sm:w-5" />
-            <span class="font-semibold text-sm sm:text-base">AI 요약 불가</span>
+            <span class="font-semibold text-xs sm:text-sm">AI 요약 불가</span>
           </div>
-          <p class="text-gray-700 dark:text-gray-300 text-sm sm:text-base">
+          <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
             게시글에서 제공된 내용이 적어 요약이 불가능합니다. 하단의 원문 보기를 클릭해서 읽어주세요.
           </p>
         </div>
       {:else}
-        <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4 mb-4 sm:mb-8">
+        <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-2 sm:p-4 mb-3 sm:mb-8">
           <div class="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-blue-600 dark:text-blue-400">
             <Bot class="h-4 w-4 sm:h-5 sm:w-5" />
-            <span class="font-semibold text-sm sm:text-base">AI 요약</span>
+            <span class="font-semibold text-xs sm:text-sm">AI 요약</span>
           </div>
-          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 sm:mb-4">
+          <p class="text-xs sm:text-xs text-gray-500 dark:text-gray-400 mb-6 sm:mb-6">
             이 글은 AI가 원문을 분석하여 핵심 내용을 요약한 것입니다.
           </p>
-          <div class="prose dark:prose-invert max-w-none prose-sm sm:prose-base">
+          <div class="prose dark:prose-invert max-w-none prose-xs sm:prose-sm prose-headings:text-sm sm:prose-headings:text-base prose-h1:text-base sm:prose-h1:text-lg prose-h2:text-sm sm:prose-h2:text-base">
             {@html post.gptSummary}
           </div>
         </div>
@@ -383,5 +391,29 @@
   :global(.prose li) {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+  }
+  
+  /* 모바일 환경에서 헤딩 크기 강제 조정 */
+  @media (max-width: 640px) {
+    :global(.prose h1) {
+      font-size: 1.1rem !important;
+      margin-top: 1.2rem !important;
+      margin-bottom: 0.8rem !important;
+    }
+    :global(.prose h2) {
+      font-size: 1rem !important;
+      margin-top: 1rem !important;
+      margin-bottom: 0.6rem !important;
+    }
+    :global(.prose h3) {
+      font-size: 0.9rem !important;
+      margin-top: 0.8rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    :global(.prose h4, .prose h5, .prose h6) {
+      font-size: 0.85rem !important;
+      margin-top: 0.7rem !important;
+      margin-bottom: 0.4rem !important;
+    }
   }
 </style> 

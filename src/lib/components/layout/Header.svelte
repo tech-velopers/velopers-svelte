@@ -30,38 +30,38 @@
         >elopers</span
       >
     </button>
-    <nav class="flex items-center space-x-1.5 sm:space-x-2">
-      <div class="flex items-center space-x-1.5 sm:space-x-2">
+    <nav class="flex items-center space-x-1 sm:space-x-2">
+      <div class="flex items-center space-x-1 sm:space-x-2">
         <button
           on:click={() => navigate("/")}
-          class="hidden sm:block p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+          class="hidden sm:block p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
           >홈</button
         >
         <button
           on:click={() => navigate("/all-blogs")}
-          class="p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm sm:text-base"
+          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
           >모든 블로그</button
         >
         <button
           on:click={() => navigate("/about")}
-          class="p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm sm:text-base"
+          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
           >소개</button
         >
         <button
-          on:click={() => navigate("/changelog")}
-          class="p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm sm:text-base"
-          >변경사항</button
+          on:click={() => navigate("/popular-posts")}
+          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
+          >인기 게시글</button
         >
       </div>
       <button
         on:click={toggleDarkMode}
-        class="p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        class="p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         aria-label="다크모드 토글"
       >
         {#if isDarkMode}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6 text-amber-400"
+            class="h-5 w-5 sm:h-6 sm:w-6 text-amber-400"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -74,7 +74,7 @@
         {:else}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6 text-gray-700 hover:text-blue-600"
+            class="h-5 w-5 sm:h-6 sm:w-6 text-gray-700 hover:text-blue-600"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -84,44 +84,6 @@
           </svg>
         {/if}
       </button>
-      <div
-        class="hidden md:block h-4 w-px mx-2 bg-gray-300 dark:bg-gray-700"
-      ></div>
-      <div class="hidden md:flex items-center space-x-2">
-        <HoverCard.Root openDelay={500}>
-          <HoverCard.Trigger>
-            <button
-              disabled
-              class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 cursor-not-allowed text-gray-400 dark:text-gray-500"
-              >로그인</button
-            >
-          </HoverCard.Trigger>
-          <HoverCard.Content class="w-56">
-            <div class="p-4">
-              <p class="text-sm text-gray-600 dark:text-gray-300">
-                아직 구현되지 않았어요
-              </p>
-            </div>
-          </HoverCard.Content>
-        </HoverCard.Root>
-
-        <HoverCard.Root openDelay={500}>
-          <HoverCard.Trigger>
-            <button
-              disabled
-              class="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg cursor-not-allowed"
-              >회원가입</button
-            >
-          </HoverCard.Trigger>
-          <HoverCard.Content class="w-56">
-            <div class="p-4">
-              <p class="text-sm text-gray-600 dark:text-gray-300">
-                아직 구현되지 않았어요
-              </p>
-            </div>
-          </HoverCard.Content>
-        </HoverCard.Root>
-      </div>
     </nav>
   </div>
 </header>

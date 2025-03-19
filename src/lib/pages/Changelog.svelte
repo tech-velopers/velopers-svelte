@@ -6,11 +6,11 @@
 <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
   <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-8 text-gray-900 dark:text-white">변경사항</h1>
   
-  <div class="space-y-4 sm:space-y-6">
+  <div class="space-y-3 sm:space-y-5">
 
-    <div class="flex gap-2 sm:gap-4">
-      <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
-        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-03-19</p>
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-19</p>
       </div>
       <Alert.Root class="flex-1">
         <Alert.Title class="text-base sm:text-lg font-semibold">기능 업데이트 🎉</Alert.Title>
@@ -23,9 +23,9 @@
       </Alert.Root>
     </div>
 
-    <div class="flex gap-2 sm:gap-4">
-      <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
-        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-03-17</p>
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-17</p>
       </div>
       <Alert.Root class="flex-1">
         <Alert.Title class="text-base sm:text-lg font-semibold">기능 업데이트 🎉</Alert.Title>
@@ -45,9 +45,9 @@
       </Alert.Root>
     </div>
 
-    <div class="flex gap-2 sm:gap-4">
-      <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
-        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-03-10</p>
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-10</p>
       </div>
       <Alert.Root class="flex-1">
         <Alert.Title class="text-base sm:text-lg font-semibold">기능 업데이트 🎉</Alert.Title>
@@ -64,9 +64,9 @@
       </Alert.Root>
     </div>
 
-    <div class="flex gap-2 sm:gap-4">
-      <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
-        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-03-09</p>
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-09</p>
       </div>
       <Alert.Root class="flex-1">
         <Alert.Title class="text-base sm:text-lg font-semibold">블로그 추가 🚀</Alert.Title>
@@ -84,9 +84,9 @@
       </Alert.Root>
     </div>
 
-    <div class="flex gap-2 sm:gap-4">
-      <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
-        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-03-03</p>
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-03</p>
       </div>
       <Alert.Root class="flex-1">
         <Alert.Title class="text-base sm:text-lg font-semibold">블로그 추가 🚀</Alert.Title>
@@ -99,9 +99,9 @@
       </Alert.Root>
     </div>
 
-    <div class="flex gap-2 sm:gap-4">
-      <div class="w-16 sm:w-24 flex-shrink-0 pt-1">
-        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">2025-02-28</p>
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-02-28</p>
       </div>
       <Alert.Root class="flex-1">
         <Alert.Title class="text-base sm:text-lg font-semibold">블로그 추가 🚀</Alert.Title>
