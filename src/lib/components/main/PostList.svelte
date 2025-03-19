@@ -78,12 +78,7 @@
               <div class="mt-auto space-y-3">
                 <div class="flex flex-wrap gap-1 sm:gap-1.5">
                   {#each ["AD", "개발자", "노트북", "컴퓨터"] as tag}
-                    <span 
-                      class="px-1.5 sm:px-2 py-0.5 rounded-md text-xs md:text-sm
-                        {tag === 'AD' 
-                          ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' 
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}"
-                    >
+                    <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-xs md:text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                       {tag}
                     </span>
                   {/each}
