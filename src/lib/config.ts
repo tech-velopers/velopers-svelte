@@ -13,4 +13,5 @@ export const API_ENDPOINTS = {
     users: '/api/users',
     techBlogs: '/api/techBlogs',
     weeklyPosts: '/api/posts/weekly',
+    weeklyPostsByCategory: '/api/posts/weekly/category',
 } as const; 

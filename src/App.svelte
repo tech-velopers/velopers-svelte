@@ -7,6 +7,7 @@
   import Home from "$lib/pages/Home.svelte";
   import About from "$lib/pages/About.svelte";
   import AllBlogs from "$lib/pages/AllBlogs.svelte";
+  import PopularPosts from "$lib/pages/PopularPosts.svelte";
   import Post from "$lib/pages/Post.svelte";
   import BlogDetail from "$lib/pages/BlogDetail.svelte";
   import Changelog from "$lib/pages/Changelog.svelte";
@@ -50,6 +51,8 @@
       <About />
     {:else if $currentPath === '/all-blogs'}
       <AllBlogs />
+    {:else if $currentPath === '/popular-posts'}
+      <PopularPosts />
     {:else if $currentPath === '/changelog'}
       <Changelog />
     {:else if $currentPath.startsWith('/post/')}

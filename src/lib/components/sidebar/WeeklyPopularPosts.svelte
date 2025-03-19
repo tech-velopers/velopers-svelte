@@ -89,6 +89,11 @@
       <TrendingUp class="text-red-500 dark:text-red-400" size={18} />
       주간 인기 게시글
     </h3>
+    <button 
+      on:click={() => navigate('/popular-posts')}
+      class="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
+      카레고리별 인기 게시글
+    </button>
   </div>
 
   {#if loading}

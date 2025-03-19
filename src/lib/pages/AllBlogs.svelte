@@ -449,7 +449,7 @@
                   target="_blank" 
                   rel="noopener noreferrer"
                   class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center group transition-colors"
-                  on:click|stopPropagation={handleBlogClick(blog)}
+                  on:click|stopPropagation={(e) => handleBlogClick(blog)}
                 >
                   <span>블로그 바로가기</span>
                   <ExternalLink class="h-3 w-3 ml-1 flex-shrink-0 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
