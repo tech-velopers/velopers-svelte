@@ -325,7 +325,7 @@
               
               <div class="mt-3 md:mt-6 flex flex-wrap gap-2 md:gap-3">
                 <a 
-                  href={blog?.url} 
+                  href={blog?.baseUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   class="px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center text-xs md:text-sm"
