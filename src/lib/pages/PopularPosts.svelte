@@ -6,7 +6,6 @@
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
-  import { tick } from "svelte";
   import { TrendingUp } from 'lucide-svelte';
   import logger from '$lib/utils/ActivityLogger';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
@@ -37,16 +36,17 @@
   let error: string | null = null;
   let allTags: Tag[] = [];
   let sortOption = 'viewCnt-desc';
-  let open = false;
   let loadedImages = new Set<string>();
 
-
-  function closeAndFocusTrigger(triggerId: string) {
-    open = false;
-    tick().then(() => {
-      document.getElementById(triggerId)?.focus();
-    });
-  }
+  // 카테고리 표시용 매핑 (소문자 -> 표시용)
+  const categoryDisplayMap: {[key: string]: string} = {
+    'frontend': 'Frontend',
+    'backend': 'Backend',
+    'ai': 'AI',
+    'devops': 'DevOps',
+    'architecture': 'Architecture',
+    'else': 'else'
+  };
 
   function setCategory(category: string) {
     selectedCategory = category;
@@ -77,12 +77,13 @@
         
         categoryPosts = await response.json();
         
-        // 카테고리 순서 정의
-        const categoryOrder = ['Frontend', 'Backend', 'AI', 'DevOps', 'Architecture', 'else'];
+        // 카테고리 순서 정의 (소문자로)
+        const categoryOrder = ['frontend', 'backend', 'ai', 'devops', 'architecture', 'else'];
+        
         // 가져온 카테고리를 정의된 순서대로 정렬
         allCategories = Object.keys(categoryPosts).sort((a, b) => {
-          const indexA = categoryOrder.indexOf(a);
-          const indexB = categoryOrder.indexOf(b);
+          const indexA = categoryOrder.indexOf(a.toLowerCase());
+          const indexB = categoryOrder.indexOf(b.toLowerCase());
           
           // 두 카테고리가 모두 정의된 순서에 있으면 해당 순서대로 정렬
           if (indexA !== -1 && indexB !== -1) {
@@ -147,14 +148,6 @@
     }
   });
 
-  // 필터링된 포스트
-  $: filteredPosts = sortedPosts;
-
-  // 검색 기능
-  function handleSearch(event: CustomEvent<{query: string}> | null = null) {
-    // 검색 기능 제거
-  }
-
   function searchWithSelected(data: any) {
     if ($selectedBlogs.length > 0 || $selectedTags.length > 0) {
       logger.logClick('FILTERED_SEARCH', undefined, `필터: ${$selectedBlogs.length}개 블로그, ${$selectedTags.length}개 태그`, {
@@ -172,6 +165,16 @@
   // 태그 전환 핸들러
   function handleToggleTag(tag: string) {
     toggleTag(tag);
+  }
+
+  // 카테고리 표시명 가져오기
+  function getCategoryDisplayName(category: string): string {
+    return categoryDisplayMap[category.toLowerCase()] || category;
+  }
+  
+  // 검색 핸들러 (빈 함수로 유지, MainLayout에 필요함)
+  function handleSearch() {
+    // 실제 검색 기능은 구현하지 않음
   }
 </script>
 
@@ -209,7 +212,7 @@
           ? 'bg-blue-500 hover:bg-blue-600 text-white' 
           : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'}"
       >
-        {category}
+        {getCategoryDisplayName(category)}
       </button>
     {/each}
   </div>
@@ -220,13 +223,14 @@
     </div>
   {:else if error}
     <div class="text-red-500 text-center p-4">{error}</div>
-  {:else if filteredPosts.length === 0}
+  {:else if sortedPosts.length === 0}
     <div class="text-center py-12">
-      <p class="text-gray-500 dark:text-gray-400">검색 결과가 없습니다.</p>
+      <p class="text-gray-500 dark:text-gray-400">표시할 게시글이 없습니다.</p>
     </div>
+    
   {:else}
     <div class="space-y-4">
-      {#each filteredPosts as post, index (post.id)}
+      {#each sortedPosts as post, index (post.id)}
         <div class="flex items-start">
           <div class="flex-shrink-0 w-12 flex justify-center items-start pt-4 mr-2">
             <span class="text-2xl font-bold text-blue-500 dark:text-blue-400">{index + 1}</span>
