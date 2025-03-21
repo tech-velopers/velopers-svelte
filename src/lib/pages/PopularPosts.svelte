@@ -23,6 +23,7 @@
     tags: string[];
     createdAt: number[];
     viewCnt: number;
+    score: number;
   };
 
   type CategoryPosts = {
@@ -35,7 +36,6 @@
   let isLoading = true;
   let error: string | null = null;
   let allTags: Tag[] = [];
-  let sortOption = 'viewCnt-desc';
   let loadedImages = new Set<string>();
 
   // 카테고리 표시용 매핑 (소문자 -> 표시용)
@@ -123,30 +123,8 @@
     ? Object.values(categoryPosts).flat()
     : categoryPosts[selectedCategory] || [];
 
-  // 정렬된 포스트
-  $: sortedPosts = [...postsToShow].sort((a, b) => {
-    switch (sortOption) {
-      case 'title-asc':
-        return a.title.localeCompare(b.title);
-      case 'title-desc':
-        return b.title.localeCompare(a.title);
-      case 'viewCnt-desc':
-        return b.viewCnt - a.viewCnt;
-      case 'viewCnt-asc':
-        return a.viewCnt - b.viewCnt;
-      case 'recent':
-        // createdAt이 없는 경우 가장 오래된 것으로 처리
-        if (!a.createdAt) return 1;
-        if (!b.createdAt) return -1;
-        
-        // 날짜 비교
-        const dateA = new Date(a.createdAt[0], a.createdAt[1] - 1, a.createdAt[2]);
-        const dateB = new Date(b.createdAt[0], b.createdAt[1] - 1, b.createdAt[2]);
-        return dateB.getTime() - dateA.getTime();
-      default:
-        return 0;
-    }
-  });
+  // 정렬된 포스트 (항상 score 기준 내림차순)
+  $: sortedPosts = [...postsToShow].sort((a, b) => b.score - a.score);
 
   function searchWithSelected(data: any) {
     if ($selectedBlogs.length > 0 || $selectedTags.length > 0) {
