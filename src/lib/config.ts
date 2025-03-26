@@ -10,6 +10,7 @@ export const getApiUrl = (endpoint: string) => `${API_BASE_URL}${endpoint}`;
 export const API_ENDPOINTS = {
     posts: '/api/posts',
     tags: '/api/tags',
+    allTags: '/api/tags/all',
     users: '/api/users',
     techBlogs: '/api/techBlogs',
     weeklyPosts: '/api/posts/weekly',

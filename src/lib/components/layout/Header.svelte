@@ -43,6 +43,11 @@
           >모든 블로그</button
         >
         <button
+          on:click={() => navigate("/all-tags")}
+          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
+          >모든 태그</button
+        >
+        <button
           on:click={() => navigate("/about")}
           class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
           >소개</button
