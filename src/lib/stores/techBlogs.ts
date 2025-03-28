@@ -7,7 +7,7 @@ export interface TechBlog {
   icon: string;
   baseUrl: string;
   postCnt: number;
-  lastCreatedAt?: number[]; // 마지막 게시글 작성 일자 [년, 월, 일, 시, 분, 초]
+  lastCreatedAt?: string; // 마지막 게시글 작성 일자 ISO 형식 문자열 (예: "2025-03-18T15:42:52")
 }
 
 interface TechBlogMap {

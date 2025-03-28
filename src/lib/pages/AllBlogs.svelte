@@ -116,8 +116,8 @@
         if (!b.lastCreatedAt) return -1;
         
         // 날짜 비교
-        const dateA = new Date(a.lastCreatedAt[0], a.lastCreatedAt[1] - 1, a.lastCreatedAt[2]);
-        const dateB = new Date(b.lastCreatedAt[0], b.lastCreatedAt[1] - 1, b.lastCreatedAt[2]);
+        const dateA = new Date(a.lastCreatedAt);
+        const dateB = new Date(b.lastCreatedAt);
         return dateB.getTime() - dateA.getTime();
       default:
         return 0;
@@ -212,11 +212,10 @@
   }
 
   // 날짜 포맷팅 함수 개선
-  function formatDate(dateArray?: number[]): string {
-    if (!dateArray || dateArray.length < 3) return '정보 없음';
+  function formatDate(dateString?: string): string {
+    if (!dateString) return '정보 없음';
     
-    const [year, month, day] = dateArray;
-    const date = new Date(year, month - 1, day);
+    const date = new Date(dateString);
     const now = new Date();
     
     // 오늘 날짜인 경우
@@ -250,15 +249,14 @@
     }
     
     // 그 외의 경우
-    return `${year}년 ${month}월 ${day}일`;
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
   }
 
   // 날짜에 따른 클래스 결정 함수
-  function getDateClass(dateArray?: number[]): string {
-    if (!dateArray || dateArray.length < 3) return '';
+  function getDateClass(dateString?: string): string {
+    if (!dateString) return '';
     
-    const [year, month, day] = dateArray;
-    const date = new Date(year, month - 1, day);
+    const date = new Date(dateString);
     const now = new Date();
     
     // 일주일 이내인 경우
@@ -279,11 +277,10 @@
   }
 
   // 블로그 카드 스타일 결정 함수
-  function getBlogCardClass(dateArray?: number[]): string {
-    if (!dateArray || dateArray.length < 3) return '';
+  function getBlogCardClass(dateString?: string): string {
+    if (!dateString) return '';
     
-    const [year, month, day] = dateArray;
-    const date = new Date(year, month - 1, day);
+    const date = new Date(dateString);
     const now = new Date();
     
     // 일주일 이내인 경우
@@ -327,11 +324,10 @@
   }
 
   // 최근 업데이트 여부 확인 함수
-  function isRecentlyUpdated(dateArray?: number[]): boolean {
-    if (!dateArray || dateArray.length < 3) return false;
+  function isRecentlyUpdated(dateString?: string): boolean {
+    if (!dateString) return false;
     
-    const [year, month, day] = dateArray;
-    const date = new Date(year, month - 1, day);
+    const date = new Date(dateString);
     const now = new Date();
     
     // 2일 이내인 경우

@@ -228,11 +228,11 @@
   }
 
   // 날짜 포맷팅 함수
-  function formatDate(dateArray?: number[]): string {
-    if (!dateArray || dateArray.length < 3) return '정보 없음';
+  function formatDate(dateString?: string): string {
+    if (!dateString) return '정보 없음';
     
-    const [year, month, day] = dateArray;
-    return new Date(year, month - 1, day).toLocaleDateString('ko-KR', {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -256,8 +256,8 @@
     <meta name="site_name" property="og:site_name" content="Velopers" />
     <meta property="og:locale" content="ko_KR" />
     {#if blog.lastCreatedAt}
-      <meta property="article:published_time" content={new Date(blog.lastCreatedAt[0], blog.lastCreatedAt[1] - 1, blog.lastCreatedAt[2]).toISOString()} />
-      <meta property="article:modified_time" content={new Date(blog.lastCreatedAt[0], blog.lastCreatedAt[1] - 1, blog.lastCreatedAt[2]).toISOString()} />
+      <meta property="article:published_time" content={blog.lastCreatedAt} />
+      <meta property="article:modified_time" content={blog.lastCreatedAt} />
     {/if}
     <meta property="article:section" content="기술 블로그" />
     <meta property="article:publisher" content="https://www.velopers.kr" />

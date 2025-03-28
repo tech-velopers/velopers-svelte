@@ -21,7 +21,7 @@
     techBlogName: string;
     category: string;
     tags: string[];
-    createdAt: number[];
+    createdAt: string;
     viewCnt?: number;
   } | null = null;
 
@@ -80,9 +80,9 @@
     }
   }
 
-  function formatDate(date: number[]): string {
-    const [year, month, day] = date;
-    return new Date(year, month - 1, day).toLocaleDateString('ko-KR', {
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -179,7 +179,7 @@
     <meta name="url" property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
     <meta name="site_name" property="og:site_name" content="Velopers" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="article:published_time" content={new Date(post.createdAt[0], post.createdAt[1] - 1, post.createdAt[2]).toISOString()} />
+    <meta property="article:published_time" content={new Date(post.createdAt).toISOString()} />
     <meta property="article:section" content={post.category || '기술 블로그'} />
     <meta property="article:publisher" content="https://www.velopers.kr" />
     <meta property="article:author" content={post.techBlogName} />
