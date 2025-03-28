@@ -17,7 +17,7 @@
     techBlogName: string;
     category: string;
     tags: string[];
-    createdAt: number[];
+    createdAt: string;
     viewCnt: number;
   };
 
@@ -71,11 +71,11 @@
   }
 
   // 날짜 포맷팅 함수
-  function formatDate(dateArray: number[]): string {
-    if (!dateArray || dateArray.length < 3) return '정보 없음';
+  function formatDate(dateString: string): string {
+    if (!dateString) return '정보 없음';
     
-    const [year, month, day] = dateArray;
-    return new Date(year, month - 1, day).toLocaleDateString('ko-KR', {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

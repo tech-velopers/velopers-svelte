@@ -18,7 +18,7 @@
     imageUrl: string;
     techBlogName: string;
     tags: string[];
-    createdAt: any;
+    createdAt: string;
     viewCnt?: number;
   };
 
@@ -39,9 +39,9 @@
   };
 
   // 날짜 포맷팅 함수
-  function formatDate(date: number[]): string {
-    const [year, month, day] = date;
-    return new Date(year, month - 1, day).toLocaleDateString('ko-KR', {
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
