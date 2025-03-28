@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import logger from '$lib/utils/ActivityLogger';
+  import Changelog from './Changelog.svelte';
 
   onMount(() => {
     // About 페이지 조회 로깅
@@ -80,5 +81,9 @@
         </a>
       </p>
     </section>
+  </div>
+  
+  <div class="mt-8">
+    <Changelog />
   </div>
 </div> 
