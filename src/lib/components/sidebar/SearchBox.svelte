@@ -52,7 +52,7 @@
 
   // 검색어가 변경되면 inputQuery 업데이트 (빈 문자열일 때도 업데이트)
   $: {
-    if ($searchQuery !== inputQuery) {
+    if ($searchQuery !== inputQuery && $searchQuery) {
       inputQuery = $searchQuery;
     }
   }
