@@ -1,7 +1,16 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { fade } from 'svelte/transition';
-  import { selectedBlogs, selectedTags, toggleBlog, toggleTag, resetSelected } from '$lib/stores/search';
+  import { 
+    selectedBlogs, 
+    selectedTags, 
+    toggleBlog, 
+    toggleTag, 
+    resetSelected,
+    searchQuery,
+    setSearchQuery
+  } from '$lib/stores/search';
+  import { updateUrl } from '$lib/stores/router';
   import { Search, RotateCcw } from 'lucide-svelte';
 
   export let searchWithSelected: () => void;
@@ -11,19 +20,40 @@
     search: { query: string };
   }>();
 
-  let searchQuery = '';
+  // 입력 중인 검색어를 임시로 저장하는 변수
+  let inputQuery = '';
+
+  // 컴포넌트 마운트 시 검색어 초기화
+  onMount(() => {
+    // 스토어에서 검색어를 가져와 설정
+    inputQuery = $searchQuery;
+  });
 
   async function handleSearch() {
-    if (searchQuery.trim()) {
-      dispatch('search', { query: searchQuery.trim() });
+    if (inputQuery.trim()) {
+      // 검색어 업데이트
+      setSearchQuery(inputQuery.trim());
+      dispatch('search', { query: inputQuery.trim() });
+      // URL 업데이트
+      updateUrl();
     } else if ($selectedTags.length > 0 || $selectedBlogs.length > 0) {
+      setSearchQuery(''); // 검색어 초기화
       searchWithSelected();
+      // URL 업데이트
+      updateUrl();
     }
   }
 
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       handleSearch();
+    }
+  }
+
+  // 검색어가 변경되면 inputQuery 업데이트 (빈 문자열일 때도 업데이트)
+  $: {
+    if ($searchQuery !== inputQuery) {
+      inputQuery = $searchQuery;
     }
   }
 </script>
@@ -34,7 +64,7 @@
       <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />
       <input
         type="search"
-        bind:value={searchQuery}
+        bind:value={inputQuery}
         on:keydown={handleKeyDown}
         placeholder="검색어를 입력하세요"
         class="w-full pl-10 pr-4 py-3 border-2 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -61,7 +91,10 @@
             {#each $selectedBlogs as blog (blog.name)}
               <button
                 transition:fade|local={{ duration: 200 }}
-                on:click={() => toggleBlog(blog)}
+                on:click={() => {
+                  toggleBlog(blog);
+                  updateUrl(); // URL 업데이트
+                }}
                 class="group flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all duration-200 shadow-sm hover:shadow"
               >
                 <img 
@@ -92,7 +125,10 @@
             {#each $selectedTags as tag (tag)}
               <button
                 transition:fade|local={{ duration: 200 }}
-                on:click={() => toggleTag(tag)}
+                on:click={() => {
+                  toggleTag(tag);
+                  updateUrl(); // URL 업데이트
+                }}
                 class="group flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all duration-200 shadow-sm hover:shadow"
               >
                 {tag}
@@ -114,7 +150,11 @@
       <Search class="h-3.5 w-3.5" />
     </button>
     <button 
-      on:click={onReset}
+      on:click={() => {
+        onReset();
+        inputQuery = ''; // 입력 필드 초기화
+        updateUrl(); // URL 업데이트
+      }}
       class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
     >
       <span>초기화</span>

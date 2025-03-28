@@ -1,6 +1,15 @@
 import { writable, get } from 'svelte/store';
 import { getApiUrl, API_ENDPOINTS } from '$lib/config';
-import { selectedBlogs, selectedTags } from './search';
+import { 
+  selectedBlogs, 
+  selectedTags, 
+  searchQuery as searchQueryStore, 
+  selectedCategory, 
+  currentPage as currentPageStore,
+  setPage,
+  setCategory as setSearchCategory,
+  setSearchQuery
+} from './search';
 
 export interface Post {
   id: number;
@@ -14,23 +23,17 @@ export interface Post {
 
 interface PostsState {
   posts: Post[];
-  currentPage: number;
   totalPages: number;
   isLoading: boolean;
   error: string | null;
-  currentCategory: string;
-  searchQuery: string;
 }
 
 function createPostsStore() {
   const initialState: PostsState = {
     posts: [],
-    currentPage: 0,
     totalPages: 1,
     isLoading: false,
-    error: null,
-    currentCategory: 'All',
-    searchQuery: ''
+    error: null
   };
 
   const { subscribe, update } = writable<PostsState>(initialState);
@@ -39,19 +42,18 @@ function createPostsStore() {
     update(state => ({ ...state, isLoading: true, error: null }));
 
     try {
-      const currentState = get({ subscribe });
       const response = await fetch(getApiUrl(API_ENDPOINTS.posts), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          category: currentState.currentCategory,
+          category: get(selectedCategory),
           tags: get(selectedTags),
           blogs: get(selectedBlogs).map(blog => blog.name),
-          query: currentState.searchQuery,
+          query: get(searchQueryStore),
           size: 10,
-          page: currentState.currentPage
+          page: get(currentPageStore)
         })
       });
 
@@ -73,39 +75,40 @@ function createPostsStore() {
     }
   }
 
-  function setCategory(category: string, resetPage: boolean = true) {
-    update(state => ({ 
-      ...state, 
-      currentCategory: category, 
-      currentPage: resetPage ? 1 : state.currentPage,
-      searchQuery: '' 
-    }));
+  function setPostsCategory(category: string, resetPage: boolean = true) {
+    setSearchCategory(category);
+    
+    if (resetPage) {
+      setPage(1);
+    }
   }
 
-  function setPage(page: number) {
-    update(state => ({ ...state, currentPage: page }));
+  function setPostsPage(page: number) {
+    setPage(page);
   }
 
-  function setSearchQuery(query: string) {
-    update(state => ({ ...state, searchQuery: query, currentPage: 1 }));
+  function setPostsSearchQuery(query: string) {
+    setSearchQuery(query);
+    setPage(1);
   }
 
   function reset() {
-    update(state => ({
-      ...state,
-      currentCategory: 'all',
-      currentPage: 1,
-      searchQuery: ''
-    }));
+    setSearchCategory('all');
+    setPage(1);
+    setSearchQuery('');
   }
 
   return {
     subscribe,
     fetchPosts,
-    setCategory,
-    setPage,
-    setSearchQuery,
-    reset
+    setCategory: setPostsCategory,
+    setPage: setPostsPage,
+    setSearchQuery: setPostsSearchQuery,
+    reset,
+    // 현재 페이지, 검색어, 카테고리 등의 상태는 search 스토어에서 직접 구독해야 함
+    get currentPage() { return get(currentPageStore); },
+    get currentCategory() { return get(selectedCategory); },
+    get searchQuery() { return get(searchQueryStore); }
   };
 }
 

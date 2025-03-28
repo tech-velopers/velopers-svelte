@@ -10,6 +10,28 @@
 
     <div class="flex gap-1.5 sm:gap-3">
       <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-28</p>
+      </div>
+      <Alert.Root class="flex-1">
+        <Alert.Title class="text-base sm:text-lg font-semibold">버그 수정 🐛</Alert.Title>
+        <Alert.Description>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            검색 후 포스트를 봤다가 뒤로가기 누르면 검색 파라미터가 초기화되는 버그를 수정했어요! (드디어!) <br>
+          </p>
+          <br>
+        </Alert.Description>
+        <Alert.Title class="text-base sm:text-lg font-semibold">블로그 추가 🚀</Alert.Title>
+        <Alert.Description>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            아래 블로그들을 추가했어요! <br><br>
+            교보DTS
+          </p>
+        </Alert.Description>
+      </Alert.Root>
+    </div>
+
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
         <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-19</p>
       </div>
       <Alert.Root class="flex-1">
@@ -69,7 +91,7 @@
         <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-09</p>
       </div>
       <Alert.Root class="flex-1">
-        <Alert.Title class="text-base sm:text-lg font-semibold">블로그 추가 🚀</Alert.Title>
+          <Alert.Title class="text-base sm:text-lg font-semibold">블로그 추가 🚀</Alert.Title>
         <Alert.Description>
           <p class="mt-1 sm:mt-2 text-sm sm:text-base">
             아래 블로그들을 추가했어요! <br><br>

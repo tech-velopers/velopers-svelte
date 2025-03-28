@@ -1,8 +1,16 @@
 <script lang="ts">
   import * as HoverCard from "$lib/components/ui/hover-card";
   import { navigate } from "$lib/stores/router";
+  import { resetSelected } from "$lib/stores/search";
+  
   export let isDarkMode: boolean;
   export let toggleDarkMode: () => void;
+
+  // 로고 또는 홈 클릭 시 검색 파라미터 초기화 후 홈으로 이동
+  function handleHomeNavigation() {
+    // resetSearchState 옵션을 true로 설정하여 검색 파라미터 초기화 및 홈으로 이동
+    navigate("/", false, true);
+  }
 </script>
 
 <header
@@ -12,7 +20,7 @@
     class="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between"
   >
     <button
-      on:click={() => navigate("/")}
+      on:click={handleHomeNavigation}
       class="inline-flex items-center hover:opacity-90 transition-opacity"
     >
       <span class="text-orange-500 text-xs sm:text-sm font-bold leading-none"
@@ -33,7 +41,7 @@
     <nav class="flex items-center space-x-1 sm:space-x-2">
       <div class="flex items-center space-x-1 sm:space-x-2">
         <button
-          on:click={() => navigate("/")}
+          on:click={handleHomeNavigation}
           class="hidden sm:block p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
           >홈</button
         >

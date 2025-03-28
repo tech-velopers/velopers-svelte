@@ -1,7 +1,7 @@
 <script lang="ts">
   import "./app.css";
   import { onMount } from "svelte";
-  import { currentPath } from "$lib/stores/router";
+  import { currentPath, initRouter } from "$lib/stores/router";
   import Header from "$lib/components/layout/Header.svelte";
   import Footer from "$lib/components/layout/Footer.svelte";
   import Home from "$lib/pages/Home.svelte";
@@ -17,8 +17,9 @@
   // 다크모드 상태 관리
   let isDarkMode = false;
   
-  // 초기 테마 로드
+  // 초기 테마 로드 및 라우터 초기화
   onMount(() => {
+    // 테마 설정
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       isDarkMode = true;
@@ -27,6 +28,9 @@
       isDarkMode = false;
       document.documentElement.classList.remove('dark');
     }
+    
+    // 라우터 초기화 - URL에서 상태 복원
+    initRouter();
   });
   
   // 테마 설정 함수
