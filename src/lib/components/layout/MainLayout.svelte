@@ -69,11 +69,11 @@
   
   <!-- 왼쪽 광고 영역 - 데스크톱에서만 표시 (lg 이상) -->
   <div class="hidden lg:block absolute top-4 ml-4">
-    <div class="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-md">
+    <div class="p-2 rounded-lg">
       <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 text-center">광고</div>
       <!-- 왼쪽 사이드 광고 -->
       <ins class="adsbygoogle"
-          style="display:block; width:160px; height:600px;"
+          style="display:block; width:200px; height:500px;"
           data-ad-client="ca-pub-2560054260004649"
           data-ad-slot="3835436676"
           data-ad-format="auto"

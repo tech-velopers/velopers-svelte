@@ -118,8 +118,8 @@
       {#each weeklyPosts as post, index}
         <li>
           <div class="flex gap-2">
-            <div class="flex-shrink-0 w-5 text-center">
-              <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">{index + 1}</span>
+            <div class="flex-shrink-0 w-5 text-center relative">
+              <span class="text-sm font-semibold {index === 0 ? 'text-yellow-500' : 'text-gray-500 dark:text-gray-400'}">{index + 1}</span>
             </div>
             <div class="flex-1">
               <!-- 게시글 제목 (클릭 시 게시글 상세 페이지로 이동) -->
