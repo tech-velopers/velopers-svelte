@@ -1,7 +1,12 @@
 <script lang="ts">
   import { selectedTags, toggleTag } from '$lib/stores/search';
-  import logger from '$lib/utils/ActivityLogger';
   import { navigate } from "$lib/stores/router";
+  import { Button } from "$lib/components/ui/button";
+  import { Badge } from "$lib/components/ui/badge";
+  import { cn } from "$lib/utils.js";
+  import { Tag as TagIcon, ChevronRight } from 'lucide-svelte';
+  import { Skeleton } from "$lib/components/ui/skeleton";
+  import logger from '$lib/utils/ActivityLogger';
 
   export let allTags: Array<{ id: number; tagName: string; }>;
   export let loading = false;
@@ -22,32 +27,43 @@
   }
 </script>
 
-<div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
-  <div class="flex justify-between items-center mb-3">
-    <h3 class="text-base font-medium dark:text-white">인기 태그</h3>
-    <button 
+<div class="bg-card text-card-foreground p-4 rounded-lg border shadow-sm">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-base font-medium flex items-center gap-1.5">
+      <TagIcon class="text-blue-500 dark:text-blue-400" size={18} />
+      <span>인기 태그</span>
+    </h3>
+    <Button 
+      variant="ghost"
+      size="sm"
+      class="h-auto p-0 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-transparent"
       on:click={() => navigate('/all-tags')}
-      class="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
+    >
       전체보기
-    </button>
+    </Button>
   </div>
-  <div class="flex flex-wrap gap-2">
+  <div class="flex flex-wrap gap-1.5">
     {#if loading}
-      {#each Array(50) as _, i}
-        <div class="px-2 py-1 rounded-md animate-pulse bg-gray-200 dark:bg-gray-700">
-          <div class="h-4 {i % 3 === 0 ? 'w-24' : i % 3 === 1 ? 'w-16' : 'w-20'} bg-gray-300 dark:bg-gray-600 rounded"></div>
-        </div>
-      {/each}
+      <div class="grid grid-cols-3 gap-1.5 w-full">
+        {#each Array(15) as _, i}
+          <Skeleton class="h-8 w-full rounded-md" />
+        {/each}
+      </div>
     {:else}
       {#each allTags as tag}
-        <button
-          class="px-3 py-1.5 text-sm rounded-lg transition-colors {$selectedTags.includes(tag.tagName)
-            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
+        <Button 
+          variant={$selectedTags.includes(tag.tagName) ? "default" : "outline"}
+          size="sm"
+          class={cn(
+            "px-3 py-[0.3rem] h-auto font-normal text-sm transition-colors border min-w-max",
+            $selectedTags.includes(tag.tagName) 
+              ? "bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
+              : "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
+          )}
           on:click={() => handleTagToggle(tag.tagName)}
         >
           {tag.tagName}
-        </button>
+        </Button>
       {/each}
     {/if}
   </div>

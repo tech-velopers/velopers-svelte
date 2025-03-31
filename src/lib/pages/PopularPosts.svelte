@@ -10,6 +10,7 @@
   import logger from '$lib/utils/ActivityLogger';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import PostCard from '$lib/components/main/PostCard.svelte';
+  import CategoryList from '$lib/components/main/CategoryList.svelte';
 
   type WeeklyPost = {
     id: number;
@@ -173,27 +174,8 @@
     </p>
   </div>
   
-  <!-- 카테고리 선택 버튼 -->
-  <div class="flex flex-wrap gap-2 mb-6">
-    <button 
-      on:click={() => setCategory('all')}
-      class="px-3 py-2 text-sm rounded-lg transition-colors {selectedCategory === 'all' 
-        ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-        : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'}"
-    >
-      전체 보기
-    </button>
-    {#each allCategories as category}
-      <button 
-        on:click={() => setCategory(category)}
-        class="px-3 py-2 text-sm rounded-lg transition-colors {selectedCategory === category 
-          ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-          : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'}"
-      >
-        {getCategoryDisplayName(category)}
-      </button>
-    {/each}
-  </div>
+  <!-- CategoryList 컴포넌트 사용 -->
+  <CategoryList currentCategory={selectedCategory} selectCategory={setCategory} />
   
   {#if isLoading}
     <div class="flex justify-center items-center h-64">

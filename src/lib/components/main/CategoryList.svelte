@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Server, Home, Palette, Bot, GitBranch, Network, Wind } from 'lucide-svelte';
+  import { Button } from "$lib/components/ui/button";
+  import { cn } from "$lib/utils.js";
   
   export let currentCategory: string;
   export let selectCategory: (category: string) => void;
@@ -31,27 +33,32 @@
   });
 </script>
 
-<div class="mb-6">
-  <div class="grid grid-cols-4 gap-3 md:grid-cols-4 lg:grid-cols-7">
+<div class="space-y-2 mb-6">
+  <div class="flex overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-7 md:gap-2">
     {#each categories as category}
-      <button 
-        class="w-full px-4 py-2.5 rounded-xl border-2 transition-all duration-200
-          text-sm font-medium shadow-sm hover:shadow text-center
-          {currentCategory === category.value
-            ? 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600 hover:border-blue-600' 
-            : 'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:border-blue-200 dark:hover:border-blue-800'} 
-          hover:-translate-y-0.5"
+      <Button
+        variant="outline"
+        size="sm"
+        class={cn(
+          "flex flex-col items-center justify-center gap-1.5 px-3 py-2 h-auto min-w-[80px] transition-all duration-200 rounded-lg whitespace-nowrap mx-0.5 first:ml-0 last:mr-0 md:mx-0 md:w-full",
+          currentCategory === category.value 
+            ? "bg-blue-500 text-white border-blue-500 shadow-sm hover:bg-blue-600 hover:border-blue-500 hover:text-white" 
+            : "hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 hover:text-blue-700 dark:hover:text-blue-400"
+        )}
         on:click={() => selectCategory(category.value)}
       >
-        <span class="flex flex-col items-center gap-1 {category.value === 'Architecture' ? 'text-[13px]' : ''}">
-          <svelte:component 
-            this={category.icon} 
-            class="w-6 h-6" 
-            strokeWidth={1.5}
-          />
-          <span>{category.label}</span>
-        </span>
-      </button>
+        <svelte:component 
+          this={category.icon} 
+          class={cn(
+            "w-3.5 h-3.5 transition-colors",
+            currentCategory === category.value 
+              ? "text-white" 
+              : "text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400"
+          )}
+          strokeWidth={1.5}
+        />
+        <span class="text-sm font-medium">{category.label}</span>
+      </Button>
     {/each}
   </div>
 </div> 

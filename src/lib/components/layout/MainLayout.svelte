@@ -73,7 +73,7 @@
       <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 text-center">광고</div>
       <!-- 왼쪽 사이드 광고 -->
       <ins class="adsbygoogle"
-          style="display:block; width:200px; height:500px;"
+          style="display:block; width:200px; height:400px;"
           data-ad-client="ca-pub-2560054260004649"
           data-ad-slot="3835436676"
           data-ad-format="auto"

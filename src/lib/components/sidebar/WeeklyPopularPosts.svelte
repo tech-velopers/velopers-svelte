@@ -3,8 +3,11 @@
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { navigate } from '$lib/stores/router';
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
-  import { TrendingUp } from 'lucide-svelte';
-  import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+  import { TrendingUp, ExternalLink } from 'lucide-svelte';
+  import { Skeleton } from "$lib/components/ui/skeleton";
+  import { Button } from "$lib/components/ui/button";
+  import * as Avatar from "$lib/components/ui/avatar";
+  import { cn } from "$lib/utils.js";
   import logger from '$lib/utils/ActivityLogger';
 
   type WeeklyPost = {
@@ -83,21 +86,24 @@
   }
 </script>
 
-<div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md dark:ring-1 dark:ring-gray-700">
-  <div class="flex justify-between items-center mb-3">
-    <h3 class="text-base font-medium dark:text-white flex items-center gap-2">
-      <TrendingUp class="text-red-500 dark:text-red-400" size={18} />
-      주간 인기 게시글
+<div class="bg-card text-card-foreground p-4 rounded-lg border shadow-sm">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-base font-medium flex items-center gap-1.5">
+      <TrendingUp class="text-orange-500 dark:text-orange-400" size={18} />
+      <span>주간 인기 게시글</span>
     </h3>
-    <button 
+    <Button 
+      variant="ghost"
+      size="sm"
+      class="h-auto p-0 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-transparent"
       on:click={() => navigate('/popular-posts')}
-      class="text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
-      카레고리별 인기 게시글
-    </button>
+    >
+      카테고리별 인기 게시글
+    </Button>
   </div>
 
   {#if loading}
-    <div class="space-y-3">
+    <div class="space-y-2.5">
       {#each Array(5) as _, i}
         <div class="flex gap-2">
           <div class="flex-shrink-0 w-5 text-center">
@@ -110,21 +116,29 @@
       {/each}
     </div>
   {:else if error}
-    <p class="text-red-500 dark:text-red-400 text-sm">{error}</p>
+    <p class="text-sm text-destructive">{error}</p>
   {:else if weeklyPosts.length === 0}
-    <p class="text-gray-500 dark:text-gray-400 text-sm">주간 인기 게시글이 없습니다.</p>
+    <p class="text-sm text-muted-foreground">주간 인기 게시글이 없습니다.</p>
   {:else}
     <ul class="space-y-3">
       {#each weeklyPosts as post, index}
         <li>
           <div class="flex gap-2">
             <div class="flex-shrink-0 w-5 text-center relative">
-              <span class="text-sm font-semibold {index === 0 ? 'text-yellow-500' : 'text-gray-500 dark:text-gray-400'}">{index + 1}</span>
+              <span class={cn(
+                "text-sm font-semibold", 
+                index === 0 ? "text-amber-500 dark:text-amber-400" : 
+                index === 1 ? "text-zinc-500 dark:text-zinc-400" : 
+                index === 2 ? "text-amber-700 dark:text-amber-600" : 
+                "text-muted-foreground"
+              )}>
+                {index + 1}
+              </span>
             </div>
             <div class="flex-1">
               <!-- 게시글 제목 (클릭 시 게시글 상세 페이지로 이동) -->
               <button 
-                class="text-sm text-left text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium line-clamp-1 transition-colors w-full"
+                class="text-sm text-left hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-full font-medium line-clamp-1"
                 on:click={() => navigateToPost(post.id, post)}
               >
                 {post.title}
@@ -133,14 +147,18 @@
               <!-- 블로그 정보 (클릭 시 블로그 상세 페이지로 이동) -->
               <div class="flex items-center mt-1">
                 <button 
-                  class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  on:click|stopPropagation={() => navigateToBlog(post.techBlogName)}
+                  class="flex items-center gap-1.5 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  on:click={(e) => {
+                    e.stopPropagation();
+                    navigateToBlog(post.techBlogName);
+                  }}
                 >
-                  <img 
-                    src={`/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
-                    alt={post.techBlogName}
-                    class="w-4 h-4 rounded-full"
-                  />
+                  <Avatar.Root class="h-4 w-4">
+                    <Avatar.Image 
+                      src={`/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
+                      alt={post.techBlogName}
+                    />
+                  </Avatar.Root>
                   <span class="text-xs">
                     {post.techBlogName}
                   </span>

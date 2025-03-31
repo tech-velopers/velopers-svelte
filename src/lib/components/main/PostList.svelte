@@ -42,7 +42,7 @@
     const timeBasedRandom = () => {
       const now = new Date();
       // 현재 시간을 5분 단위로 나누어 시드값 생성 (300000ms = 5분)
-      const timeSlot = Math.floor(now.getTime() / 300000);
+      const timeSlot = Math.floor(now.getTime() / 1800000);
       
       // 시드값을 기반으로 0과 1 사이의 결정적인 난수 생성
       const seededRandom = (seed: number) => {
