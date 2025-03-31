@@ -1,15 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
-  import { currentPath, currentUrl, navigate } from '$lib/stores/router';
+  import { currentPath, navigate } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
-  import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
+  import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
-  import { selectedBlogs } from '$lib/stores/search';
-  import { ExternalLink, Undo2, Share2, Calendar, FileText } from 'lucide-svelte';
+  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase } from 'lucide-svelte';
   import { toast } from "svelte-sonner";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import PostCard from "$lib/components/main/PostCard.svelte";
+  import Pagination from "$lib/components/main/Pagination.svelte";
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
 
@@ -25,12 +25,6 @@
   let blogId: number | null = null;
   let techBlogsLoaded = false;
   
-  let selectedBlogsSnapshot: any[] = [];
-  
-  $: {
-    selectedBlogsSnapshot = $selectedBlogs;
-  }
-
   // URL에서 블로그 ID 가져오기
   $: {
     const pathParts = $currentPath.split('/');
@@ -113,12 +107,9 @@
       if (foundBlog) {
         blog = foundBlog;
         fetchBlogPosts(foundBlog.techBlogName, currentPage);
-        
-        // 모바일에서는 즉시 스크롤, 데스크톱에서는 부드럽게 스크롤
-        const isMobile = window.innerWidth < 1024; // lg 브레이크포인트
         window.scrollTo({ 
           top: 0, 
-          behavior: isMobile ? 'auto' : 'smooth' 
+          behavior: 'auto' 
         });
       } else {
         error = '블로그를 찾을 수 없습니다.';
@@ -171,12 +162,9 @@
   function goToPage(page: number) {
     if (blog) {
       fetchBlogPosts(blog.techBlogName, page);
-      
-      // 모바일에서는 즉시 스크롤, 데스크톱에서는 부드럽게 스크롤
-      const isMobile = window.innerWidth < 1024; // lg 브레이크포인트
       window.scrollTo({
         top: 0,
-        behavior: isMobile ? 'auto' : 'smooth'
+        behavior: 'auto'
       });
     }
   }
@@ -227,6 +215,13 @@
     }
   }
 
+  // 채용정보 페이지 열기
+  function openJobInfo() {
+    if (blog?.techBlogName) {
+      window.open(`https://www.jobkorea.co.kr/Search/?stext=${encodeURIComponent(blog.techBlogName)}`, '_blank', 'noopener,noreferrer');
+    }
+  }
+
   // 날짜 포맷팅 함수
   function formatDate(dateString?: string): string {
     if (!dateString) return '정보 없음';
@@ -269,7 +264,7 @@
   {/if}
 </svelte:head>
 
-<MainLayout allTags={allTags} {searchWithSelected} {onSearch} {onReset} showLogo={true} showSidebar={false}>
+<MainLayout allTags={allTags} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
   {#if loading}
     <div class="max-w-4xl mx-auto p-4 space-y-6">
       <Skeleton class="w-full h-64" />
@@ -323,24 +318,29 @@
                 {/if}
               </div>
               
-              <div class="mt-3 md:mt-6 flex flex-wrap gap-2 md:gap-3">
-                <a 
-                  href={blog?.baseUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  class="px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center text-xs md:text-sm"
+              <div class="mt-3 md:mt-6 flex flex-nowrap gap-1 md:gap-3">
+                <button 
+                  class="px-2 py-1.5 md:px-3 md:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-xs md:text-sm whitespace-nowrap flex-1"
                   on:click={openBlogUrl}
                 >
+                  <ExternalLink class="mr-1 md:mr-1.5 h-3.5 md:h-4 w-3.5 md:w-4" />
                   <span>블로그 방문</span>
-                  <ExternalLink class="ml-1 md:ml-1.5 h-3.5 w-3.5 md:h-4 md:w-4" />
-                </a>
+                </button>
                 
                 <button 
-                  class="px-3 py-1.5 md:px-4 md:py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors flex items-center text-sm md:text-base"
+                  class="px-2 py-1.5 md:px-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-xs md:text-sm whitespace-nowrap flex-1"
                   on:click={handleShareClick}
                 >
-                  <Share2 class="mr-1 md:mr-1.5 h-3.5 w-3.5 md:h-4 md:w-4" />
+                  <Share2 class="mr-1 md:mr-1.5 h-3.5 md:h-4 w-3.5 md:w-4" />
                   <span>공유하기</span>
+                </button>
+                
+                <button 
+                  class="px-2 py-1.5 md:px-3 md:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-xs md:text-sm whitespace-nowrap flex-1"
+                  on:click={openJobInfo}
+                >
+                  <Briefcase class="mr-1 md:mr-1.5 h-3.5 md:h-4 w-3.5 md:w-4" />
+                  <span>채용정보</span>
                 </button>
               </div>
             </div>
@@ -357,9 +357,9 @@
           
           <button 
             on:click={handleBackClick}
-            class="px-2 py-1 md:px-3 md:py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center text-xs md:text-sm"
+            class="px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center text-sm min-w-[110px]"
           >
-            <Undo2 class="h-3 w-3 md:h-3.5 md:w-3.5 mr-1 md:mr-1.5" />
+            <Undo2 class="h-4 w-4 mr-1.5" />
             <span>뒤로 가기</span>
           </button>
         </div>
@@ -390,20 +390,11 @@
           
           <!-- 페이지네이션 -->
           {#if totalPages > 1}
-            <div class="flex justify-center mt-8">
-              <div class="flex space-x-1">
-                {#each Array(totalPages) as _, i}
-                  <button 
-                    class="w-10 h-10 flex items-center justify-center rounded-md {currentPage === i + 1 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
-                    on:click={() => goToPage(i + 1)}
-                  >
-                    {i + 1}
-                  </button>
-                {/each}
-              </div>
-            </div>
+            <Pagination 
+              {currentPage}
+              {totalPages}
+              {goToPage}
+            />
           {/if}
         {/if}
       </div>

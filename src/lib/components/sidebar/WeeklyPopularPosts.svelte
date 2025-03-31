@@ -124,7 +124,7 @@
             <div class="flex-1">
               <!-- 게시글 제목 (클릭 시 게시글 상세 페이지로 이동) -->
               <button 
-                class="text-sm text-left text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium line-clamp-2 transition-colors w-full"
+                class="text-sm text-left text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium line-clamp-1 transition-colors w-full"
                 on:click={() => navigateToPost(post.id, post)}
               >
                 {post.title}

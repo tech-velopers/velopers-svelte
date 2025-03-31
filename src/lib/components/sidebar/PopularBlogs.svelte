@@ -174,7 +174,16 @@
               </HoverCard.Trigger>
               <HoverCard.Content class="w-72 p-4">
                 <div class="flex flex-col space-y-3">
-                  <div class="flex justify-between space-x-3">
+                  <button 
+                    class="flex justify-between space-x-3 w-full text-left cursor-pointer border-0 bg-transparent group" 
+                    on:click={() => {
+                      if ($techBlogMap && company.name) {
+                        const blog = $techBlogMap[company.name];
+                        if (blog && blog.id) {
+                          navigate(`/blog/${blog.id}`);
+                        }
+                      }
+                    }}>
                     <Avatar.Root class="h-12 w-12">
                       <Avatar.Image 
                         src={`/icons/${company.avatar}` || `https://api.dicebear.com/7.x/initials/svg?seed=${company.name}`} 
@@ -182,8 +191,8 @@
                       />
                     </Avatar.Root>
                     <div class="space-y-1 flex-1">
-                      <h4 class="text-sm font-semibold dark:text-white">{company.name}</h4>
-                      <p class="text-sm text-gray-600 dark:text-gray-300">기술 블로그</p>
+                      <h4 class="text-sm font-semibold dark:text-white group-hover:text-blue-500 transition-colors">{company.name}</h4>
+                      <p class="text-sm text-gray-600 dark:text-gray-300 group-hover:text-blue-400 transition-colors">기술 블로그</p>
                       <div class="flex items-center pt-2">
                         <div class="flex text-xs text-gray-500 dark:text-gray-400">
                           <span class="flex items-center">
@@ -193,7 +202,7 @@
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </button>
                   <div class="flex gap-2">
                     <button 
                       class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors {$selectedBlogs.some(blog => blog.name === company.name)

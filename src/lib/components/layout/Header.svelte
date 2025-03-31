@@ -17,7 +17,7 @@
   class="sticky top-0 z-50 w-full bg-white dark:bg-gray-950 border-b shadow-sm transition-colors"
 >
   <div
-    class="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between"
+    class="container mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between"
   >
     <button
       on:click={handleHomeNavigation}
@@ -38,8 +38,8 @@
         >elopers</span
       >
     </button>
-    <nav class="flex items-center space-x-1 sm:space-x-2">
-      <div class="flex items-center space-x-1 sm:space-x-2">
+    <nav class="flex items-center">
+      <div class="flex flex-wrap items-center">
         <button
           on:click={handleHomeNavigation}
           class="hidden sm:block p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -47,28 +47,28 @@
         >
         <button
           on:click={() => navigate("/all-blogs")}
-          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
+          class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >모든 블로그</button
         >
         <button
           on:click={() => navigate("/all-tags")}
-          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
+          class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >모든 태그</button
         >
         <button
           on:click={() => navigate("/about")}
-          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
+          class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >소개</button
         >
         <button
           on:click={() => navigate("/popular-posts")}
-          class="p-1.5 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-base"
+          class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >인기 게시글</button
         >
       </div>
       <button
         on:click={toggleDarkMode}
-        class="p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        class="p-1.5 sm:p-2.5 ml-1 sm:ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         aria-label="다크모드 토글"
       >
         {#if isDarkMode}

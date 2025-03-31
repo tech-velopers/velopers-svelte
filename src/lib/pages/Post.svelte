@@ -216,7 +216,7 @@
   </MainLayout>
 {:else if post}
   <MainLayout allTags={[]} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
-    <article class="max-w-4xl mx-auto p-1 sm:p-4 space-y-3 sm:space-y-6">
+    <article class="max-w-4xl mx-auto p-1 sm:p-4 space-y-3 sm:space-y-4 mb-1 sm:mb-2">
       <div class="w-full h-48 sm:h-64 relative rounded-xl overflow-hidden">
         <img 
           src={post.imageUrl ? post.imageUrl : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} 
@@ -225,7 +225,7 @@
         />
       </div>
 
-      <header class="space-y-3 sm:space-y-4">
+      <header class="space-y-3 sm:space-y-4 p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm dark:ring-1 dark:ring-gray-700">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
           {post.title}
         </h1>
@@ -236,7 +236,7 @@
           <div class="flex flex-wrap items-center gap-2 sm:gap-3">
             <!-- 블로그 이름 클릭 시 블로그 상세 페이지로 이동 -->
             <div 
-              class="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              class="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-300 dark:border-gray-700 h-8 sm:h-9"
               on:click={() => post && navigateToBlog(post.techBlogName)}
               on:keydown={(e) => post && e.key === 'Enter' && navigateToBlog(post.techBlogName)}
               role="button"
@@ -247,13 +247,13 @@
                 alt={post.techBlogName}
                 class="w-5 h-5 sm:w-6 sm:h-6 rounded-full mr-1.5 sm:mr-2"
               />
-              <span class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-medium">{post.techBlogName}</span>
+              <span class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{post.techBlogName}</span>
             </div>
             
             {#if post.category}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <div 
-                class="bg-blue-50 dark:bg-blue-900/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                class="flex items-center bg-blue-50 dark:bg-blue-900/20 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors border border-blue-200 dark:border-blue-800 h-8 sm:h-9"
                 on:click={() => post && post.category && handleCategoryClick(post.category)}
                 role="button"
                 tabindex="0"
@@ -289,7 +289,7 @@
         <div class="flex flex-wrap gap-1.5 sm:gap-2">
           {#each post.tags as tag}
             <span 
-              class="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs sm:text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              class="px-3 py-1.5 text-sm rounded-lg transition-colors bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               on:click={() => handleTagClick(tag)}
               on:keydown={(e) => e.key === 'Enter' && handleTagClick(tag)}
               role="button"
@@ -302,7 +302,7 @@
       </header>
 
       {#if !post.gptSummary || post.gptSummary.length <= 10}
-        <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-2 sm:p-6 mb-3 sm:mb-8">
+        <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-2 sm:p-6 mb-2 sm:mb-4">
           <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 text-yellow-600 dark:text-yellow-400">
             <Bot class="h-4 w-4 sm:h-5 sm:w-5" />
             <span class="font-semibold text-xs sm:text-sm">AI 요약 불가</span>
@@ -312,7 +312,7 @@
           </p>
         </div>
       {:else}
-        <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-2 sm:p-4 mb-3 sm:mb-8">
+        <div class="bg-blue-50 dark:bg-gray-800 rounded-lg p-2 sm:p-4 mb-2 sm:mb-4">
           <div class="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 text-blue-600 dark:text-blue-400">
             <Bot class="h-4 w-4 sm:h-5 sm:w-5" />
             <span class="font-semibold text-xs sm:text-sm">AI 요약</span>
@@ -326,27 +326,27 @@
         </div>
       {/if}
 
-      <div class="flex justify-center gap-2 sm:gap-4 pt-4 sm:pt-8">
+      <div class="flex justify-center items-center gap-2 sm:gap-4">
         <button
           on:click={handleBackClick}
-          class="px-3 py-2 sm:px-6 sm:py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
+          class="px-3 py-2 sm:px-4 sm:py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-sm min-w-[110px]"
         >
-          <Undo2 class="h-4 w-4 sm:h-5 sm:w-5" />
-          <span>목록으로</span>
+          <Undo2 class="mr-1.5 h-4 w-4" />
+          <span>뒤로가기</span>
         </button>
         <button
           on:click={handleShareClick}
-          class="px-3 py-2 sm:px-6 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
+          class="px-3 py-2 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-sm min-w-[110px]"
         >
-          <Share2 class="h-4 w-4 sm:h-5 sm:w-5" />
+          <Share2 class="mr-1.5 h-4 w-4" />
           <span>공유하기</span>
         </button>
         <button
           on:click={handleOriginalPostClick}
-          class="px-3 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
+          class="px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-sm min-w-[110px]"
         >
+          <ExternalLink class="mr-1.5 h-4 w-4" />
           <span>원문 보기</span>
-          <ExternalLink class="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
       </div>
     </article>
