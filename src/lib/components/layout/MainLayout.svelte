@@ -42,22 +42,6 @@
 </script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
-  <!-- 왼쪽 광고 영역 - 데스크톱에서만 표시 (lg 이상) -->
-  <div class="hidden lg:block fixed left-0 top-0 h-full z-10 ml-4">
-    <div class="sticky top-6 flex h-screen items-center">
-      <div class="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-md">
-        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 text-center">광고</div>
-        <!-- 왼쪽 사이드 광고 -->
-        <ins class="adsbygoogle"
-            style="display:block; width:160px; height:600px;"
-            data-ad-client="ca-pub-2560054260004649"
-            data-ad-slot="3835436676"
-            data-ad-format="auto"
-            data-full-width-responsive="false"></ins>
-      </div>
-    </div>
-  </div>
-
   <div class="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
     {#if showLogo}
       <div class="mb-4 sm:mb-8">
@@ -80,6 +64,20 @@
           {onReset}
         />
       {/if}
+    </div>
+  </div>
+  
+  <!-- 왼쪽 광고 영역 - 데스크톱에서만 표시 (lg 이상) -->
+  <div class="hidden lg:block absolute top-4 ml-4">
+    <div class="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-md">
+      <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 text-center">광고</div>
+      <!-- 왼쪽 사이드 광고 -->
+      <ins class="adsbygoogle"
+          style="display:block; width:160px; height:600px;"
+          data-ad-client="ca-pub-2560054260004649"
+          data-ad-slot="3835436676"
+          data-ad-format="auto"
+          data-full-width-responsive="false"></ins>
     </div>
   </div>
 </div>
