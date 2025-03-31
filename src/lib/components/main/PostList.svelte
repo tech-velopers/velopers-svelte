@@ -27,6 +27,9 @@
     "개발자의 생산성을 높여주는 추천 아이템"
   ];
   
+  // 쿠팡 파트너스 광고 ID 목록
+  const adId = "849051"
+  
   // 랜덤 광고 타이틀을 가져오는 함수
   function getRandomAdTitle() {
     const randomIndex = Math.floor(Math.random() * adTitles.length);
@@ -35,10 +38,38 @@
   
   // 컴포넌트가 마운트될 때 랜덤 인덱스 설정
   onMount(() => {
-    // 첫 번째 광고는 1~3 인덱스 중 랜덤
-    firstAdIndex = Math.floor(Math.random() * 3) + 1;
-    // 두 번째 광고는 6~8 인덱스 중 랜덤
-    secondAdIndex = Math.floor(Math.random() * 3) + 6;
+    // 현재 시간을 기준으로 5분 간격으로 일정한 랜덤값 생성
+    const timeBasedRandom = () => {
+      const now = new Date();
+      // 현재 시간을 5분 단위로 나누어 시드값 생성 (300000ms = 5분)
+      const timeSlot = Math.floor(now.getTime() / 300000);
+      
+      // 시드값을 기반으로 0과 1 사이의 결정적인 난수 생성
+      const seededRandom = (seed: number) => {
+        // 간단한 시드 기반 난수 생성기
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+      };
+      
+      // 시드값으로 첫 번째와 두 번째 광고 위치 결정
+      firstAdIndex = Math.floor(seededRandom(timeSlot) * 3) + 1;
+      secondAdIndex = Math.floor(seededRandom(timeSlot + 1) * 3) + 6;
+    };
+    
+    // 초기 위치 설정
+    timeBasedRandom();
+    
+    // 매 분마다 체크하여 5분이 지났는지 확인
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      // 현재 분이 5로 나누어 떨어지면 광고 위치 업데이트
+      if (now.getMinutes() % 5 === 0 && now.getSeconds() === 0) {
+        timeBasedRandom();
+      }
+    }, 1000);
+    
+    // 컴포넌트 언마운트 시 인터벌 정리
+    return () => clearInterval(intervalId);
   });
 
   function handleAdClick(position: number) {
@@ -127,11 +158,15 @@
               </div>
             </div>
             <div class="w-16 sm:w-24 md:w-28 lg:w-36 h-16 sm:h-24 md:h-28 lg:h-36 flex-shrink-0 rounded-lg overflow-hidden relative">
-              <img 
-                src="https://ads-partners.coupang.com/banners/849057?subId=&traceId=V0-301-5f9bd61900e673c0-I849057&w=300&h=250" 
-                alt="광고 상품" 
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              />
+              <iframe 
+                src={`https://ads-partners.coupang.com/widgets.html?id=${adId}&template=carousel&trackingCode=AF6109504&subId=&width=300&height=300&tsource=`}
+                width="100%" 
+                height="100%" 
+                frameborder="0" 
+                scrolling="no" 
+                referrerpolicy="unsafe-url"
+                title="쿠팡 파트너스 광고"
+              ></iframe>
             </div>
           </div>
         </a>
