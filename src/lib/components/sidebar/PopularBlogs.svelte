@@ -154,7 +154,7 @@
       class="flex-1 h-8 text-sm bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800 dark:bg-blue-950/30 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-950/50"
       on:click={() => addGroupBlogs(nekarakuCompanies)}
     >
-      네카라쿠배
+      네카라쿠배당토
     </Button>
   </div>
   

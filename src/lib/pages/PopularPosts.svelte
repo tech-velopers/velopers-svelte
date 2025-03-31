@@ -197,7 +197,11 @@
           </div>
           <div class="flex-1">
             <PostCard 
-              post={{...post, imageUrl: post.imageUrl || ''}} 
+              post={{
+                ...post, 
+                imageUrl: post.imageUrl || '',
+                createdAt: new Date(post.createdAt[0], post.createdAt[1]-1, post.createdAt[2]).toISOString()
+              }} 
               toggleTag={handleToggleTag} 
               toggleBlog={toggleBlog} 
               {loadedImages} 
