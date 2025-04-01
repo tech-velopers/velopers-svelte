@@ -10,6 +10,7 @@
   import logger from '$lib/utils/ActivityLogger';
   import { Button } from "$lib/components/ui/button";
   import { cn } from "$lib/utils.js";
+  import { formatDate, dateArrayToISOString } from '$lib/utils/dateUtils';
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
 
@@ -80,16 +81,6 @@
     if (postId) {
       fetchPost(postId);
     }
-  }
-
-  function formatDate(dateArray: number[]): string {
-    const [year, month, day, hour, minute, second] = dateArray;
-    const date = new Date(year, month - 1, day, hour, minute, second);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
 
   function handleOriginalPostClick() {
@@ -182,10 +173,7 @@
     <meta name="url" property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
     <meta name="site_name" property="og:site_name" content="Velopers" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="article:published_time" content={(() => {
-      const [year, month, day, hour, minute, second] = post.createdAt;
-      return new Date(year, month - 1, day, hour, minute, second).toISOString();
-    })()} />
+    <meta property="article:published_time" content={dateArrayToISOString(post.createdAt)} />
     <meta property="article:section" content={post.category || '기술 블로그'} />
     <meta property="article:publisher" content="https://www.velopers.kr" />
     <meta property="article:author" content={post.techBlogName} />

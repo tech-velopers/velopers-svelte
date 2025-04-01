@@ -19,6 +19,7 @@
   import { Input } from "$lib/components/ui/input";
   import * as Hangul from 'hangul-js';
   import logger from '$lib/utils/ActivityLogger';
+  import { formatRelativeDate, isRecentlyUpdated } from '$lib/utils/dateUtils';
 
   let blogs: TechBlog[] = [];
   let isLoading = true;
@@ -213,48 +214,6 @@
     toggleBlog({ name: blog.techBlogName, avatar: blog.icon });
   }
 
-  // 날짜 포맷팅 함수 개선
-  function formatDate(dateArray?: number[]): string {
-    if (!dateArray) return '정보 없음';
-    
-    const [year, month, day, hour, minute, second] = dateArray;
-    const date = new Date(year, month - 1, day, hour, minute, second);
-    const now = new Date();
-    
-    // 오늘 날짜인 경우
-    if (date.toDateString() === now.toDateString()) {
-      return '오늘';
-    }
-    
-    // 어제 날짜인 경우
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    if (date.toDateString() === yesterday.toDateString()) {
-      return '어제';
-    }
-    
-    // 일주일 이내인 경우
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(now.getDate() - 7);
-    if (date > oneWeekAgo) {
-      const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-      // 음수 일수가 나오는 경우 '오늘'로 표시
-      return diffDays < 0 ? '오늘' : `${diffDays}일 전`;
-    }
-    
-    // 한달 이내인 경우
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(now.getMonth() - 1);
-    if (date > oneMonthAgo) {
-      const diffWeeks = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 7));
-      // 음수 주수가 나오는 경우 '오늘'로 표시
-      return diffWeeks < 0 ? '오늘' : `${diffWeeks}주 전`;
-    }
-    
-    // 그 외의 경우
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-  }
-
   // 날짜에 따른 클래스 결정 함수
   function getDateClass(dateArray?: number[]): string {
     if (!dateArray) return '';
@@ -326,20 +285,6 @@
 
   function handleReset() {
     resetSelected();
-  }
-
-  // 최근 업데이트 여부 확인 함수
-  function isRecentlyUpdated(dateArray?: number[]): boolean {
-    if (!dateArray) return false;
-    
-    const [year, month, day, hour, minute, second] = dateArray;
-    const date = new Date(year, month - 1, day, hour, minute, second);
-    const now = new Date();
-    
-    // 2일 이내인 경우
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(now.getDate() - 2);
-    return date > twoDaysAgo;
   }
 </script>
 
@@ -468,7 +413,7 @@
                 <div class="flex items-center mt-1">
                   <span class="text-xs text-gray-500 dark:text-gray-400">마지막 업데이트:</span>
                   <span class="text-xs ml-1 {getDateClass(blog.lastCreatedAt)}">
-                    {formatDate(blog.lastCreatedAt)}
+                    {formatRelativeDate(blog.lastCreatedAt)}
                   </span>
                 </div>
               </div>

@@ -11,6 +11,7 @@
   import { Button } from "$lib/components/ui/button";
   import logger from '$lib/utils/ActivityLogger';
   import BlogHoverCard from "$lib/components/sidebar/BlogHoverCard.svelte";
+  import { formatDate } from '$lib/utils/dateUtils';
 
 
   export let post: {
@@ -46,17 +47,6 @@
     ...blogInfo,
     name: post.techBlogName
   };
-
-  // 날짜 포맷팅 함수
-  function formatDate(dateArray: number[]): string {
-    const [year, month, day, hour, minute, second] = dateArray;
-    const date = new Date(year, month - 1, day, hour, minute, second);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
 
   onMount(() => {
     if (post.imageUrl && loadedImages.has(post.imageUrl)) {

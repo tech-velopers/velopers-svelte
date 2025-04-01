@@ -12,6 +12,8 @@
   import Pagination from "$lib/components/main/Pagination.svelte";
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
+  import { formatDate, formatDateString } from '$lib/utils/dateUtils';
+  import logger from '$lib/utils/ActivityLogger';
 
   let blog: TechBlog | null = null;
   let blogPosts: any[] = [];
@@ -24,6 +26,23 @@
   let totalPages = 1;
   let blogId: number | null = null;
   let techBlogsLoaded = false;
+  
+  // 날짜 포맷 헬퍼 함수
+  function formatBlogDate(dateValue: string | number[]): string {
+    if (typeof dateValue === 'string') {
+      return formatDateString(dateValue);
+    } else if (Array.isArray(dateValue)) {
+      return formatDate(dateValue);
+    }
+    return '정보 없음';
+  }
+  
+  // 날짜 배열을 ISO 문자열로 변환
+  function dateArrayToISOString(dateArray: number[]): string {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
+    const date = new Date(year, month - 1, day, hour, minute, second);
+    return date.toISOString();
+  }
   
   // URL에서 블로그 ID 가져오기
   $: {
@@ -73,6 +92,19 @@
         
         // 데이터 로드 완료 표시
         techBlogsLoaded = true;
+
+        // 페이지 조회 로깅
+        if (blog) {
+          logger.logActivity({
+            activityType: 'VIEW',
+            targetType: 'BLOG_DETAIL',
+            targetId: blog.id,
+            extraData: {
+              blogName: blog.techBlogName,
+              from: 'blog_detail'
+            }
+          });
+        }
       } catch (e) {
         console.error('데이터 로드 오류:', e);
         error = e instanceof Error ? e.message : '데이터를 불러오는데 실패했습니다.';
@@ -84,6 +116,18 @@
     
     const handlePopState = () => {
       console.log('popstate 이벤트 발생');
+      if (blog) {
+        logger.logActivity({
+          activityType: 'NAVIGATE',
+          targetType: 'BLOG_DETAIL',
+          targetId: blog.id,
+          extraData: { 
+            action: 'popstate',
+            blogName: blog.techBlogName,
+            from: 'blog_detail'
+          }
+        });
+      }
     };
     
     window.addEventListener('popstate', handlePopState);
@@ -161,6 +205,17 @@
   // 페이지 변경 함수
   function goToPage(page: number) {
     if (blog) {
+      logger.logActivity({
+        activityType: 'CLICK',
+        targetType: 'PAGINATION',
+        targetId: blog.id,
+        extraData: {
+          blogName: blog.techBlogName,
+          previousPage: currentPage,
+          newPage: page,
+          from: 'blog_detail'
+        }
+      });
       fetchBlogPosts(blog.techBlogName, page);
       window.scrollTo({
         top: 0,
@@ -184,13 +239,32 @@
 
   // 뒤로가기 함수
   function handleBackClick() {
-    // 브라우저의 뒤로가기 사용
+    if (blog) {
+      logger.logActivity({
+        activityType: 'CLICK',
+        targetType: 'BACK_BUTTON',
+        targetId: blog.id,
+        extraData: {
+          blogName: blog.techBlogName,
+          from: 'blog_detail'
+        }
+      });
+    }
     window.history.back();
   }
 
   // 공유 기능
   function handleShareClick() {
     if (blog) {
+      logger.logActivity({
+        activityType: 'CLICK',
+        targetType: 'SHARE_BUTTON',
+        targetId: blog.id,
+        extraData: {
+          blogName: blog.techBlogName,
+          from: 'blog_detail'
+        }
+      });
       const shareUrl = `${window.location.origin}/blog/${blog.id}`;
       navigator.clipboard.writeText(shareUrl)
         .then(() => {
@@ -211,6 +285,16 @@
   // 블로그 URL 열기
   function openBlogUrl() {
     if (blog?.baseUrl) {
+      logger.logActivity({
+        activityType: 'CLICK',
+        targetType: 'BLOG_VISIT',
+        targetId: blog.id,
+        extraData: {
+          blogName: blog.techBlogName,
+          url: blog.baseUrl,
+          from: 'blog_detail'
+        }
+      });
       window.open(blog.baseUrl, '_blank', 'noopener,noreferrer');
     }
   }
@@ -218,20 +302,17 @@
   // 채용정보 페이지 열기
   function openJobInfo() {
     if (blog?.techBlogName) {
+      logger.logActivity({
+        activityType: 'CLICK',
+        targetType: 'JOB_INFO',
+        targetId: blog.id,
+        extraData: {
+          blogName: blog.techBlogName,
+          from: 'blog_detail'
+        }
+      });
       window.open(`https://www.jobkorea.co.kr/Search/?stext=${encodeURIComponent(blog.techBlogName)}`, '_blank', 'noopener,noreferrer');
     }
-  }
-
-  // 날짜 포맷팅 함수
-  function formatDate(dateString?: string): string {
-    if (!dateString) return '정보 없음';
-    
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
 
   // 검색 관련 함수들 (MainLayout에 필요)
@@ -251,8 +332,8 @@
     <meta name="site_name" property="og:site_name" content="Velopers" />
     <meta property="og:locale" content="ko_KR" />
     {#if blog.lastCreatedAt}
-      <meta property="article:published_time" content={blog.lastCreatedAt} />
-      <meta property="article:modified_time" content={blog.lastCreatedAt} />
+      <meta property="article:published_time" content={typeof blog.lastCreatedAt === 'string' ? blog.lastCreatedAt : dateArrayToISOString(blog.lastCreatedAt)} />
+      <meta property="article:modified_time" content={typeof blog.lastCreatedAt === 'string' ? blog.lastCreatedAt : dateArrayToISOString(blog.lastCreatedAt)} />
     {/if}
     <meta property="article:section" content="기술 블로그" />
     <meta property="article:publisher" content="https://www.velopers.kr" />
@@ -313,7 +394,7 @@
                 {#if blog.lastCreatedAt}
                   <div class="flex items-center text-gray-600 dark:text-gray-300">
                     <Calendar class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" />
-                    <span class="text-sm md:text-base">마지막 업데이트: {formatDate(blog.lastCreatedAt)}</span>
+                    <span class="text-sm md:text-base">마지막 업데이트: {formatBlogDate(blog.lastCreatedAt)}</span>
                   </div>
                 {/if}
               </div>

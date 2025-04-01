@@ -9,6 +9,7 @@
   import * as Avatar from "$lib/components/ui/avatar";
   import { cn } from "$lib/utils.js";
   import logger from '$lib/utils/ActivityLogger';
+  import { formatDateString } from '$lib/utils/dateUtils';
 
   type WeeklyPost = {
     id: number;
@@ -71,18 +72,6 @@
       
       navigate(`/blog/${blogInfo.id}`);
     }
-  }
-
-  // 날짜 포맷팅 함수
-  function formatDate(dateString: string): string {
-    if (!dateString) return '정보 없음';
-    
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   }
 </script>
 
