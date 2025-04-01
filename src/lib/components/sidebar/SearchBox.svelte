@@ -53,11 +53,9 @@
     }
   }
 
-  // 검색어가 변경되면 inputQuery 업데이트 (빈 문자열일 때도 업데이트)
-  $: {
-    if ($searchQuery !== inputQuery && $searchQuery) {
-      inputQuery = $searchQuery;
-    }
+  // searchQuery 스토어가 변경될 때만 inputQuery 업데이트
+  $: if ($searchQuery !== undefined) {
+    inputQuery = $searchQuery;
   }
 </script>
 
