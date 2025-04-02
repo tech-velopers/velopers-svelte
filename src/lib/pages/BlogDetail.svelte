@@ -92,19 +92,6 @@
         
         // 데이터 로드 완료 표시
         techBlogsLoaded = true;
-
-        // 페이지 조회 로깅
-        if (blog) {
-          logger.logActivity({
-            activityType: 'VIEW',
-            targetType: 'BLOG_DETAIL',
-            targetId: blog.id,
-            extraData: {
-              blogName: blog.techBlogName,
-              from: 'blog_detail'
-            }
-          });
-        }
       } catch (e) {
         console.error('데이터 로드 오류:', e);
         error = e instanceof Error ? e.message : '데이터를 불러오는데 실패했습니다.';
@@ -150,6 +137,8 @@
       
       if (foundBlog) {
         blog = foundBlog;
+        // 블로그 데이터가 로드된 후 페이지 뷰 로깅
+        logger.logPageView('BLOG_DETAIL', foundBlog.id);
         fetchBlogPosts(foundBlog.techBlogName, currentPage);
         window.scrollTo({ 
           top: 0, 
