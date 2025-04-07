@@ -12,6 +12,7 @@
   import Post from "$lib/pages/Post.svelte";
   import BlogDetail from "$lib/pages/BlogDetail.svelte";
   import Changelog from "$lib/pages/Changelog.svelte";
+  import Quiz from "$lib/pages/Quiz.svelte";
   import { Toaster } from "$lib/components/ui/sonner";
 
   // 다크모드 상태 관리
@@ -62,6 +63,8 @@
       <PopularPosts />
     {:else if $currentPath === '/changelog'}
       <Changelog />
+    {:else if $currentPath === '/quiz'}
+      <Quiz />
     {:else if $currentPath.startsWith('/post/')}
       <Post />
     {:else if $currentPath.startsWith('/blog/')}
@@ -71,6 +74,8 @@
     {/if}
   </main>
 
-  <Footer />
+  {#if $currentPath !== '/quiz'}
+    <Footer />
+  {/if}
   <Toaster />
 </div>

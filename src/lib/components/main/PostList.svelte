@@ -4,6 +4,8 @@
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import logger from '$lib/utils/ActivityLogger';
   import { onMount } from 'svelte';
+  import { Button } from "$lib/components/ui/button";
+  import { cn } from "$lib/utils";
 
   export let posts: any[];
   export let currentPage: number;
@@ -20,9 +22,9 @@
   
   // 광고 타이틀 목록
   const adTitles = [
-    "개발자가 관심있어하는 상품은 뭘까?",
+    "LLM 사용비라도 모으고 싶어요 😭",
     "개발자를 위한 최고의 업무 환경 구축하기",
-    "코딩에 집중하기 위한 필수 아이템 모음",
+    "서버 비용이라도 모으고 싶어요 😭",
     "프로그래머가 애용하는 인기 제품이 뭐야?",
     "개발자의 생산성을 높여주는 추천 아이템"
   ];
@@ -42,7 +44,7 @@
     const timeBasedRandom = () => {
       const now = new Date();
       // 현재 시간을 5분 단위로 나누어 시드값 생성 (300000ms = 5분)
-      const timeSlot = Math.floor(now.getTime() / 1800000);
+      const timeSlot = Math.floor(now.getTime() / 600000);
       
       // 시드값을 기반으로 0과 1 사이의 결정적인 난수 생성
       const seededRandom = (seed: number) => {
@@ -121,43 +123,50 @@
           class="block w-full cursor-pointer"
           on:click={() => handleAdClick(index + 1)}
         >
-          <div 
-            class="bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-row gap-4 md:gap-4 lg:gap-6 dark:ring-1 dark:ring-gray-800 group"
+          <article 
+            class="bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-row flex-wrap sm:flex-nowrap gap-4 md:gap-4 lg:gap-6 dark:ring-1 dark:ring-gray-800 group"
           >
             <div class="flex-1 flex flex-col">
               <div class="flex-grow">
-                <h2 class="text-sm sm:text-base md:text-lg font-semibold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300">
+                <h2 class="text-sm sm:text-base md:text-lg font-semibold mb-2 text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors duration-300">
                   {getRandomAdTitle()}
                 </h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-3 text-xs sm:text-sm">
+                <p class="text-gray-600 dark:text-gray-300 mb-0 sm:mb-3 text-xs sm:text-sm">
                   이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
                 </p>
               </div>
               
-              <div class="mt-auto space-y-3">
+              <div class="mt-auto space-y-3 hidden sm:block">
                 <div class="flex flex-wrap gap-1 sm:gap-1.5">
                   {#each ["AD", "개발자", "노트북", "컴퓨터", "쿠팡"] as tag}
-                    <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-xs md:text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      class={cn(
+                        "px-3 py-[0.3rem] h-auto font-normal text-sm transition-all",
+                        "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
+                      )}
+                    >
                       {tag}
-                    </span>
+                    </Button>
                   {/each}
                 </div>
 
                 <div class="flex items-center text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                  <div class="flex items-center">
+                  <div class="flex items-center hover:text-blue-500 transition-colors">
                     <img 
                       src="https://api.dicebear.com/7.x/initials/svg?seed=AD" 
                       alt="광고" 
                       class="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 rounded-full"
                     />
-                    <span class="font-medium ml-1.5 sm:ml-2 text-xs sm:text-sm">velopers 광고</span>
+                    <span class="font-medium ml-1.5 sm:ml-2 text-xs sm:text-sm">velopers</span>
                   </div>
                   <span class="mx-1.5 sm:mx-2">•</span>
                   <span>{new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                 </div>
               </div>
             </div>
-            <div class="w-16 sm:w-24 md:w-28 lg:w-36 h-16 sm:h-24 md:h-28 lg:h-36 flex-shrink-0 rounded-lg overflow-hidden relative">
+            <div class="w-16 sm:w-24 md:w-28 lg:w-36 h-16 sm:h-24 md:h-28 lg:h-36 flex-shrink-0 rounded-lg overflow-hidden relative group">
               <iframe 
                 src={`https://ads-partners.coupang.com/widgets.html?id=${adId}&template=carousel&trackingCode=AF6109504&subId=&width=300&height=300&tsource=`}
                 width="100%" 
@@ -167,8 +176,40 @@
                 referrerpolicy="unsafe-url"
                 title="쿠팡 파트너스 광고"
               ></iframe>
+              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
             </div>
-          </div>
+            
+            <!-- 모바일에서만 보이는 태그와 메타 정보 영역 -->
+            <div class="w-full order-2 -mt-0.5 hidden max-sm:block">
+              <div class="flex flex-wrap gap-1 mb-2">
+                {#each ["AD", "개발자", "노트북", "컴퓨터", "쿠팡"] as tag}
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    class={cn(
+                      "px-3 py-[0.3rem] h-auto font-normal text-xs transition-all",
+                      "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
+                    )}
+                  >
+                    {tag}
+                  </Button>
+                {/each}
+              </div>
+
+              <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex items-center hover:text-blue-500 transition-colors">
+                  <img 
+                    src="https://api.dicebear.com/7.x/initials/svg?seed=AD" 
+                    alt="광고" 
+                    class="w-4 h-4 rounded-full"
+                  />
+                  <span class="font-medium ml-1.5 text-xs">velopers 광고</span>
+                </div>
+                <span class="mx-1.5">•</span>
+                <span>{new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </div>
+            </div>
+          </article>
         </a>
       {/if}
     {/each}
