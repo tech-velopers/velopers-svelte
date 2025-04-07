@@ -117,4 +117,44 @@ export function dateArrayToISOString(dateArray: number[]): string {
   const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
   const date = new Date(year, month - 1, day, hour, minute, second);
   return date.toISOString();
+}
+
+/**
+ * 두 날짜 배열을 비교하는 함수
+ * 
+ * @param dateArrayA 첫 번째 날짜 배열 [year, month, day, hour, minute, second?]
+ * @param dateArrayB 두 번째 날짜 배열 [year, month, day, hour, minute, second?]
+ * @param ascending 오름차순 정렬 여부 (기본값: false, 내림차순)
+ * @returns 비교 결과 (양수: B가 더 최근, 음수: A가 더 최근, 0: 동일)
+ */
+export function compareDateArrays(dateArrayA?: number[], dateArrayB?: number[], ascending: boolean = false): number {
+  // dateArray가 없는 경우 처리
+  if (!dateArrayA) return ascending ? -1 : 1;
+  if (!dateArrayB) return ascending ? 1 : -1;
+  
+  try {
+    // 날짜 객체 생성 (기본값 처리)
+    const [yearA = 1970, monthA = 1, dayA = 1, hourA = 0, minuteA = 0, secondA = 0] = dateArrayA;
+    const [yearB = 1970, monthB = 1, dayB = 1, hourB = 0, minuteB = 0, secondB = 0] = dateArrayB;
+    
+    // 유효한 날짜인지 검증
+    if (isNaN(yearA) || isNaN(monthA) || isNaN(dayA)) return ascending ? -1 : 1;
+    if (isNaN(yearB) || isNaN(monthB) || isNaN(dayB)) return ascending ? 1 : -1;
+    
+    // JavaScript에서는 월이 0부터 시작하므로 -1 처리
+    const dateA = new Date(yearA, monthA - 1, dayA, hourA, minuteA, secondA);
+    const dateB = new Date(yearB, monthB - 1, dayB, hourB, minuteB, secondB);
+    
+    // 날짜가 유효하지 않은 경우 처리
+    if (isNaN(dateA.getTime())) return ascending ? -1 : 1;
+    if (isNaN(dateB.getTime())) return ascending ? 1 : -1;
+    
+    // 날짜 비교 (ascending이 true면 오름차순, false면 내림차순)
+    return ascending 
+      ? dateA.getTime() - dateB.getTime() 
+      : dateB.getTime() - dateA.getTime();
+  } catch (error) {
+    console.error("날짜 비교 오류:", error);
+    return 0; // 오류 발생 시 동일한 것으로 처리
+  }
 } 

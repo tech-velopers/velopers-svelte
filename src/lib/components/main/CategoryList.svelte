@@ -33,7 +33,7 @@
   });
 </script>
 
-<div class="space-y-2 mb-6">
+<div class="space-y-2 mb-2">
   <div class="flex overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-7 md:gap-2">
     {#each categories as category}
       <Button

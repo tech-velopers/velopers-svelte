@@ -150,12 +150,12 @@
   class="w-full text-left cursor-pointer">
   <article 
     class={cn(
-      "bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300",
+      "bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300",
       "flex flex-row flex-wrap sm:flex-nowrap gap-4 md:gap-4 lg:gap-6",
       "dark:ring-1 dark:ring-gray-800 group",
       isVisited 
         ? "bg-[#f3f4f6] dark:bg-[#1f2937]"
-        : "dark:ring-2"
+        : ""
     )}
   >
     <div class="flex-1 flex flex-col">
@@ -180,13 +180,13 @@
       </div>
       
       <div class="mt-auto space-y-3 hidden sm:block">
-        <div class="flex flex-wrap gap-1 sm:gap-1.5">
+        <div class="flex flex-wrap gap-1.5">
           {#each post.tags as tag}
             <Button 
               variant={isTagSelected(tag) ? "default" : "outline"}
               size="sm"
               class={cn(
-                "px-3 py-[0.3rem] h-auto font-normal text-sm transition-all",
+                "px-3 py-[0.3rem] h-auto font-normal text-sm transition-colors border",
                 isTagSelected(tag) 
                   ? "bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
                   : isVisited 
@@ -261,13 +261,13 @@
     
     <!-- 모바일에서만 보이는 태그와 메타 정보 영역 -->
     <div class="w-full order-2 -mt-0.5 hidden max-sm:block">
-      <div class="flex flex-wrap gap-1 mb-2">
+      <div class="flex flex-wrap gap-1.5 mb-2">
         {#each post.tags as tag}
           <Button 
             variant={isTagSelected(tag) ? "default" : "outline"}
             size="sm"
             class={cn(
-              "px-3 py-[0.3rem] h-auto font-normal text-xs transition-all",
+              "px-3 py-[0.3rem] h-auto font-normal text-xs transition-colors border",
               isTagSelected(tag) 
                 ? "bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
                 : isVisited 

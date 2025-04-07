@@ -200,7 +200,7 @@
               post={{
                 ...post, 
                 imageUrl: post.imageUrl || '',
-                createdAt: new Date(post.createdAt[0], post.createdAt[1]-1, post.createdAt[2]).toISOString()
+                createdAt: post.createdAt
               }} 
               toggleTag={handleToggleTag} 
               toggleBlog={toggleBlog} 

@@ -5,7 +5,7 @@
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
-  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase } from 'lucide-svelte';
+  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase, Grid2x2 } from 'lucide-svelte';
   import { toast } from "svelte-sonner";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import PostCard from "$lib/components/main/PostCard.svelte";
@@ -304,6 +304,22 @@
     }
   }
 
+  // 모든 블로그 페이지로 이동하는 함수
+  function navigateToAllBlogs() {
+    if (blog) {
+      logger.logActivity({
+        activityType: 'CLICK',
+        targetType: 'ALL_BLOGS_BUTTON',
+        targetId: blog.id,
+        extraData: {
+          blogName: blog.techBlogName,
+          from: 'blog_detail'
+        }
+      });
+    }
+    navigate('/all-blogs');
+  }
+
   // 검색 관련 함수들 (MainLayout에 필요)
   const searchWithSelected = () => {};
   const onSearch = () => {};
@@ -356,60 +372,66 @@
   {:else if blog}
     <div class="max-w-4xl mx-auto p-2 sm:p-4 space-y-4 sm:space-y-8">
       <!-- 블로그 헤더 섹션 -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
-        <div class="p-4 md:p-6">
+      <div class="bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
+        <div class="p-1 md:p-2">
           <div class="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
             <!-- 블로그 아이콘 -->
-            <div class="w-20 h-20 md:w-32 md:h-32 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm">
+            <div class="w-20 h-20 md:w-28 md:h-28 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm">
               <img 
                 src={`/icons/${blog?.icon}`} 
                 alt={blog?.techBlogName}
                 class="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
               />
             </div>
             
             <!-- 블로그 정보 -->
             <div class="flex-1">
-              <h1 class="text-xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-2">
                 {blog.techBlogName}
               </h1>
               
-              <div class="flex flex-wrap gap-2 md:gap-3 mt-2 md:mt-4">
-                <div class="flex items-center text-gray-600 dark:text-gray-300">
+              <div class="flex flex-wrap gap-2 md:gap-3 mt-2 md:mt-3">
+                <div class="flex items-center text-gray-500 dark:text-gray-400">
                   <FileText class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" />
-                  <span class="text-sm md:text-base">게시글 {blog.postCnt}개</span>
+                  <span class="text-xs md:text-sm">게시글 {blog.postCnt}개</span>
                 </div>
                 
                 {#if blog.lastCreatedAt}
-                  <div class="flex items-center text-gray-600 dark:text-gray-300">
+                  <div class="flex items-center text-gray-500 dark:text-gray-400">
                     <Calendar class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" />
-                    <span class="text-sm md:text-base">마지막 업데이트: {formatBlogDate(blog.lastCreatedAt)}</span>
+                    <span class="text-xs md:text-sm">마지막 업데이트: {formatBlogDate(blog.lastCreatedAt)}</span>
                   </div>
                 {/if}
               </div>
               
-              <div class="mt-3 md:mt-6 flex flex-nowrap gap-1 md:gap-3">
+              <div class="mt-3 md:mt-5 flex flex-nowrap gap-2 md:gap-3">
                 <button 
-                  class="px-2 py-1.5 md:px-3 md:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-xs md:text-sm whitespace-nowrap flex-1"
+                  class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors duration-300 flex items-center justify-center text-xs md:text-sm whitespace-nowrap border border-blue-500 hover:border-blue-600 flex-1"
                   on:click={openBlogUrl}
+                  tabindex="0"
                 >
-                  <ExternalLink class="mr-1 md:mr-1.5 h-3.5 md:h-4 w-3.5 md:w-4" />
+                  <ExternalLink class="mr-1.5 h-4 w-4" />
                   <span>블로그 방문</span>
                 </button>
                 
                 <button 
-                  class="px-2 py-1.5 md:px-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-xs md:text-sm whitespace-nowrap flex-1"
+                  class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors duration-300 flex items-center justify-center text-xs md:text-sm whitespace-nowrap border border-blue-500 hover:border-blue-600 flex-1"
                   on:click={handleShareClick}
+                  tabindex="0"
                 >
-                  <Share2 class="mr-1 md:mr-1.5 h-3.5 md:h-4 w-3.5 md:w-4" />
+                  <Share2 class="mr-1.5 h-4 w-4" />
                   <span>공유하기</span>
                 </button>
                 
                 <button 
-                  class="px-2 py-1.5 md:px-3 md:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center text-xs md:text-sm whitespace-nowrap flex-1"
+                  class="px-3 py-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800 rounded-md transition-colors duration-300 flex items-center justify-center text-xs md:text-sm whitespace-nowrap border border-gray-300 dark:border-gray-700 flex-1 text-gray-600 dark:text-gray-300"
                   on:click={openJobInfo}
+                  tabindex="0"
                 >
-                  <Briefcase class="mr-1 md:mr-1.5 h-3.5 md:h-4 w-3.5 md:w-4" />
+                  <Briefcase class="mr-1.5 h-4 w-4" />
                   <span>채용정보</span>
                 </button>
               </div>
@@ -421,17 +443,29 @@
       <!-- 블로그 게시글 섹션 -->
       <div class="space-y-3 md:space-y-4">
         <div class="flex justify-between items-center">
-          <h2 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+          <h2 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
             최근 게시글 ({blog?.postCnt ?? 0}개)
           </h2>
           
-          <button 
-            on:click={handleBackClick}
-            class="px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center text-sm min-w-[110px]"
-          >
-            <Undo2 class="h-4 w-4 mr-1.5" />
-            <span>뒤로 가기</span>
-          </button>
+          <div class="flex gap-2">
+            <button 
+              on:click={navigateToAllBlogs}
+              class="px-3 py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-md hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800 transition-colors duration-300 flex items-center justify-center text-sm"
+              tabindex="0"
+            >
+              <Grid2x2 class="h-4 w-4 mr-1.5" />
+              <span>모든 블로그</span>
+            </button>
+            
+            <button 
+              on:click={handleBackClick}
+              class="px-3 py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-md hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800 transition-colors duration-300 flex items-center justify-center text-sm"
+              tabindex="0"
+            >
+              <Undo2 class="h-4 w-4 mr-1.5" />
+              <span>뒤로 가기</span>
+            </button>
+          </div>
         </div>
         
         {#if postsLoading}
@@ -441,8 +475,8 @@
             {/each}
           </div>
         {:else if blogPosts.length === 0}
-          <div class="bg-yellow-50 dark:bg-gray-800 border border-yellow-200 dark:border-gray-700 rounded-lg p-6">
-            <p class="text-yellow-700 dark:text-yellow-400">
+          <div class="bg-card p-3 sm:p-4 md:p-5 border shadow-sm rounded-lg dark:ring-1 dark:ring-gray-800 text-center">
+            <p class="text-gray-600 dark:text-gray-300">
               이 블로그에 등록된 게시글이 없습니다.
             </p>
           </div>
@@ -471,7 +505,3 @@
     </div>
   {/if}
 </MainLayout>
-
-<style>
-  /* 추가 스타일링이 필요한 경우 여기에 작성 */
-</style> 

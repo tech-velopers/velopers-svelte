@@ -19,7 +19,7 @@
   import { Input } from "$lib/components/ui/input";
   import * as Hangul from 'hangul-js';
   import logger from '$lib/utils/ActivityLogger';
-  import { formatRelativeDate, isRecentlyUpdated } from '$lib/utils/dateUtils';
+  import { formatRelativeDate, isRecentlyUpdated, dateArrayToISOString } from '$lib/utils/dateUtils';
 
   let blogs: TechBlog[] = [];
   let isLoading = true;
@@ -116,12 +116,12 @@
         if (!a.lastCreatedAt) return 1;
         if (!b.lastCreatedAt) return -1;
         
-        // 날짜 비교
-        const [yearA, monthA, dayA, hourA, minuteA, secondA] = a.lastCreatedAt;
-        const [yearB, monthB, dayB, hourB, minuteB, secondB] = b.lastCreatedAt;
-        const dateA = new Date(yearA, monthA - 1, dayA, hourA, minuteA, secondA);
-        const dateB = new Date(yearB, monthB - 1, dayB, hourB, minuteB, secondB);
-        return dateB.getTime() - dateA.getTime();
+        // dateUtils를 사용하여 날짜를 ISO 문자열로 변환 후 비교
+        const dateStrA = dateArrayToISOString(a.lastCreatedAt);
+        const dateStrB = dateArrayToISOString(b.lastCreatedAt);
+        
+        // ISO 문자열을 직접 비교 (사전식 비교가 날짜 순서와 일치)
+        return dateStrB.localeCompare(dateStrA);
       default:
         return 0;
     }
