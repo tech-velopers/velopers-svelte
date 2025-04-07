@@ -10,6 +10,20 @@
 
     <div class="flex gap-1.5 sm:gap-3">
       <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-04-07</p>
+      </div>
+      <Alert.Root class="flex-1">
+        <Alert.Title class="text-base sm:text-lg font-semibold">기능 추가 🎉</Alert.Title>
+        <Alert.Description>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            검색시 블로그명을 자동완성해줘요!
+          </p>
+        </Alert.Description>
+      </Alert.Root>
+    </div>
+
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
         <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-03-31</p>
       </div>
       <Alert.Root class="flex-1">
@@ -77,7 +91,6 @@
           <p class="mt-1 sm:mt-2 text-sm sm:text-base">
             주간 인기 게시글을 추가했어요! <br>
           </p>
-          <br>
         </Alert.Description>
       </Alert.Root>
     </div>
