@@ -355,16 +355,19 @@
         </div>
       </header>
 
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649" crossorigin="anonymous"></script>
-      <ins class="adsbygoogle"
-          style="display:block; text-align:center;"
-          data-ad-layout="in-article"
-          data-ad-format="fluid"
-          data-ad-client="ca-pub-2560054260004649"
-          data-ad-slot="4577187600"></ins>
-      <script>
-          (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
+      <!-- Ad Container -->
+      <div class="w-full max-h-48 overflow-hidden my-4 sm:my-5 md:my-6"> 
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle"
+            style="display:block; text-align:center;"
+            data-ad-layout="in-article"
+            data-ad-format="auto" 
+            data-ad-client="ca-pub-2560054260004649"
+            data-ad-slot="4577187600"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
 
       {#if !post.gptSummary || post.gptSummary.length <= 10}
         <div class="bg-card p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800 transition-all duration-300">
