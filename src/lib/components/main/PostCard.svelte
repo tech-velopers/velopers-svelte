@@ -216,6 +216,7 @@
                 <Avatar.Image 
                   src={`/icons/${blogInfo.icon}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`} 
                   alt={post.techBlogName} 
+                  loading="lazy"
                 />
               </Avatar.Root>
               <span 
@@ -297,6 +298,7 @@
               <Avatar.Image 
                 src={`/icons/${blogInfo.icon}` || `https://api.dicebear.com/7.x/initials/svg?seed=${post.techBlogName}`} 
                 alt={post.techBlogName} 
+                loading="lazy"
               />
             </Avatar.Root>
             <span 

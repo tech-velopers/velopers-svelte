@@ -6,6 +6,7 @@
   import { Button } from "$lib/components/ui/button";
   import { onMount } from 'svelte';
   import { formatDateString } from '$lib/utils/dateUtils';
+  import { Flame } from 'lucide-svelte';
 
   const categoryGroups = {
     "네이버 • 카카오": [
@@ -124,7 +125,10 @@
 
 <div class="bg-card text-card-foreground p-4 rounded-lg border shadow-sm">
   <div class="flex justify-between items-center mb-3">
-    <h3 class="text-base font-medium">인기 블로그</h3>
+    <h3 class="text-base font-medium flex items-center gap-1.5">
+      <Flame class="text-orange-500 dark:text-orange-400" size={18} />
+      <span>인기 블로그</span>
+    </h3>
     <Button 
       variant="ghost"
       size="sm"
