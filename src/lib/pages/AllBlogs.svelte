@@ -15,7 +15,7 @@
   import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
   import { cn } from "$lib/utils";
   import { tick } from "svelte";
-  import { Search, ExternalLink } from 'lucide-svelte';
+  import { Search, ExternalLink, FileText, Eye, Calendar } from 'lucide-svelte';
   import { Input } from "$lib/components/ui/input";
   import * as Hangul from 'hangul-js';
   import logger from '$lib/utils/ActivityLogger';
@@ -67,6 +67,8 @@
     { value: 'posts-desc', label: '게시글 많은순' },
     { value: 'posts-asc', label: '게시글 적은순' },
     { value: 'recent-update', label: '최근 추가된 순' },
+    { value: 'views-desc', label: '조회수 많은 순' },
+    { value: 'views-asc', label: '조회수 적은 순' },
   ];
 
   $: selectedValue = sortOptions.find((option) => option.value === sortOption)?.label ?? "정렬 방식 선택";
@@ -122,6 +124,10 @@
         
         // ISO 문자열을 직접 비교 (사전식 비교가 날짜 순서와 일치)
         return dateStrB.localeCompare(dateStrA);
+      case 'views-desc':
+        return b.totalPostViewCnt - a.totalPostViewCnt;
+      case 'views-asc':
+        return a.totalPostViewCnt - b.totalPostViewCnt;
       default:
         return 0;
     }
@@ -402,15 +408,21 @@
                   <ExternalLink class="h-3 w-3 ml-1 flex-shrink-0 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
                 </a>
               </div>
-              <div class="flex flex-col mt-2.5">
+              <div class="flex flex-col space-y-1 mt-2.5"> 
                 <div class="flex items-center">
-                  <span
-                    class="text-sm text-gray-500 dark:text-gray-400"
-                  >
+                  <FileText class="w-3 h-3 mr-1 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                  <span class="text-xs text-gray-500 dark:text-gray-400">
                     게시글 {blog.postCnt}개
                   </span>
                 </div>
+                <div class="flex items-center">
+                  <Eye class="w-3 h-3 mr-1 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                  <span class="text-xs text-gray-500 dark:text-gray-400">
+                    총 조회수 {blog.totalPostViewCnt.toLocaleString()}회
+                  </span>
+                </div>
                 <div class="flex items-center mt-1">
+                  <Calendar class="w-3 h-3 mr-1 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                   <span class="text-xs text-gray-500 dark:text-gray-400">마지막 업데이트:</span>
                   <span class="text-xs ml-1 {getDateClass(blog.lastCreatedAt)}">
                     {formatRelativeDate(blog.lastCreatedAt)}

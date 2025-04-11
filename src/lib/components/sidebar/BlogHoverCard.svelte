@@ -7,7 +7,7 @@
   import { Button } from "$lib/components/ui/button";
   import { Badge } from "$lib/components/ui/badge";
   import { cn } from "$lib/utils.js";
-  import { Check, ExternalLink } from 'lucide-svelte';
+  import { Check, ExternalLink, FileText, Eye } from 'lucide-svelte';
 
   // company 또는 blogInfo를 받을 수 있도록 수정
   export let company: {
@@ -19,6 +19,7 @@
     baseUrl?: string;
     id?: number;
     techBlogName?: string;
+    totalPostViewCnt?: number;
   };
 
   // 추가 옵션 Props
@@ -36,6 +37,7 @@
   $: blogUrl = company.url || company.baseUrl || '';
   $: blogId = company.id;
   $: postCount = company.postCnt || 0;
+  $: totalViewCount = company.totalPostViewCnt || 0;
 
   // 이벤트 핸들러
   function navigateToBlog(event: Event) {
@@ -105,9 +107,16 @@
         <div class="space-y-1 flex-1">
           <h4 class="text-sm font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{blogName}</h4>
           <p class="text-xs text-muted-foreground">기술 블로그</p>
-          <Badge variant="outline" class="text-[10px] px-1.5 py-0 h-4 font-normal">
-            포스트 {postCount}개
-          </Badge>
+          <div class="flex flex-col space-y-0.5 mt-1"> 
+            <div class="flex items-center">
+              <FileText class="w-3 h-3 mr-1 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+              <span class="text-xs text-muted-foreground">포스트 {postCount}개</span>
+            </div>
+            <div class="flex items-center">
+              <Eye class="w-3 h-3 mr-1 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+              <span class="text-xs text-muted-foreground">총 조회수 {totalViewCount.toLocaleString()}회</span>
+            </div>
+          </div>
         </div>
       </button>
       <div class="flex gap-2 mt-1">

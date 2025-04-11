@@ -5,7 +5,7 @@
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
-  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase, Grid2x2 } from 'lucide-svelte';
+  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase, Grid2x2, Eye } from 'lucide-svelte';
   import { toast } from "svelte-sonner";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import PostCard from "$lib/components/main/PostCard.svelte";
@@ -393,10 +393,15 @@
                 {blog.techBlogName}
               </h1>
               
-              <div class="flex flex-wrap gap-2 md:gap-3 mt-2 md:mt-3">
+              <div class="flex flex-col space-y-1 mt-2 md:mt-3">
                 <div class="flex items-center text-gray-500 dark:text-gray-400">
                   <FileText class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" />
                   <span class="text-xs md:text-sm">게시글 {blog.postCnt}개</span>
+                </div>
+                
+                <div class="flex items-center text-gray-500 dark:text-gray-400">
+                  <Eye class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" />
+                  <span class="text-xs md:text-sm">총 조회수 {blog.totalPostViewCnt.toLocaleString()}회</span>
                 </div>
                 
                 {#if blog.lastCreatedAt}
