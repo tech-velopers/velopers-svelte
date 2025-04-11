@@ -47,7 +47,7 @@
   };
 </script>
 
-<div class="min-h-screen bg-gray-50 dark:bg-black transition-colors">
+<div class="min-h-screen bg-gray-50 dark:bg-black transition-colors overflow-x-hidden">
   <Header {isDarkMode} {toggleDarkMode} />
 
   <main>
