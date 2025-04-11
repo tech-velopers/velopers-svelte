@@ -10,6 +10,30 @@
 
     <div class="flex gap-1.5 sm:gap-3">
       <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-04-08</p>
+      </div>
+      <Alert.Root class="flex-1">
+        <Alert.Title class="text-base sm:text-lg font-semibold">기능 추가 🎉</Alert.Title>
+        <Alert.Description>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            - 블로그별 총 게시글 조회수 표시 기능을 추가했어요. (전체 블로그, 상세 페이지, 호버 카드)
+          </p>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            - 전체 블로그 페이지에 조회수 순 정렬 기능을 추가했어요.
+          </p>
+        </Alert.Description>
+        <br>
+        <Alert.Title class="text-base sm:text-lg font-semibold">UI 개선 🎨</Alert.Title>
+        <Alert.Description>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            - 블로그 카드 및 상세 페이지의 통계 정보(게시글 수, 조회수, 업데이트)를 아이콘과 함께 세로로 표시하도록 개선했어요.
+          </p>
+        </Alert.Description>
+      </Alert.Root>
+    </div>
+
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
         <p class="text-xxs sm:text-xs font-medium text-gray-500 dark:text-gray-400">2025-04-07</p>
       </div>
       <Alert.Root class="flex-1">

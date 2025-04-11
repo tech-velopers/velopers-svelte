@@ -25,7 +25,6 @@
   let currentPage = 1;
   let totalPages = 1;
   let blogId: number | null = null;
-  let techBlogsLoaded = false;
   
   // 날짜 포맷 헬퍼 함수
   function formatBlogDate(dateValue: string | number[]): string {
@@ -52,10 +51,7 @@
         const id = parseInt(pathParts[2]);
         if (!isNaN(id)) {
           blogId = id;
-          // techBlogsLoaded가 true일 때만 fetchBlogDetails 호출
-          if (techBlogsLoaded) {
-            fetchBlogDetails(id);
-          }
+          fetchBlogDetails(id);
         } else {
           error = '잘못된 블로그 ID입니다.';
         }
@@ -66,12 +62,7 @@
     }
   }
 
-  // techBlogsStore 구독 및 데이터 로드 상태 감시
-  $: {
-    if (techBlogsLoaded && blogId !== null) {
-      fetchBlogDetails(blogId);
-    }
-  }
+  let techBlogsUnsubscribe: () => void;
 
   onMount(() => {
     loading = true;
@@ -89,9 +80,6 @@
         tagsStore.subscribe(tags => {
           allTags = tags;
         });
-        
-        // 데이터 로드 완료 표시
-        techBlogsLoaded = true;
       } catch (e) {
         console.error('데이터 로드 오류:', e);
         error = e instanceof Error ? e.message : '데이터를 불러오는데 실패했습니다.';
@@ -122,41 +110,36 @@
     // 정리 함수 직접 반환
     return () => {
       window.removeEventListener('popstate', handlePopState);
+      if (techBlogsUnsubscribe) techBlogsUnsubscribe();
     };
   });
 
   // 블로그 정보 가져오기
   async function fetchBlogDetails(id: number) {
     try {
-      loading = true;
       error = null;
       
       // techBlogsStore에서 블로그 정보 가져오기
-      const blogs = get(techBlogsStore);
-      const foundBlog = blogs.find(b => b.id === id);
-      
-      if (foundBlog) {
-        blog = foundBlog;
-        // 블로그 데이터가 로드된 후 페이지 뷰 로깅
-        logger.logPageView('BLOG_DETAIL', foundBlog.id);
-        fetchBlogPosts(foundBlog.techBlogName, currentPage);
-        window.scrollTo({ 
-          top: 0, 
-          behavior: 'auto' 
-        });
-      } else {
-        error = '블로그를 찾을 수 없습니다.';
-        console.error(`블로그를 찾을 수 없음: ID ${id}`);
-      }
+      techBlogsUnsubscribe = techBlogsStore.subscribe(blogs => {
+        const foundBlog = blogs.find(b => b.id === id);
+        if (foundBlog) {
+          blog = foundBlog;
+          // 블로그 데이터가 로드된 후 페이지 뷰 로깅
+          logger.logPageView('BLOG_DETAIL', foundBlog.id);
+          fetchBlogPosts(foundBlog.techBlogName, currentPage);
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        } else if (blogs.length > 0) {
+          // 스토어에 데이터는 있지만 해당 ID의 블로그가 없는 경우
+          error = '블로그를 찾을 수 없습니다.';
+          console.error(`블로그를 찾을 수 없음: ID ${id}`);
+          loading = false;
+        }
+      });
     } catch (e) {
       error = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
-    } finally {
       loading = false;
     }
   }
-
-  // svelte/store에서 get 함수 import
-  import { get } from 'svelte/store';
 
   // 블로그 게시글 가져오기
   async function fetchBlogPosts(blogName: string, page: number) {
@@ -186,8 +169,10 @@
       currentPage = page;
     } catch (e) {
       console.error('게시글 로딩 오류:', e);
+      loading = false;
     } finally {
       postsLoading = false;
+      loading = false;
     }
   }
 

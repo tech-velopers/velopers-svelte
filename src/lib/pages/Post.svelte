@@ -69,12 +69,8 @@
         logger.logPageView('POST', post.id);
       }
       
-      // 모바일에서는 즉시 스크롤, 데스크톱에서는 부드럽게 스크롤
-      const isMobile = window.innerWidth < 1024; // lg 브레이크포인트
-      window.scrollTo({ 
-        top: 0, 
-        behavior: isMobile ? 'auto' : 'smooth' 
-      });
+      // 즉시 맨 위로 스크롤
+      window.scrollTo(0, 0);
     } catch (e) {
       error = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
     } finally {
