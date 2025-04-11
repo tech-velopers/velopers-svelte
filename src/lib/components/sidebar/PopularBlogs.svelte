@@ -78,6 +78,7 @@
       url: string;
       postCnt: number;
       totalPostViewCnt: number;
+      lastCreatedAt?: number[];
     }>;
   }> = [];
 
@@ -92,7 +93,7 @@
     const blogsToAdd = companyNames
       .map(name => {
         const blog = $techBlogMap[name];
-        return blog ? { name: blog.techBlogName, avatar: blog.icon, totalPostViewCnt: blog.totalPostViewCnt } : null;
+        return blog ? { name: blog.techBlogName, avatar: blog.icon, totalPostViewCnt: blog.totalPostViewCnt, lastCreatedAt: blog.lastCreatedAt } : null;
       })
       .filter((blog): blog is NonNullable<typeof blog> => blog !== null);
     
@@ -111,7 +112,8 @@
               avatar: blog.icon,
               url: blog.baseUrl,
               postCnt: blog.postCnt,
-              totalPostViewCnt: blog.totalPostViewCnt
+              totalPostViewCnt: blog.totalPostViewCnt,
+              lastCreatedAt: blog.lastCreatedAt
             } : null;
           })
           .filter((blog): blog is NonNullable<typeof blog> => blog !== null)

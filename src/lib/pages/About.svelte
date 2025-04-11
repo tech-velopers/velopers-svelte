@@ -10,8 +10,8 @@
 </script>
 
 <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-4xl">
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8">
-    <h1 class="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">Velopers 소개</h1>
+  <div class="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-4 sm:p-8 dark:ring-1 dark:ring-gray-800">
+    <h1 class="text-2xl sm:text-4xl font-semibold mb-4 sm:mb-6 text-gray-900 dark:text-white">Velopers 소개</h1>
     
     <section class="mb-4 sm:mb-8">
       <h2 class="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 text-gray-800 dark:text-gray-200">Velopers란?</h2>
@@ -74,7 +74,7 @@
         문의사항이나 제안사항이 있으시다면 아래 이메일로 연락해주세요.<br>
         Email: <a 
           href="mailto:sm0514sm@gmail.com" 
-          class="text-blue-600 dark:text-blue-400 hover:underline"
+          class="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:underline transition-colors"
           on:click={() => logger.logClick('EMAIL_LINK', undefined, 'sm0514sm@gmail.com', { type: 'contact' })}
         >
           sm0514sm@gmail.com

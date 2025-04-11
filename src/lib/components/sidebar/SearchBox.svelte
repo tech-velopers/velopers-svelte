@@ -1,6 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { fade } from 'svelte/transition';
+  import { fade, slide } from 'svelte/transition';
+  import { flip } from 'svelte/animate';
+  import { tweened } from 'svelte/motion';
+  import { cubicOut } from 'svelte/easing';
+  import { tick } from 'svelte';
   import { 
     selectedBlogs, 
     selectedTags, 
@@ -33,8 +37,34 @@
   let blogs: TechBlog[] = [];
   let selectedSuggestionIndex = -1;
 
+  let mainContainer: HTMLDivElement;
+
+  // 높이 애니메이션을 위한 tweened 스토어
+  const containerHeight = tweened(0, {
+    duration: 200,
+    easing: cubicOut
+  });
+
+  // 컨테이너 높이를 측정하고 tweened 스토어를 업데이트하는 함수
+  async function updateHeight() {
+    await tick();
+    if (!mainContainer) return;
+
+    let requiredHeight = 0;
+    if ($selectedBlogs.length > 0 || $selectedTags.length > 0) {
+       requiredHeight = mainContainer.scrollHeight;
+    }
+    containerHeight.set(requiredHeight);
+  }
+
+  // 선택된 블로그/태그 변경 시 높이 업데이트
+  $: if ($selectedBlogs || $selectedTags) {
+    updateHeight();
+  }
+
   // 컴포넌트 마운트 시 검색어 초기화
   onMount(() => {
+    updateHeight();
     // 스토어에서 검색어를 가져와 설정
     inputQuery = $searchQuery;
     
@@ -263,8 +293,9 @@
 
   {#if $selectedTags.length > 0 || $selectedBlogs.length > 0}
     <div 
-      transition:fade|local={{ duration: 200 }}
-      class="mt-4"
+      bind:this={mainContainer}
+      class="mt-4 overflow-hidden"
+      style:height="{$containerHeight}px"
     >
       <div class="flex items-center justify-center my-3">
         <div class="flex-1 h-px bg-border"></div>
@@ -278,6 +309,7 @@
           <div class="flex flex-wrap gap-1.5">
             {#each $selectedBlogs as blog (blog.name)}
               <button
+                animate:flip={{ duration: 200 }}
                 transition:fade|local={{ duration: 200 }}
                 on:click={() => {
                   toggleBlog(blog);
@@ -316,6 +348,7 @@
           <div class="flex flex-wrap gap-1.5">
             {#each $selectedTags as tag (tag)}
               <button
+                animate:flip={{ duration: 200 }}
                 transition:fade|local={{ duration: 200 }}
                 on:click={() => {
                   toggleTag(tag);
