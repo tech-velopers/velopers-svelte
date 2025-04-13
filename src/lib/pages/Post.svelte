@@ -356,7 +356,7 @@
       </header>
 
       <!-- Ad Container -->
-      <div class="bg-card w-full my-4 sm:my-5 md:my-6 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800 transition-all duration-300 overflow-hidden max-h-40 sm:max-h-32"> 
+      <div class="bg-card w-full my-4 sm:my-5 md:my-6 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800 transition-all duration-300 overflow-hidden max-h-40 sm:max-h-32 md:max-h-24"> 
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649" crossorigin="anonymous"></script>
         <ins class="adsbygoogle"
             style="display:block; text-align:center;"
