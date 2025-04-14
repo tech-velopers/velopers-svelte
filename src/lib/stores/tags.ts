@@ -4,7 +4,7 @@ import { getApiUrl, API_ENDPOINTS } from '$lib/config';
 export interface Tag {
   id: number;
   tagName: string;
-  postCnt: number;
+  count: number;
 }
 
 interface TagsStore {
@@ -27,12 +27,13 @@ function createTagsStore(): TagsStore {
 
     try {
       isLoading = true;
-      const response = await fetch(getApiUrl(API_ENDPOINTS.tags));
-      if (!response.ok) throw new Error('Failed to fetch tags');
-      const data = await response.json();
-      set(data);
+      const response = await fetch(getApiUrl(API_ENDPOINTS.allTags));
+      if (!response.ok) throw new Error('Failed to fetch all tags');
+      const data: Tag[] = await response.json();
+      
+      set(data); // API에서 받은 모든 태그 저장
     } catch (error) {
-      console.error('Error fetching tags:', error);
+      console.error('Error fetching all tags:', error);
     } finally {
       isLoading = false;
     }

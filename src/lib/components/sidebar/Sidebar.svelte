@@ -10,11 +10,28 @@
     closeSidebar,
   } from "$lib/stores/sidebar";
   import WeeklyPopularPosts from "./WeeklyPopularPosts.svelte";
+  import { store as tagsStore, type Tag } from '$lib/stores/tags';
+  import { onMount } from 'svelte';
 
-  export let allTags: { id: number; tagName: string }[];
   export let searchWithSelected: (data: any) => void;
   export let onSearch: (event: CustomEvent<{ query: string }>) => void;
   export let onReset: () => void;
+
+  let allTagsData: Tag[] = [];
+
+  onMount(() => {
+    const unsubscribe = tagsStore.subscribe(value => {
+      allTagsData = value;
+    });
+    tagsStore.fetchTags();
+    return unsubscribe;
+  });
+
+  $: popularTags = [...allTagsData]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 50)
+    .sort((a, b) => a.tagName.localeCompare(b.tagName))
+    .map(tag => ({ id: tag.id, tagName: tag.tagName }));
 
   // 검색 이벤트 핸들러
   const handleSearch = (event: CustomEvent<{ query: string }>) => {
@@ -54,7 +71,7 @@
   />
   <WeeklyPopularPosts />
   <PopularBlogs />
-  <PopularTags {allTags} />
+  <PopularTags allTags={popularTags} />
 </aside>
 
 <!-- 모바일 팝업 -->
@@ -120,7 +137,7 @@
         />
         <WeeklyPopularPosts />
         <PopularBlogs />
-        <PopularTags {allTags} />
+        <PopularTags allTags={popularTags} />
       </div>
     </div>
   </div>

@@ -18,14 +18,7 @@
   import logger from '$lib/utils/ActivityLogger';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
 
-  interface TagWithCount {
-    id: number;
-    tagName: string;
-    count: number;
-  }
-
-  let tags: TagWithCount[] = [];
-  let allTags: Tag[] = [];
+  let tags: Tag[] = [];
   let isLoading = true;
   let error: string | null = null;
   let sortOption = 'count-desc';
@@ -86,26 +79,31 @@
     
     async function init() {
       try {
-        // 일반 태그 정보를 위한 구독
+        // tagsStore 구독하여 tags 업데이트
         unsubscribe = tagsStore.subscribe((value: Tag[]) => {
-          allTags = value;
+          tags = value;
+          // 스토어에서 데이터를 받아오면 로딩 상태 해제
+          if (value.length > 0 || !isLoading) { // 이미 로딩 완료된 상태 방지
+            isLoading = false;
+          }
         });
         
-        // 태그와 카운트 정보를 가져옴
-        const response = await fetch(getApiUrl(API_ENDPOINTS.allTags));
-        if (!response.ok) {
-          throw new Error('태그를 가져오는데 실패했습니다.');
-        }
-        tags = await response.json();
+        // 스토어에 태그 데이터 요청
+        await tagsStore.fetchTags(); 
         
-        await tagsStore.fetchTags();
+        // 스토어 fetchTags 내부 오류는 콘솔에만 찍히므로,
+        // 초기 로딩 완료 후에도 tags가 비어있으면 에러 처리 (선택적 개선)
+        // setTimeout(() => { // 비동기 처리 대기
+        //  if (tags.length === 0 && isLoading) {
+        //    error = '태그를 가져오는데 실패했습니다.';
+        //    isLoading = false;
+        //  }
+        // }, 3000); // 적절한 타임아웃 설정 필요
         
         // 페이지 조회 로깅
         logger.logPageView('ALL_TAGS', undefined);
       } catch (e) {
         error = e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.";
-      } finally {
-        isLoading = false;
       }
     }
 
@@ -117,7 +115,7 @@
   });
 
   // 태그 토글 함수
-  function handleTagToggle(tag: TagWithCount) {
+  function handleTagToggle(tag: Tag) {
     // 태그 토글 상태 확인
     const isSelected = $selectedTags.includes(tag.tagName);
     
@@ -163,7 +161,7 @@
 </script>
 
 <MainLayout
-  {allTags}
+  allTags={tags.map(tag => ({ id: tag.id, tagName: tag.tagName }))}
   searchWithSelected={searchWithSelected}
   onSearch={handleSearch}
   onReset={handleReset}
@@ -232,23 +230,21 @@
   {:else}
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
       {#each filteredTags as tag (tag.id)}
-        <button 
-          class="w-full bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:shadow-md dark:border-gray-700 transition-all p-4 flex flex-col items-center justify-center"
-          on:click={() => handleTagToggle(tag)}
-        >
-          <div class="flex flex-col items-center text-center">
-            <span
-              class="px-3 py-2 text-sm font-medium rounded-lg transition-colors inline-block {$selectedTags.includes(tag.tagName)
-                ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
-            >
-              {tag.tagName}
-            </span>
-            <span class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              포스트 {tag.count}개
-            </span>
-          </div>
-        </button>
+        <div class="flex flex-col items-center">
+          <Button 
+            variant={$selectedTags.includes(tag.tagName) ? "default" : "outline"}
+            size="sm"
+            class={cn(
+              "px-3 py-[0.3rem] h-auto font-normal text-sm transition-colors border w-full justify-center",
+              $selectedTags.includes(tag.tagName) 
+                ? "bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
+                : "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
+            )}
+            on:click={() => handleTagToggle(tag)}
+          >
+            {tag.tagName} <span class="ml-1 text-xs opacity-75">({tag.count})</span>
+          </Button>
+        </div>
       {/each}
     </div>
   {/if}
