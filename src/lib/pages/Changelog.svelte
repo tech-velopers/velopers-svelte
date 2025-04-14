@@ -1,12 +1,30 @@
 <script lang="ts">
   import * as Alert from "$lib/components/ui/alert";
   import { cn } from "$lib/utils";
+  import { format } from 'date-fns'; // Import date-fns for formatting
+
+  const today = format(new Date(), 'yyyy-MM-dd'); // Get today's date
 </script>
 
 <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
   <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-8 text-gray-900 dark:text-white">변경사항</h1>
   
   <div class="space-y-3 sm:space-y-5">
+
+    <!-- Add today's changelog entry -->
+    <div class="flex gap-1.5 sm:gap-3">
+      <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">
+        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">{today}</p>
+      </div>
+      <Alert.Root class="flex-1">
+        <Alert.Title class="text-base sm:text-lg font-semibold">기능 추가 & UI 개선 📢</Alert.Title>
+        <Alert.Description class="text-gray-600 dark:text-gray-300">
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base">
+            - RSS 피드 안내 페이지(/rss-info)를 추가하고 푸터에 링크를 연결했어요. 요약 RSS 피드를 구독하고 싶으신 경우 클릭해보세요!
+          </p>
+        </Alert.Description>
+      </Alert.Root>
+    </div>
 
     <div class="flex gap-1.5 sm:gap-3">
       <div class="w-14 sm:w-20 flex-shrink-0 pt-0.5">

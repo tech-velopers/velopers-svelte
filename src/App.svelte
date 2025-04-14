@@ -13,6 +13,7 @@
   import BlogDetail from "$lib/pages/BlogDetail.svelte";
   import Changelog from "$lib/pages/Changelog.svelte";
   import Quiz from "$lib/pages/Quiz.svelte";
+  import RssInfo from "$lib/pages/RssInfo.svelte";
   import { Toaster } from "$lib/components/ui/sonner";
 
   // 다크모드 상태 관리
@@ -65,6 +66,8 @@
       <Changelog />
     {:else if $currentPath === '/quiz'}
       <Quiz />
+    {:else if $currentPath === '/rss-info'}
+      <RssInfo />
     {:else if $currentPath.startsWith('/post/')}
       <Post />
     {:else if $currentPath.startsWith('/blog/')}

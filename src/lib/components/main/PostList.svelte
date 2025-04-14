@@ -6,6 +6,9 @@
   import { onMount } from 'svelte';
   import { Button } from "$lib/components/ui/button";
   import { cn } from "$lib/utils";
+  import * as Alert from "$lib/components/ui/alert/index.js";
+  import { Rss, ArrowRight } from "lucide-svelte";
+  import { navigate } from "$lib/stores/router";
 
   export let posts: any[];
   export let currentPage: number;
@@ -92,6 +95,27 @@
 </script>
 
 <div class="space-y-4">
+  <Alert.Root class="mb-4">
+    <Rss class="h-4 w-4" />
+    <Alert.Title class="flex items-center justify-between">
+      <span>RSS 피드로 새 글을 구독하세요!</span>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        class="ml-auto px-3 py-1 h-auto text-xs"
+        on:click={() => navigate('/rss-info')}
+        role="button"
+        tabindex={0}
+      >
+        자세히 보기
+        <ArrowRight class="w-3 h-3 ml-1" />
+      </Button>
+    </Alert.Title>
+    <Alert.Description>
+      전체 글 또는 요약본 RSS 피드를 통해 관심 있는 기술 블로그의 업데이트를 놓치지 마세요.
+    </Alert.Description>
+  </Alert.Root>
+
   {#if loading}
     {#each Array(5) as _}
       <div class="bg-white dark:bg-gray-900 p-3 md:p-4 rounded-lg shadow-sm flex gap-4 md:gap-6 dark:ring-1 dark:ring-gray-800">
