@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { ArrowUpRight } from 'lucide-svelte';
+  import { ArrowUpRight, Copy } from 'lucide-svelte';
   import logger from '$lib/utils/ActivityLogger';
   import { onMount } from 'svelte';
+  import { toast } from "svelte-sonner";
 
   onMount(() => {
     logger.logPageView('RSS_INFO');
@@ -17,6 +18,38 @@
       location: 'RSS_INFO'
     });
   };
+
+  const handleCopyClick = (type: 'FULL' | 'SUMMARY') => {
+    const targetUrl = type === 'FULL' ? 'https://www.velopers.kr/rss.xml' : 'https://www.velopers.kr/summary-rss.xml';
+    const targetType = type === 'FULL' ? 'RSS_FULL_COPY' : 'RSS_SUMMARY_COPY';
+
+    navigator.clipboard.writeText(targetUrl)
+      .then(() => {
+        toast.success("RSS 링크가 클립보드에 복사되었습니다.", {
+          description: targetUrl,
+          duration: 3000
+        });
+        logger.logClick(targetType, undefined, type, {
+          url: targetUrl,
+          from: 'RssInfo',
+          location: 'RSS_INFO',
+          status: 'success'
+        });
+      })
+      .catch((err) => {
+        toast.error("링크 복사에 실패했습니다.", {
+          description: "다시 시도해주세요.",
+          duration: 3000
+        });
+        logger.logClick(targetType, undefined, type, {
+          url: targetUrl,
+          from: 'RssInfo',
+          location: 'RSS_INFO',
+          status: 'error',
+          error: err instanceof Error ? err.message : String(err)
+        });
+      });
+  };
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -30,35 +63,53 @@
     <div class="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-5 dark:ring-1 dark:ring-gray-800">
       <h2 class="text-lg font-semibold mb-3 dark:text-gray-200">전체 콘텐츠 RSS</h2>
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        각 게시물의 전체 내용이 포함된 표준 RSS 피드입니다. RSS 리더기에서 바로 모든 내용을 확인하고 싶을 때 유용합니다.
+        각 게시물의 전체 내용이 포함된 표준 RSS 피드입니다. <br>RSS 리더기에서 바로 모든 내용을 확인하고 싶을 때 유용합니다.
       </p>
-      <a 
-        href="https://www.velopers.kr/rss.xml" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
-        on:click={() => handleLinkClick('FULL')}
-      >
-        /rss.xml
-        <ArrowUpRight class="w-4 h-4 ml-1" />
-      </a>
+      <div class="flex items-center gap-2">
+        <a 
+          href="https://www.velopers.kr/rss.xml" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+          on:click={() => handleLinkClick('FULL')}
+        >
+          /rss.xml
+          <ArrowUpRight class="w-4 h-4 ml-1" />
+        </a>
+        <button
+          class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+          title="링크 복사"
+          on:click={() => handleCopyClick('FULL')}
+        >
+          <Copy class="w-4 h-4" />
+        </button>
+      </div>
     </div>
 
     <div class="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-5 dark:ring-1 dark:ring-gray-800">
       <h2 class="text-lg font-semibold mb-3 dark:text-gray-200">요약 RSS</h2>
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        각 게시물의 제목과 요약 정보만 포함된 RSS 피드입니다. 빠르게 새로운 글을 확인하고 싶으신 경우 편리합니다.
+        각 게시물의 제목과 요약 정보만 포함된 RSS 피드입니다. <br>빠르게 새로운 글을 확인하고 싶으신 경우 편리합니다.
       </p>
-      <a 
-        href="https://www.velopers.kr/summary-rss.xml" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
-        on:click={() => handleLinkClick('SUMMARY')}
-      >
-        /summary-rss.xml
-        <ArrowUpRight class="w-4 h-4 ml-1" />
-      </a>
+      <div class="flex items-center gap-2">
+        <a 
+          href="https://www.velopers.kr/summary-rss.xml" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+          on:click={() => handleLinkClick('SUMMARY')}
+        >
+          /summary-rss.xml
+          <ArrowUpRight class="w-4 h-4 ml-1" />
+        </a>
+        <button
+          class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+          title="링크 복사"
+          on:click={() => handleCopyClick('SUMMARY')}
+        >
+          <Copy class="w-4 h-4" />
+        </button>
+      </div>
     </div>
   </div>
 </div> 
