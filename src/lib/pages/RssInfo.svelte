@@ -2,6 +2,21 @@
   import { ArrowUpRight } from 'lucide-svelte';
   import logger from '$lib/utils/ActivityLogger';
   import { onMount } from 'svelte';
+
+  onMount(() => {
+    logger.logPageView('RSS_INFO');
+  });
+
+  const handleLinkClick = (type: 'FULL' | 'SUMMARY') => {
+    const targetUrl = type === 'FULL' ? 'https://www.velopers.kr/rss.xml' : 'https://www.velopers.kr/summary-rss.xml';
+    const targetType = type === 'FULL' ? 'RSS_FULL_LINK' : 'RSS_SUMMARY_LINK';
+    
+    logger.logClick(targetType, undefined, undefined, {
+      url: targetUrl,
+      from: 'RssInfo',
+      location: 'RSS_INFO'
+    });
+  };
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -46,21 +61,4 @@
       </a>
     </div>
   </div>
-</div>
-
-<script lang="ts">
-  onMount(() => {
-    logger.logPageView('RSS_INFO');
-  });
-
-  const handleLinkClick = (type: 'FULL' | 'SUMMARY') => {
-    const targetUrl = type === 'FULL' ? 'https://www.velopers.kr/rss.xml' : 'https://www.velopers.kr/summary-rss.xml';
-    const targetType = type === 'FULL' ? 'RSS_FULL_LINK' : 'RSS_SUMMARY_LINK';
-    
-    logger.logClick(targetType, undefined, {
-      url: targetUrl,
-      from: 'RssInfo',
-      location: 'RSS_INFO'
-    });
-  };
-</script> 
+</div> 

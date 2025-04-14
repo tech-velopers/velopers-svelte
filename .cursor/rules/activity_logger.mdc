@@ -21,11 +21,28 @@ logger.logActivity({
   extraData: { key: 'value' } // 추가 데이터 (선택 사항)
 });
 
+
+
 // 페이지 조회 로깅
 logger.logPageView('HOME');
 
 // 클릭 이벤트 로깅
-logger.logClick('BUTTON', 1, { action: 'toggle' });
+  /**
+   * 클릭 활동을 로깅합니다.
+   * @param targetType 클릭한 요소 유형
+   * @param targetId 클릭한 요소 ID
+   * @param targetName 클릭한 요소 이름
+   * @param extraData 추가 정보
+   */
+  logClick(targetType: string, targetId?: number, targetName?: string, extraData?: Record<string, any>): void {
+    this.logActivity({
+      activityType: 'CLICK',
+      targetType: targetType,
+      targetId: targetId,
+      targetName: targetName,
+      extraData: extraData
+    });
+  }
 
 // 검색 이벤트 로깅
 logger.logSearch('검색어', 'TAG_SEARCH');
