@@ -1,5 +1,7 @@
 <script lang="ts">
   import { ArrowUpRight } from 'lucide-svelte';
+  import logger from '$lib/utils/ActivityLogger';
+  import { onMount } from 'svelte';
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -20,6 +22,7 @@
         target="_blank" 
         rel="noopener noreferrer" 
         class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+        on:click={() => handleLinkClick('FULL')}
       >
         /rss.xml
         <ArrowUpRight class="w-4 h-4 ml-1" />
@@ -36,10 +39,28 @@
         target="_blank" 
         rel="noopener noreferrer" 
         class="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+        on:click={() => handleLinkClick('SUMMARY')}
       >
         /summary-rss.xml
         <ArrowUpRight class="w-4 h-4 ml-1" />
       </a>
     </div>
   </div>
-</div> 
+</div>
+
+<script lang="ts">
+  onMount(() => {
+    logger.logPageView('RSS_INFO');
+  });
+
+  const handleLinkClick = (type: 'FULL' | 'SUMMARY') => {
+    const targetUrl = type === 'FULL' ? 'https://www.velopers.kr/rss.xml' : 'https://www.velopers.kr/summary-rss.xml';
+    const targetType = type === 'FULL' ? 'RSS_FULL_LINK' : 'RSS_SUMMARY_LINK';
+    
+    logger.logClick(targetType, undefined, {
+      url: targetUrl,
+      from: 'RssInfo',
+      location: 'RSS_INFO'
+    });
+  };
+</script> 
