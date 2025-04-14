@@ -155,7 +155,11 @@
           on:click={() => handleAdClick(index + 1)}
         >
           <article 
-            class="bg-white dark:bg-gray-900 p-3 sm:p-4 md:p-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-row flex-wrap sm:flex-nowrap gap-4 md:gap-4 lg:gap-6 dark:ring-1 dark:ring-gray-800 group"
+            class={cn(
+              "bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300",
+              "flex flex-row flex-wrap sm:flex-nowrap gap-4 md:gap-4 lg:gap-6",
+              "dark:ring-1 dark:ring-gray-800 group"
+            )}
           >
             <div class="flex-1 flex flex-col">
               <div class="flex-grow">
