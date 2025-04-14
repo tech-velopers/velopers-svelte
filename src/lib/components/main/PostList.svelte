@@ -146,7 +146,7 @@
         {loadedImages}
       />
       
-      {#if index + 1 === firstAdIndex || index + 1 === secondAdIndex}
+      {#if index + 1 === secondAdIndex}
         <a 
           href="https://link.coupang.com/a/cj6d0H" 
           target="_blank" 
