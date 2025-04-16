@@ -20,6 +20,7 @@
     "bits-ui": "^0.22.0",
     "clsx": "^2.1.1",
     "cmdk-sv": "^0.0.18",
+    "date-fns": "^4.1.0",
     "lucide-svelte": "^0.482.0",
     "mode-watcher": "^0.5.1",
     "postcss": "^8.4.49",
@@ -34,7 +35,6 @@
   },
   "dependencies": {
     "@sveltejs/kit": "^2.15.2",
-    "date-fns": "^4.1.0",
     "hangul-js": "^0.2.6",
     "shadcn-svelte": "^0.14.0",
     "svelte-routing": "^2.13.0"

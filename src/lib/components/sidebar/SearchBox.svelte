@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { fade, slide } from 'svelte/transition';
+  import { fade } from 'svelte/transition';
   import { flip } from 'svelte/animate';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -10,17 +10,18 @@
     selectedTags, 
     toggleBlog, 
     toggleTag, 
-    resetSelected,
     searchQuery,
     setSearchQuery
   } from '$lib/stores/search';
   import { updateUrl } from '$lib/stores/router';
-  import { Search, RotateCcw, X, Check } from 'lucide-svelte';
+  import { Search, RotateCcw, X, Check, Tag as TagIcon } from 'lucide-svelte';
   import { Input } from "$lib/components/ui/input";
   import { Button } from "$lib/components/ui/button";
   import { cn } from "$lib/utils.js";
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
+  import { store as tagsStore } from '$lib/stores/tags';
+  import type { Tag } from '$lib/stores/tags';
   import * as Hangul from 'hangul-js';
 
   export let searchWithSelected: () => void;
@@ -30,22 +31,27 @@
     search: { query: string };
   }>();
 
-  // 입력 중인 검색어를 임시로 저장하는 변수
+  interface Suggestion {
+    type: 'blog' | 'tag';
+    name: string;
+    icon?: string;
+    isSelected?: boolean;
+  }
+
   let inputQuery = '';
-  let suggestions: Array<{name: string, icon: string, isSelected?: boolean}> = [];
+  let suggestions: Suggestion[] = [];
   let showSuggestions = false;
   let blogs: TechBlog[] = [];
+  let tags: Tag[] = [];
   let selectedSuggestionIndex = -1;
 
   let mainContainer: HTMLDivElement;
 
-  // 높이 애니메이션을 위한 tweened 스토어
   const containerHeight = tweened(0, {
     duration: 200,
     easing: cubicOut
   });
 
-  // 컨테이너 높이를 측정하고 tweened 스토어를 업데이트하는 함수
   async function updateHeight() {
     await tick();
     if (!mainContainer) return;
@@ -57,54 +63,65 @@
     containerHeight.set(requiredHeight);
   }
 
-  // 선택된 블로그/태그 변경 시 높이 업데이트
   $: if ($selectedBlogs || $selectedTags) {
     updateHeight();
   }
 
-  // 컴포넌트 마운트 시 검색어 초기화
   onMount(() => {
     updateHeight();
-    // 스토어에서 검색어를 가져와 설정
     inputQuery = $searchQuery;
     
-    // techBlogsStore 구독
-    const unsubscribe = techBlogsStore.subscribe((value: TechBlog[]) => {
+    const unsubscribeBlogs = techBlogsStore.subscribe((value: TechBlog[]) => {
       blogs = value;
     });
-    
-    // 테크블로그 데이터 가져오기
     techBlogsStore.fetchTechBlogs();
+
+    const unsubscribeTags = tagsStore.subscribe((value: Tag[]) => {
+      tags = value;
+    });
+    tagsStore.fetchTags();
     
-    return unsubscribe;
+    return () => {
+      unsubscribeBlogs();
+      unsubscribeTags();
+    };
   });
 
-  // 블로그명 자동완성 함수
   $: {
-    if (inputQuery && inputQuery.trim() !== '' && blogs.length > 0) {
+    if (inputQuery && inputQuery.trim() !== '' && (blogs.length > 0 || tags.length > 0)) {
       const query = inputQuery.toLowerCase();
-      suggestions = blogs
+      const queryHangul = query;
+
+      const blogSuggestions: Suggestion[] = blogs
         .filter(blog => {
           const blogName = blog.techBlogName;
-          
-          // 일반 텍스트 검색 (대소문자 구분 없음)
           if (blogName.toLowerCase().includes(query)) return true;
-          
-          // Hangul.js의 search 함수를 사용하여 한글 초성 검색
-          return Hangul.search(blogName, query) >= 0;
+          return Hangul.search(blogName, queryHangul) >= 0;
         })
         .map(blog => ({
+          type: 'blog',
           name: blog.techBlogName,
           icon: blog.icon,
-          // 이미 선택된 블로그인지 확인
           isSelected: $selectedBlogs.some(b => b.name.toLowerCase() === blog.techBlogName.toLowerCase())
-        }))
-        // 글자 길이가 짧은 순으로 정렬
+        }));
+
+      const tagSuggestions: Suggestion[] = tags
+        .filter(tag => {
+          const tagName = tag.tagName;
+          if (tagName.toLowerCase().includes(query)) return true;
+          return Hangul.search(tagName, queryHangul) >= 0;
+        })
+        .map(tag => ({
+          type: 'tag',
+          name: tag.tagName,
+          isSelected: $selectedTags.includes(tag.tagName)
+        }));
+
+      suggestions = [...blogSuggestions, ...tagSuggestions]
         .sort((a, b) => a.name.length - b.name.length)
-        .slice(0, 5); // 최대 5개까지만 표시
+        .slice(0, 5);
       
       showSuggestions = suggestions.length > 0;
-      // 새로운 검색 결과가 나타날 때마다 선택 인덱스 초기화
       selectedSuggestionIndex = -1;
     } else {
       suggestions = [];
@@ -113,33 +130,68 @@
     }
   }
 
-  function selectSuggestion(suggestion: {name: string, icon: string, isSelected?: boolean}) {
-    inputQuery = suggestion.name;
+  async function selectSuggestion(suggestion: Suggestion) {
+    const nameToToggle = suggestion.name;
+    const typeToToggle = suggestion.type;
+    const iconToToggle = suggestion.icon;
+
+    inputQuery = '';
+    setSearchQuery('');
     showSuggestions = false;
     selectedSuggestionIndex = -1;
+
+    await tick();
+
+    if (typeToToggle === 'blog') {
+      toggleBlog({ 
+        name: nameToToggle, 
+        avatar: iconToToggle || ''
+      });
+    } else if (typeToToggle === 'tag') {
+      toggleTag(nameToToggle);
+    }
+
+    updateUrl();
   }
 
-  // 블로그 이름이 완전히 일치하는지 확인하고 일치하면 선택
-  function trySelectBlogByExactMatch() {
-    if (!inputQuery) return false;
+  async function trySelectBlogByExactMatch(): Promise<boolean> {
+    if (!inputQuery || blogs.length === 0) return false;
     
-    // 블로그 이름과 정확히 일치하는 항목 찾기
+    const lowerInputQuery = inputQuery.toLowerCase();
     const exactMatchBlog = blogs.find(blog => 
-      blog.techBlogName.toLowerCase() === inputQuery.toLowerCase()
+      blog.techBlogName.toLowerCase() === lowerInputQuery
     );
     
     if (exactMatchBlog) {
-      // 블로그 선택
-      toggleBlog({ 
-        name: exactMatchBlog.techBlogName, 
-        avatar: exactMatchBlog.icon 
-      });
+      const blogToToggle = { name: exactMatchBlog.techBlogName, avatar: exactMatchBlog.icon };
       
-      // 검색창 비우기
       inputQuery = '';
       setSearchQuery('');
+      await tick();
+
+      toggleBlog(blogToToggle);
+      updateUrl();
+      return true;
+    }
+    return false;
+  }
+  
+  async function trySelectTagByExactMatch(): Promise<boolean> {
+    if (!inputQuery || tags.length === 0) return false;
+
+    const lowerInputQuery = inputQuery.toLowerCase();
+    const exactMatchTag = tags.find(tag =>
+      tag.tagName.toLowerCase() === lowerInputQuery
+    );
+
+    if (exactMatchTag) {
+      const tagToToggle = exactMatchTag.tagName;
       
-      // URL 업데이트
+      inputQuery = '';
+      setSearchQuery('');
+      await tick();
+
+      toggleTag(tagToToggle);
       updateUrl();
       return true;
     }
@@ -147,79 +199,58 @@
   }
 
   async function handleSearch() {
-    // 정확히 일치하는 블로그가 있으면 선택
-    const exactMatch = trySelectBlogByExactMatch();
-    
-    if (!exactMatch) {
-      if (inputQuery.trim()) {
-        // 검색어 업데이트
-        setSearchQuery(inputQuery.trim());
-        dispatch('search', { query: inputQuery.trim() });
-        // URL 업데이트
-        updateUrl();
-      } else if ($selectedTags.length > 0 || $selectedBlogs.length > 0) {
-        setSearchQuery(''); // 검색어 초기화
-        searchWithSelected();
-        // URL 업데이트
-        updateUrl();
-      }
+    if (await trySelectBlogByExactMatch()) {
+      showSuggestions = false;
+      return;
     }
+    
+    if (await trySelectTagByExactMatch()) {
+      showSuggestions = false;
+      return;
+    }
+
+    const trimmedQuery = inputQuery.trim();
+    if (trimmedQuery) {
+      setSearchQuery(trimmedQuery);
+      dispatch('search', { query: trimmedQuery });
+      updateUrl();
+    } else if ($selectedTags.length > 0 || $selectedBlogs.length > 0) {
+      setSearchQuery('');
+      searchWithSelected();
+      updateUrl();
+    }
+    
     showSuggestions = false;
   }
 
-  function handleKeyDown(event: KeyboardEvent) {
-    // 화살표 키, Enter, Escape가 아닌 다른 키가 입력되면 포커스 초기화
+  async function handleKeyDown(event: KeyboardEvent) {
     const navigationKeys = ['ArrowUp', 'ArrowDown', 'Enter', 'Escape', 'Tab'];
     if (!navigationKeys.includes(event.key) && !event.isComposing) {
       selectedSuggestionIndex = -1;
     }
 
-    if (showSuggestions && !event.isComposing) {
+    if (showSuggestions && !event.isComposing && suggestions.length > 0) {
       if (event.key === 'ArrowDown') {
         event.preventDefault();
-        if (selectedSuggestionIndex === -1) {
-          selectedSuggestionIndex = 0;
-        } else if (selectedSuggestionIndex === suggestions.length - 1) {
-          // 마지막 항목에서 다시 처음으로 순환
-          selectedSuggestionIndex = 0;
-        } else {
-          selectedSuggestionIndex = selectedSuggestionIndex + 1;
-        }
+        selectedSuggestionIndex = (selectedSuggestionIndex + 1) % suggestions.length;
       } else if (event.key === 'ArrowUp') {
         event.preventDefault();
-        if (selectedSuggestionIndex === -1 || selectedSuggestionIndex === 0) {
-          // 선택된 항목이 없거나 첫 항목에서 마지막으로 순환
-          selectedSuggestionIndex = suggestions.length - 1;
-        } else {
-          selectedSuggestionIndex = selectedSuggestionIndex - 1;
-        }
+        selectedSuggestionIndex = (selectedSuggestionIndex - 1 + suggestions.length) % suggestions.length;
       } else if (event.key === 'Enter') {
         event.preventDefault();
         if (selectedSuggestionIndex >= 0) {
-          const selectedSuggestion = suggestions[selectedSuggestionIndex];
-          selectSuggestion(selectedSuggestion);
-          
-          // 블로그 선택
-          toggleBlog({ 
-            name: selectedSuggestion.name, 
-            avatar: selectedSuggestion.icon 
-          });
-          
-          // 검색창 비우기
-          inputQuery = '';
-          setSearchQuery('');
-          
-          // URL 업데이트
-          updateUrl();
+          const selected = suggestions[selectedSuggestionIndex];
+          await selectSuggestion(selected);
         } else {
-          handleSearch();
+          await handleSearch();
         }
       } else if (event.key === 'Escape') {
         showSuggestions = false;
         selectedSuggestionIndex = -1;
       }
-    } else if (event.key === 'Enter') {
-      handleSearch();
+    } else if (event.key === 'Enter' && !event.isComposing) {
+      event.preventDefault();
+      await handleSearch();
     }
   }
 
@@ -230,14 +261,19 @@
   }
 
   function handleInputBlur(event: FocusEvent) {
-    // 자동완성 항목을 클릭할 시간을 주기 위해 지연
     setTimeout(() => {
-      showSuggestions = false;
-      selectedSuggestionIndex = -1;
-    }, 200);
+      const relatedTarget = event.relatedTarget as HTMLElement;
+      if (relatedTarget && relatedTarget.closest('.suggestion-list')) {
+         return;
+      }
+       
+      if (showSuggestions) {
+          showSuggestions = false;
+          selectedSuggestionIndex = -1;
+      }
+    }, 150);
   }
 
-  // searchQuery 스토어가 변경될 때만 inputQuery 업데이트
   $: if ($searchQuery !== undefined) {
     inputQuery = $searchQuery;
   }
@@ -249,38 +285,55 @@
       <Input
         type="search"
         bind:value={inputQuery}
+        on:input={() => selectedSuggestionIndex = -1}
         on:keydown={handleKeyDown}
         on:focus={handleInputFocus}
         on:blur={handleInputBlur}
-        placeholder="검색어를 입력하세요"
+        placeholder="검색어 또는 블로그/태그명 입력"
         class="pl-9 pr-4 py-2"
+        aria-autocomplete="list"
+        aria-expanded={showSuggestions}
+        aria-controls="suggestion-list"
+        role="combobox"
       />
       <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
       
       {#if showSuggestions && suggestions.length > 0}
         <div 
           transition:fade|local={{ duration: 150 }}
-          class="absolute z-50 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md shadow-md w-full mt-1 max-h-60 overflow-y-auto"
+          class="suggestion-list absolute z-50 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md shadow-md w-full mt-1 max-h-60 overflow-y-auto"
+          id="suggestion-list"
+          role="listbox"
         >
           <ul class="py-1">
-            {#each suggestions as suggestion, index}
+            {#each suggestions as suggestion, index (suggestion.type + suggestion.name)}
               <button 
-                class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer {index === selectedSuggestionIndex ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center {suggestion.isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}"
-                on:click={() => {
-                  selectSuggestion(suggestion);
-                  handleSearch();
+                class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center 
+                  {index === selectedSuggestionIndex && suggestion.isSelected ? 'bg-blue-200 dark:bg-blue-700' 
+                  : index === selectedSuggestionIndex ? 'bg-blue-100 dark:bg-blue-800' 
+                  : suggestion.isSelected ? 'bg-blue-50 dark:bg-blue-900/20' 
+                  : ''}"
+                on:mousedown|preventDefault={() => { 
+                   selectSuggestion(suggestion);
                 }}
                 role="option"
                 aria-selected={index === selectedSuggestionIndex}
+                id={`suggestion-${index}`}
               >
-                <img 
-                  src={`/icons/${suggestion.icon}`} 
-                  alt={suggestion.name} 
-                  class="w-4 h-4 rounded-full mr-2 flex-shrink-0"
-                />
-                <span class="text-sm">{suggestion.name}</span>
+                {#if suggestion.type === 'blog' && suggestion.icon}
+                  <img 
+                    src={`/icons/${suggestion.icon}`} 
+                    alt={suggestion.name} 
+                    class="w-4 h-4 rounded-full mr-2 flex-shrink-0"
+                  />
+                {:else if suggestion.type === 'tag'}
+                  <TagIcon class="w-4 h-4 mr-2 flex-shrink-0 text-muted-foreground" />
+                {:else}
+                   <div class="w-4 h-4 mr-2 flex-shrink-0"></div>
+                {/if}
+                <span class="text-sm flex-grow">{suggestion.name}</span>
                 {#if suggestion.isSelected}
-                  <Check class="ml-auto h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
+                  <Check class="ml-auto h-3.5 w-3.5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
                 {/if}
               </button>
             {/each}
@@ -313,7 +366,7 @@
                 transition:fade|local={{ duration: 200 }}
                 on:click={() => {
                   toggleBlog(blog);
-                  updateUrl(); // URL 업데이트
+                  updateUrl();
                 }}
                 class={cn(
                   "group flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
@@ -352,7 +405,7 @@
                 transition:fade|local={{ duration: 200 }}
                 on:click={() => {
                   toggleTag(tag);
-                  updateUrl(); // URL 업데이트
+                  updateUrl();
                 }}
                 class={cn(
                   "group flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
@@ -385,8 +438,9 @@
       size="sm"
       on:click={() => {
         onReset();
-        inputQuery = ''; // 입력 필드 초기화
-        updateUrl(); // URL 업데이트
+        inputQuery = '';
+        setSearchQuery('');
+        updateUrl();
       }}
       class="text-sm px-4 py-2 h-9"
     >
