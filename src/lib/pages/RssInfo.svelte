@@ -86,10 +86,16 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-5 dark:ring-1 dark:ring-gray-800">
-      <h2 class="text-lg font-semibold mb-3 dark:text-gray-200">요약 RSS</h2>
+    <div class="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-5 dark:ring-1 dark:ring-gray-800 relative border-2 border-blue-400 dark:border-blue-600">
+      <div class="absolute -top-3 -right-2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-semibold shadow-sm">
+        추천
+      </div>
+      <h2 class="text-lg font-semibold mb-3 dark:text-gray-200 flex items-center">
+        요약 RSS
+      </h2>
       <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        각 게시물의 제목과 요약 정보만 포함된 RSS 피드입니다. <br>빠르게 새로운 글을 확인하고 싶으신 경우 편리합니다.
+        많은 분들이 선택하는 <span class="font-medium text-blue-600 dark:text-blue-400">요약 RSS</span> 피드입니다. <br>
+        빠르게 새로운 글을 확인할 수 있어 <span class="font-medium">시간 절약에 효과적이며</span>, 필요한 정보만 간결하게 받아보실 수 있습니다.
       </p>
       <div class="flex items-center gap-2">
         <a 

@@ -112,7 +112,7 @@
       </Button>
     </Alert.Title>
     <Alert.Description>
-      전체 글 또는 요약본 RSS 피드를 통해 관심 있는 기술 블로그의 업데이트를 놓치지 마세요.
+      전체 글 또는 <span class="font-medium text-blue-600 dark:text-blue-400">요약본</span> RSS 피드를 통해 관심 있는 기술 블로그의 업데이트를 놓치지 마세요.
     </Alert.Description>
   </Alert.Root>
 
