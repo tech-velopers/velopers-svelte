@@ -1,62 +1,43 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
   import { onMount } from "svelte";
+  import { getApiUrl } from '$lib/config';
   
   // 퀴즈 인터페이스 정의
   interface Quiz {
-    id: number;
+    id: string;
     question: string;
-    answer: string;
+    answer: string | null;
     category: string;
+    who: string | null;
   }
-  
-  // 목업 퀴즈 데이터
-  const mockQuizzes: Quiz[] = [
-    { 
-      id: 1, 
-      question: "자바스크립트에서 클로저(Closure)란 무엇인가요?", 
-      answer: "클로저는 함수와 그 함수가 선언된 렉시컬 환경의 조합입니다. 내부함수가 외부함수의 변수에 접근할 수 있으며, 외부함수의 실행이 끝난 후에도 내부함수가 외부함수의 변수에 접근할 수 있는 메커니즘입니다.", 
-      category: "JavaScript" 
-    },
-    { 
-      id: 2, 
-      question: "React에서 Virtual DOM이란 무엇이며, 어떤 장점이 있나요?", 
-      answer: "Virtual DOM은 실제 DOM의 가벼운 복사본입니다. React는 상태 변경 시 Virtual DOM을 새로 생성하고 이전 Virtual DOM과 비교하여 실제 DOM에 최소한의 변경만 적용합니다. 이는 성능 최적화에 도움이 되며, UI 업데이트를 효율적으로 처리할 수 있게 합니다.", 
-      category: "React" 
-    },
-    { 
-      id: 3, 
-      question: "HTTP와 HTTPS의 차이점은 무엇인가요?", 
-      answer: "HTTP는 HyperText Transfer Protocol로 웹에서 데이터를 주고받는 프로토콜입니다. HTTPS는 HTTP에 SSL/TLS 암호화가 추가된 프로토콜로 보안이 강화되었습니다. HTTPS는 데이터 전송 시 암호화되어 보안성이 높고, SEO에도 유리합니다.", 
-      category: "Network" 
-    },
-    { 
-      id: 4, 
-      question: "RESTful API의 주요 원칙은 무엇인가요?", 
-      answer: "1. 자원(Resource) 기반 URL 구조\n2. HTTP 메소드(GET, POST, PUT, DELETE 등)를 통한 자원 조작\n3. 상태를 저장하지 않는 무상태(Stateless) 통신\n4. 캐시 가능성(Cacheability)\n5. 계층화된 시스템(Layered System)", 
-      category: "API" 
-    },
-    { 
-      id: 5, 
-      question: "CSS Box Model에 대해 설명해주세요.", 
-      answer: "CSS Box Model은 HTML 요소가 웹 페이지에서 차지하는 공간을 정의하는 모델입니다. 네 가지 영역으로 구성됩니다:\n1. Content: 콘텐츠가 표시되는 영역\n2. Padding: 콘텐츠와 테두리 사이의 여백\n3. Border: 패딩 주변의 테두리\n4. Margin: 테두리 바깥쪽의 여백", 
-      category: "CSS" 
-    }
-  ];
   
   // 상태 변수
   let quizzes: Quiz[] = [];
   let currentIndex = 0;
   let showAnswer = false;
   let isRandomMode = false;
+  let isLoading = true;
   
   // 현재 퀴즈
   $: currentQuiz = quizzes[currentIndex] || null;
   
-  // 퀴즈 데이터 가져오기 (실제로는 API 호출)
-  onMount(() => {
-    // 실제 구현에서는 fetch('/api/quiz')로 변경
-    quizzes = [...mockQuizzes];
+  // 퀴즈 데이터 가져오기
+  onMount(async () => {
+    try {
+      const apiUrl = getApiUrl('/api/quiz');
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+        throw new Error('퀴즈 데이터를 가져오는데 실패했습니다.');
+      }
+      
+      quizzes = await response.json();
+      isLoading = false;
+    } catch (error) {
+      console.error('퀴즈 데이터를 가져오는 중 오류 발생:', error);
+      isLoading = false;
+    }
   });
   
   // 배열 섞기 함수 (피셔-예이츠 알고리즘)
@@ -77,14 +58,6 @@
     }
   }
   
-  // 이전 퀴즈로 이동
-  function prevQuiz() {
-    if (currentIndex > 0) {
-      currentIndex -= 1;
-      showAnswer = false;
-    }
-  }
-  
   // 답변 표시 토글
   function toggleAnswer() {
     showAnswer = !showAnswer;
@@ -98,16 +71,54 @@
     showAnswer = false;
     isRandomMode = true;
   }
+  
+  // 다시하기 - 현재 질문을 랜덤한 위치에 다시 추가
+  function repeatQuiz() {
+    if (!currentQuiz) return;
+    
+    // 현재 퀴즈 복사
+    const quizToRepeat = { ...currentQuiz };
+    
+    // 현재 인덱스보다 뒤 위치 중 랜덤한 위치 선택 (최소 2문제 이후)
+    const minPosition = Math.min(currentIndex + 2, quizzes.length);
+    const maxPosition = quizzes.length;
+    
+    // 랜덤한 위치 계산 (현재 위치에서 최소 2문제 이후 ~ 마지막 사이)
+    const randomPosition = Math.floor(Math.random() * (maxPosition - minPosition + 1)) + minPosition;
+    
+    // 새 배열 생성하고 선택된 위치에 현재 퀴즈 삽입
+    const newQuizzes = [...quizzes];
+    newQuizzes.splice(randomPosition, 0, quizToRepeat);
+    
+    // 퀴즈 배열 업데이트
+    quizzes = newQuizzes;
+    
+    // 다음 퀴즈로 이동
+    nextQuiz();
+  }
 </script>
 
 <div class="container mx-auto px-4 py-6 max-w-3xl pb-24">
   <h1 class="text-2xl font-bold mb-6 text-center dark:text-white">면접 질문 퀴즈</h1>
   
-  {#if currentQuiz}
+  {#if isLoading}
+    <div class="text-center py-10">
+      <p class="text-gray-500 dark:text-gray-400">퀴즈를 불러오는 중...</p>
+    </div>
+  {:else if quizzes.length === 0}
+    <div class="text-center py-10">
+      <p class="text-gray-500 dark:text-gray-400">퀴즈 데이터가 없습니다.</p>
+    </div>
+  {:else if currentQuiz}
     <div class="mb-4 flex items-center">
       <span class="text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded-md">
         {currentQuiz.category}
       </span>
+      {#if currentQuiz.who}
+        <span class="text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded-md ml-2">
+          {currentQuiz.who}
+        </span>
+      {/if}
       <span class="ml-auto text-sm text-gray-500 dark:text-gray-400 mr-2">
         {currentIndex + 1} / {quizzes.length}
       </span>
@@ -132,16 +143,16 @@
       >
         <div class="w-full">
           {#if showAnswer}
-            <p class="whitespace-pre-line dark:text-white text-sm leading-relaxed">{currentQuiz.answer}</p>
+            {#if currentQuiz.answer}
+              <p class="whitespace-pre-line dark:text-white text-sm leading-relaxed">{currentQuiz.answer}</p>
+            {:else}
+              <p class="text-center text-gray-500 dark:text-gray-400 text-sm">답변이 제공되지 않은 질문입니다.</p>
+            {/if}
           {:else}
             <p class="text-center text-gray-500 dark:text-gray-400 text-sm">👆 답변을 확인하려면 아래 답변 보기 버튼을 클릭하세요</p>
           {/if}
         </div>
       </div>
-    </div>
-  {:else}
-    <div class="text-center py-10">
-      <p class="text-gray-500 dark:text-gray-400">퀴즈를 불러오는 중...</p>
     </div>
   {/if}
   
@@ -149,17 +160,9 @@
   <div class="fixed bottom-4 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-3 shadow-md z-20">
     <div class="container mx-auto max-w-3xl flex justify-between gap-2">
       <Button 
-        variant="outline" 
-        on:click={prevQuiz} 
-        disabled={currentIndex === 0}
-        class="flex-1"
-      >
-        이전
-      </Button>
-      
-      <Button 
         variant="default" 
         on:click={toggleAnswer}
+        disabled={quizzes.length === 0}
         class="flex-1 text-white font-medium"
       >
         답변 {showAnswer ? '가리기' : '보기'}
@@ -168,10 +171,19 @@
       <Button 
         variant="outline" 
         on:click={nextQuiz} 
-        disabled={currentIndex === quizzes.length - 1 || !currentQuiz}
+        disabled={currentIndex === quizzes.length - 1 || quizzes.length === 0}
         class="flex-1"
       >
-        다음
+        넘어가기
+      </Button>
+      
+      <Button 
+        variant="secondary" 
+        on:click={repeatQuiz} 
+        disabled={quizzes.length === 0}
+        class="flex-1"
+      >
+        다시하기
       </Button>
     </div>
   </div>
