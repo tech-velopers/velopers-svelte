@@ -99,7 +99,6 @@
 </script>
 
 <div class="container mx-auto px-4 py-6 max-w-3xl pb-24">
-  <h1 class="text-2xl font-bold mb-6 text-center dark:text-white">면접 질문 퀴즈</h1>
   
   {#if isLoading}
     <div class="text-center py-10">
@@ -200,11 +199,6 @@
   
   /* 모바일 최적화 스타일 */
   @media (max-width: 640px) {
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    
     h2 {
       font-size: 1.1rem;
     }
