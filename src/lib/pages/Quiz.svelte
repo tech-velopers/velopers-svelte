@@ -562,6 +562,9 @@
           </Button>
           <span class="ml-auto text-sm text-gray-500 dark:text-gray-400 mr-2">
             {filteredQuizzes.length > 0 ? currentIndex + 1 : 0} / {filteredQuizzes.length}
+            {#if filteredQuizzes.length > 0}
+              <span class="ml-1">({Math.round((currentIndex + 1) / filteredQuizzes.length * 100)}%)</span>
+            {/if}
           </span>
           {/if}
         </div>
