@@ -95,7 +95,7 @@
 </script>
 
 <div class="space-y-4">
-  <Alert.Root class="mb-4">
+  <!-- <Alert.Root class="mb-4">
     <Rss class="h-4 w-4" />
     <Alert.Title class="flex items-center justify-between">
       <span>RSS 피드로 새 글을 구독하세요!</span>
@@ -114,7 +114,7 @@
     <Alert.Description>
       전체 글 또는 <span class="font-medium text-blue-600 dark:text-blue-400">요약본</span> RSS 피드를 통해 관심 있는 기술 블로그의 업데이트를 놓치지 마세요.
     </Alert.Description>
-  </Alert.Root>
+  </Alert.Root> -->
 
   {#if loading}
     {#each Array(5) as _}

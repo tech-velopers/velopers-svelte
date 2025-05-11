@@ -1,0 +1,9 @@
+---
+trigger: model_decision
+description: 아이콘이 필요한 경우
+globs: 
+---
+  import { Search, RotateCcw } from 'lucide-svelte';
+  위와 같이 lucide-svelte를 사용한다.
+
+  별도의 svg를 만들지 않는다.

@@ -6,7 +6,7 @@
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
   import { navigate, visitedPosts, markPostAsVisited } from '$lib/stores/router';
-  import { ExternalLink, Eye } from 'lucide-svelte';
+  import { ExternalLink, Eye, Bot } from 'lucide-svelte';
   import { cn } from '$lib/utils';
   import { Button } from "$lib/components/ui/button";
   import logger from '$lib/utils/ActivityLogger';
@@ -24,6 +24,7 @@
     tags: string[];
     createdAt: number[];
     viewCnt?: number;
+    twoLineSummary?: string;
   };
 
   export let toggleTag: (tag: string) => void;
@@ -169,14 +170,25 @@
               : "text-gray-900 dark:text-white"
           )}
         >{post.title}</h2>
-        <p 
-          class={cn(
+        {#if post.twoLineSummary}
+          <p class={cn(
+            "mb-0 sm:mb-3 text-xs sm:text-sm flex items-center gap-1",
+            isVisited 
+              ? "text-[#9ca3af] dark:text-[#6b7280]" 
+              : "text-gray-600 dark:text-gray-300"
+          )}>
+            {post.twoLineSummary}
+          </p>
+        {:else}
+          <p class={cn(
             "mb-0 sm:mb-3 text-xs sm:text-sm",
             isVisited 
               ? "text-[#9ca3af] dark:text-[#6b7280]" 
               : "text-gray-600 dark:text-gray-300"
-          )}
-        >{post.preview}</p>
+          )}>
+            {post.preview}
+          </p>
+        {/if}
       </div>
       
       <div class="mt-auto space-y-3 hidden sm:block">
