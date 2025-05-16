@@ -49,7 +49,9 @@
 </script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-black transition-colors overflow-x-hidden">
-  <Header {isDarkMode} {toggleDarkMode} />
+  {#if $currentPath !== '/quiz'}
+    <Header {isDarkMode} {toggleDarkMode} />
+  {/if}
 
   <main>
     {#if $currentPath === '/'}

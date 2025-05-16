@@ -2,7 +2,7 @@
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
   import { Textarea } from "$lib/components/ui/textarea";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { getApiUrl } from '$lib/config';
   import { fade, slide } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
@@ -14,20 +14,7 @@
     selectedCategories: string[];
     isRandomMode: boolean;
     isAuthenticated: boolean;
-  }
-
-  // Debounce utility function
-  function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-    const debounced = (...args: Parameters<F>) => {
-      if (timeout !== null) {
-        clearTimeout(timeout);
-      }
-      timeout = setTimeout(() => {
-        func(...args);
-      }, waitFor);
-    };
-    return debounced as (...args: Parameters<F>) => ReturnType<F>;
+    quizOrder?: string[]; // 퀴즈 ID 순서 저장
   }
   
   // 퀴즈 인터페이스 정의
@@ -144,6 +131,25 @@
       quizzes = await response.json();
 
       if (loadedAuth && progressToRestore) {
+        // 랜덤 모드였고, 저장된 퀴즈 순서가 있다면 quizzes 배열을 재정렬합니다.
+        if (progressToRestore.isRandomMode && progressToRestore.quizOrder && progressToRestore.quizOrder.length > 0) {
+          const orderedQuizIdsFromStorage = progressToRestore.quizOrder;
+          const currentQuizMap = new Map(quizzes.map(q => [q.id, q]));
+          const reorderedQuizzes: Quiz[] = [];
+          
+          // 1. 저장된 순서에 따라 퀴즈를 배치합니다.
+          for (const quizId of orderedQuizIdsFromStorage) {
+            if (currentQuizMap.has(quizId)) {
+              reorderedQuizzes.push(currentQuizMap.get(quizId)!);
+              currentQuizMap.delete(quizId); // 처리된 퀴즈는 맵에서 제거
+            }
+          }
+          // 2. 저장된 순서에는 없지만 현재 API 결과에는 있는 나머지 퀴즈들을 뒤에 추가합니다.
+          // (예: 퀴즈가 새로 추가된 경우)
+          quizzes = [...reorderedQuizzes, ...Array.from(currentQuizMap.values())];
+          console.log('[Quiz] onMount: Quizzes reordered based on saved quizOrder.');
+        }
+        
         selectedCategories = progressToRestore.selectedCategories || [];
         isRandomMode = progressToRestore.isRandomMode || false;
         
@@ -179,6 +185,7 @@
         selectedCategories,
         isRandomMode,
         isAuthenticated,
+        quizOrder: quizzes.map(q => q.id) // 현재 quizzes 배열의 순서를 저장
       };
       try {
         localStorage.setItem(QUIZ_PROGRESS_KEY, JSON.stringify(progress));
@@ -235,10 +242,12 @@
   // 랜덤 퀴즈 모드 전환
   function randomQuiz() {
     quizzes = shuffleArray(quizzes); // 전체 퀴즈 배열 섞기
+    isRandomMode = true; // isRandomMode를 먼저 true로 설정해야 saveProgressToLocalStorage에서 올바르게 quizOrder를 저장함
     currentIndex = 0; // 필터링된 목록의 처음으로
     showAnswer = false;
-    isRandomMode = true;
+    // isRandomMode = true; // 위치 변경: saveProgressToLocalStorage가 반응형으로 호출될 때 isRandomMode가 true여야 함
     showToast('퀴즈 순서가 무작위로 섞였습니다.', 'success');
+    // saveProgressToLocalStorage(); // isRandomMode, quizzes 변경으로 인해 반응형으로 호출됨
   }
   
   // 다시하기 - 현재 질문을 랜덤한 위치에 다시 추가
@@ -445,7 +454,54 @@
     showAnswer = false;
     showToast('모든 카테고리가 선택 해제되었습니다.', 'info');
   }
+
+  // 키보드 이벤트 핸들러
+  function handleGlobalKeydown(event: KeyboardEvent) {
+    if (!isAuthenticated || isEditing || isCreating) return;
+
+    // 현재 포커스된 요소가 input 또는 textarea인지 확인
+    const activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+      // 비밀번호 입력 필드는 예외적으로 Enter 키만 허용 (이미 handleKeydown에서 처리)
+      if (activeElement.getAttribute('type') === 'password' && event.key === 'Enter') {
+        // checkPassword(); // 이미 Input 컴포넌트의 on:keydown에서 처리됨
+      } else if (activeElement.getAttribute('type') === 'password') {
+        return;
+      }
+      // 그 외 input/textarea 포커스 시에는 대부분의 단축키 비활성화
+      // (예: 질문/답변 수정 중에는 화살표 키 등이 텍스트 이동에 사용되어야 함)
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === ' ') {
+        return;
+      }
+    }
+
+    switch (event.key) {
+      case 'ArrowLeft':
+        if (!isEditing && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
+          prevQuiz();
+        }
+        break;
+      case 'ArrowRight':
+        if (!isEditing && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
+          nextQuiz();
+        }
+        break;
+      case ' ': // Space bar
+        event.preventDefault(); // 스페이스바의 기본 동작(페이지 스크롤 등) 방지
+        if (!isEditing && !isCreating && currentQuiz) {
+          toggleAnswer();
+        }
+        break;
+      case '?':
+        if (event.shiftKey && !isEditing && !isCreating && currentQuiz) {
+          repeatQuiz();
+        }
+        break;
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleGlobalKeydown} />
 
 <div class="container mx-auto px-4 py-6 max-w-3xl pb-24">
   
@@ -453,7 +509,7 @@
   {#if showNotification}
     <div 
       transition:fade={{ duration: 300 }}
-      class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg max-w-md {
+      class="quiz-toast-notification fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg max-w-md {
         notificationType === 'success' ? 'bg-green-500 text-white' : 
         notificationType === 'error' ? 'bg-red-500 text-white' : 
         'bg-blue-500 text-white'
@@ -759,7 +815,7 @@
     {/if}
     
     <!-- 푸터 대체 고정 버튼 -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 px-4 shadow-lg z-20 transition-all duration-300">
+    <div class="quiz-fixed-footer fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 px-4 shadow-lg z-20 transition-all duration-300">
       <div class="container mx-auto max-w-3xl flex justify-between gap-3">
         {#if isEditing}
           <Button 
@@ -787,7 +843,7 @@
                   : 'border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/30'
               }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {#if showAnswer}
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                 {:else}
@@ -831,7 +887,7 @@
               on:click={repeatQuiz} 
               class="flex items-center justify-center transition-all duration-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               <span class="hidden sm:inline">다시</span>
@@ -875,8 +931,21 @@
       padding: 0.75rem;
     }
 
-    .fixed.bottom-0 {
-      padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+    .quiz-fixed-footer {
+      /* 기본 1rem 패딩 + 안전 영역 (iPhone X 등 노치 디자인 대응) */
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .quiz-toast-notification {
+      max-width: calc(100vw - 32px); /* 16px (1rem) margin on each side */
+      padding: 0.5rem 0.75rem; /* py-2 px-3 */
+      font-size: 0.875rem; /* text-sm */
+    }
+
+    .quiz-toast-notification svg {
+      width: 1rem; /* w-4 */
+      height: 1rem; /* h-4 */
+      /* margin-right: 0.5rem; /* mr-2, already applied by class, usually fine */
     }
   }
 
