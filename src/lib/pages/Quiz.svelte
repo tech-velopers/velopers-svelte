@@ -46,6 +46,7 @@
   let newWho = '';
 
   let sortOrder: 'asc' | 'desc' = 'desc'; // 'desc'가 최신순 (id 내림차순)
+  let isQuizListOpen = false; // 퀴즈 목록 표시 여부
 
   // UI 개선을 위한 추가 상태 변수
   let showNotification = false;
@@ -495,9 +496,34 @@
     showToast('모든 카테고리가 선택 해제되었습니다.', 'info');
   }
 
+  // 퀴즈 목록 토글 함수
+  function toggleQuizList() {
+    isQuizListOpen = !isQuizListOpen;
+  }
+
+  // 특정 퀴즈로 이동 함수
+  function goToQuiz(index: number) {
+    if (index >= 0 && index < filteredQuizzes.length) {
+      currentIndex = index;
+      showAnswer = false;
+      isQuizListOpen = false; // 퀴즈 선택 후 목록 닫기
+    }
+  }
+
   // 키보드 이벤트 핸들러
   function handleGlobalKeydown(event: KeyboardEvent) {
     if (!isAuthenticated || isEditing || isCreating) return;
+
+    // 퀴즈 목록이 열려있을 때는 Enter, Space, Arrow 키들의 기본 동작만 허용 (목록 내 탐색 등)
+    if (isQuizListOpen) {
+      if (event.key === 'Escape') {
+        isQuizListOpen = false;
+      }
+      // 여기서는 목록 자체의 키보드 네비게이션을 방해하지 않도록 return;
+      // (예: 목록 아이템에 포커스가 갔을 때 Enter로 선택 등)
+      // 현재는 목록 아이템에 직접적인 키보드 포커스 및 선택 기능은 없으므로, Esc만 처리.
+      return; 
+    }
 
     // 현재 포커스된 요소가 input 또는 textarea인지 확인
     const activeElement = document.activeElement;
@@ -691,6 +717,37 @@
     {:else}
       <!-- 퀴즈 카테고리 및 컨트롤 영역 -->
       <div class="mb-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 transition-all duration-300 dark:ring-1 dark:ring-gray-700">
+        <!-- 퀴즈 목록 토글 버튼 및 목록 -->
+        <div class="mb-3">
+          <Button
+            variant="outline"
+            on:click={toggleQuizList}
+            class="w-full text-sm py-2 justify-between border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
+            disabled={isEditing || isCreating || quizzes.length === 0}
+          >
+            <span class="font-medium">{isQuizListOpen ? '퀴즈 목록 숨기기' : '퀴즈 목록 보기'} ({filteredQuizzes.length}개)</span>
+            <span class="transition-transform duration-300" style={isQuizListOpen ? "transform: rotate(180deg)" : ""}>▼</span>
+          </Button>
+          {#if isQuizListOpen && filteredQuizzes.length > 0}
+            <div class="mt-2 p-3 bg-gray-50 dark:bg-gray-700/60 rounded-md shadow max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-600 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
+              <ul class="space-y-1">
+                {#each filteredQuizzes as quiz, i}
+                  <li 
+                    class="p-2 text-sm rounded-md cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors duration-150 {currentIndex === i ? 'bg-blue-100 dark:bg-blue-900/70 font-semibold text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}"
+                    on:click={() => goToQuiz(i)}
+                    on:keydown={(e) => { if (e.key === 'Enter') goToQuiz(i); }}
+                    role="button"
+                    tabindex="0"
+                  >
+                    <span>{i + 1}. </span>
+                    <span>{quiz.question.substring(0, 50)}{quiz.question.length > 50 ? '...' : ''}</span>
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/if}
+        </div>
+
         <!-- 카테고리 필터 토글 버튼 -->
         <Button 
           variant="outline"
