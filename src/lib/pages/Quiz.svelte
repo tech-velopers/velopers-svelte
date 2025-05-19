@@ -15,6 +15,7 @@
     isRandomMode: boolean;
     isAuthenticated: boolean;
     quizOrder?: string[]; // 퀴즈 ID 순서 저장
+    sortOrder?: 'asc' | 'desc'; // 정렬 순서 추가
   }
   
   // 퀴즈 인터페이스 정의
@@ -43,6 +44,8 @@
   let newAnswer = '';
   let newCategory = '';
   let newWho = '';
+
+  let sortOrder: 'asc' | 'desc' = 'desc'; // 'desc'가 최신순 (id 내림차순)
 
   // UI 개선을 위한 추가 상태 변수
   let showNotification = false;
@@ -113,6 +116,9 @@
             isAuthenticated = true;
             loadedAuth = true;
             progressToRestore = parsed;
+            if (parsed.sortOrder) { // 저장된 정렬 순서 복원
+              sortOrder = parsed.sortOrder;
+            }
           } else {
           }
         } catch (e) {
@@ -131,6 +137,10 @@
       quizzes = await response.json();
 
       if (loadedAuth && progressToRestore) {
+        if (progressToRestore.sortOrder) { // 복원된 정렬 순서가 있으면 사용
+          sortOrder = progressToRestore.sortOrder;
+        }
+        
         // 랜덤 모드였고, 저장된 퀴즈 순서가 있다면 quizzes 배열을 재정렬합니다.
         if (progressToRestore.isRandomMode && progressToRestore.quizOrder && progressToRestore.quizOrder.length > 0) {
           const orderedQuizIdsFromStorage = progressToRestore.quizOrder;
@@ -148,10 +158,14 @@
           // (예: 퀴즈가 새로 추가된 경우)
           quizzes = [...reorderedQuizzes, ...Array.from(currentQuizMap.values())];
           console.log('[Quiz] onMount: Quizzes reordered based on saved quizOrder.');
+          isRandomMode = true; // 랜덤 모드 상태 유지
+        } else {
+          // 랜덤 모드가 아니거나 저장된 순서가 없으면 현재 sortOrder에 따라 정렬
+          performSort(sortOrder);
+          isRandomMode = false;
         }
         
         selectedCategories = progressToRestore.selectedCategories || [];
-        isRandomMode = progressToRestore.isRandomMode || false;
         
         await new Promise(resolve => setTimeout(resolve, 0)); 
 
@@ -166,6 +180,7 @@
         showAnswer = false;
       } else {
         console.log('[Quiz] onMount: No progress to restore or not authenticated from storage.');
+        performSort(sortOrder); // 기본 정렬 적용
       }
     } catch (error) {
       console.error('[Quiz] onMount: Error fetching quiz data:', error);
@@ -185,7 +200,8 @@
         selectedCategories,
         isRandomMode,
         isAuthenticated,
-        quizOrder: quizzes.map(q => q.id) // 현재 quizzes 배열의 순서를 저장
+        quizOrder: quizzes.map(q => q.id), // 현재 quizzes 배열의 순서를 저장
+        sortOrder: sortOrder // 정렬 순서 저장
       };
       try {
         localStorage.setItem(QUIZ_PROGRESS_KEY, JSON.stringify(progress));
@@ -212,6 +228,18 @@
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+  
+  // 퀴즈 정렬 함수
+  function performSort(order: 'asc' | 'desc') {
+    quizzes.sort((a, b) => {
+      if (order === 'asc') { // 오래된 순 (id 오름차순)
+        return a.id.localeCompare(b.id);
+      } else { // 최신 순 (id 내림차순)
+        return b.id.localeCompare(a.id);
+      }
+    });
+    quizzes = [...quizzes]; // Svelte 반응성 업데이트
   }
   
   // 다음 퀴즈로 이동 (필터링된 목록 기준)
@@ -242,12 +270,22 @@
   // 랜덤 퀴즈 모드 전환
   function randomQuiz() {
     quizzes = shuffleArray(quizzes); // 전체 퀴즈 배열 섞기
-    isRandomMode = true; // isRandomMode를 먼저 true로 설정해야 saveProgressToLocalStorage에서 올바르게 quizOrder를 저장함
-    currentIndex = 0; // 필터링된 목록의 처음으로
+    quizzes = [...quizzes]; // Svelte 반응성 업데이트
+    isRandomMode = true; 
+    currentIndex = 0; 
     showAnswer = false;
-    // isRandomMode = true; // 위치 변경: saveProgressToLocalStorage가 반응형으로 호출될 때 isRandomMode가 true여야 함
     showToast('퀴즈 순서가 무작위로 섞였습니다.', 'success');
-    // saveProgressToLocalStorage(); // isRandomMode, quizzes 변경으로 인해 반응형으로 호출됨
+  }
+  
+  // 정렬 순서 토글 함수
+  function toggleSortOrder() {
+    sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+    isRandomMode = false; // 순서 정렬 시 랜덤 모드 해제
+    performSort(sortOrder);
+    currentIndex = 0;
+    showAnswer = false;
+    const message = sortOrder === 'desc' ? '최신 순으로 정렬되었습니다.' : '오래된 순으로 정렬되었습니다.';
+    showToast(message, 'info');
   }
   
   // 다시하기 - 현재 질문을 랜덤한 위치에 다시 추가
@@ -340,6 +378,7 @@
       quizzes = quizzes.map(quiz => 
         quiz.id === savedQuizId ? savedQuiz : quiz
       );
+      performSort(sortOrder); // 정렬 유지
       isEditing = false;
       showToast('퀴즈가 성공적으로 수정되었습니다.', 'success');
 
@@ -407,6 +446,7 @@
       const createdQuiz = await response.json();
       
       quizzes = [...quizzes, createdQuiz];
+      performSort(sortOrder); // 정렬 유지
       isCreating = false;
       showToast('새 퀴즈가 성공적으로 생성되었습니다.', 'success');
       
@@ -467,10 +507,11 @@
         // checkPassword(); // 이미 Input 컴포넌트의 on:keydown에서 처리됨
       } else if (activeElement.getAttribute('type') === 'password') {
         return;
-      }
-      // 그 외 input/textarea 포커스 시에는 대부분의 단축키 비활성화
-      // (예: 질문/답변 수정 중에는 화살표 키 등이 텍스트 이동에 사용되어야 함)
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === ' ') {
+      } else if (event.key.startsWith("Arrow") || event.key === ' ') {
+        // input/textarea 포커스 시 화살표, 스페이스바로 인한 페이지 이동/답변보기 방지 (텍스트 조작용으로 남겨둠)
+        // 단, 여기서는 일반적인 input/textarea의 동작을 막지 않도록 수정이 필요할 수 있음.
+        // 현재 로직은 ArrowLeft/Right, Space 키에 대한 전역 핸들러의 동작을 막는 것.
+        // 사용자가 의도한 것은 퀴즈 이동/답변 토글이므로, input/textarea에 포커스 시에는 이 기능들이 동작하지 않도록 하는 것이 맞음.
         return;
       }
     }
@@ -489,7 +530,10 @@
       case ' ': // Space bar
         event.preventDefault(); // 스페이스바의 기본 동작(페이지 스크롤 등) 방지
         if (!isEditing && !isCreating && currentQuiz) {
-          toggleAnswer();
+          // Input 또는 Textarea가 포커스되어 있지 않을 때만 답변 토글
+          if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA')) {
+            toggleAnswer();
+          }
         }
         break;
       case '?':
@@ -710,6 +754,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               랜덤
+            </Button>
+            <Button 
+              variant="secondary"
+              on:click={toggleSortOrder}
+              class="text-xs py-1 px-2 h-auto transition-all duration-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+              disabled={isEditing || quizzes.length === 0}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              {sortOrder === 'desc' ? '최신 순' : '오래된 순'}
             </Button>
             {#if !isEditing && currentQuiz}  
               <Button 
