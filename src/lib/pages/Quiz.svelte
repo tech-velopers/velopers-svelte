@@ -38,6 +38,8 @@
   let isEditing = false;
   let editedQuestion = '';
   let editedAnswer = '';
+  let editedWho = '';
+  let editedCategory = '';
   let isCreating = false;
   let newQuestion = '';
   let newAnswer = '';
@@ -56,6 +58,7 @@
   let selectedCategories: string[] = [];
   let allUniqueCategories: string[] = [];
   let isCategoryFilterOpen = false; // 카테고리 필터 접힘/펼침 상태
+  let isFilterSectionVisible = false; // 필터링 섹션 전체 표시 여부 (기본값: 숨김)
 
   // 필터링된 퀴즈 목록
   $: filteredQuizzes = selectedCategories.length === 0
@@ -182,7 +185,6 @@
           const newQuizzes = availableQuizzes.filter(q => !restoredOriginalIds.has(q.id));
           
           quizzes = [...reorderedQuizzes, ...newQuizzes];
-          console.log('[Quiz] onMount: Quizzes reordered based on saved quizOrder. Restored repeat quizzes.');
           isRandomMode = true; // 랜덤 모드 상태 유지
         } else {
           // 랜덤 모드가 아니거나 저장된 순서가 없으면 현재 sortOrder에 따라 정렬
@@ -204,21 +206,18 @@
         }
         showAnswer = false;
       } else {
-        console.log('[Quiz] onMount: No progress to restore or not authenticated from storage.');
         performSort(sortOrder); // 기본 정렬 적용
       }
     } catch (error) {
-      console.error('[Quiz] onMount: Error fetching quiz data:', error);
+      console.error('퀴즈 데이터를 불러오는데 실패했습니다:', error);
       showToast('퀴즈 데이터를 불러오는데 실패했습니다.', 'error');
     } finally {
       isLoading = false;
-      console.log('[Quiz] onMount: isLoading set to false.');
     }
   });
   
   // 진행 상황 저장 (즉시 실행)
   const saveProgressToLocalStorage = () => {
-    console.log(`[Quiz] saveProgress: Attempting to save. isAuthenticated: ${isAuthenticated}, isLoading: ${isLoading}`);
     if (isAuthenticated && !isLoading && typeof window !== 'undefined' && window.localStorage) {
       const progress: SavedProgress = {
         currentIndex,
@@ -230,18 +229,13 @@
       };
       try {
         localStorage.setItem(QUIZ_PROGRESS_KEY, JSON.stringify(progress));
-        console.log('[Quiz] saveProgress: Successfully saved to localStorage:', progress);
       } catch (e) {
-        console.error('[Quiz] saveProgress: Error saving to localStorage:', e);
+        console.error('localStorage 저장 중 오류 발생:', e);
       }
-    } else {
-      console.log('[Quiz] saveProgress: Conditions not met for saving (or window/localStorage not available).');
     }
   };
 
   $: if (typeof window !== 'undefined') {
-    // 이 로그는 반응형 블록이 실행될 때마다 기록됩니다.
-    console.log(`[Quiz] Reactive save trigger block. isAuthenticated: ${isAuthenticated}, currentIndex: ${currentIndex}, isLoading: ${isLoading}`);
     saveProgressToLocalStorage();
   }
   
@@ -327,15 +321,40 @@
       id: uniqueId // 고유한 ID 할당
     };
     
-    const minPosition = Math.min(currentIndex + 5, quizzes.length);
-    const maxPosition = quizzes.length;
-    const randomPosition = Math.floor(Math.random() * (maxPosition - minPosition + 1)) + minPosition;
+    // filteredQuizzes 기준으로 위치 계산
+    const currentFilteredIndex = filteredQuizzes.findIndex(q => q.id === currentQuiz.id);
+    const remainingFilteredQuizzes = filteredQuizzes.length - currentFilteredIndex - 1;
     
-    const newQuizzes = [...quizzes];
-    newQuizzes.splice(randomPosition, 0, quizToRepeat);
+    if (remainingFilteredQuizzes <= 0) {
+      // 현재가 마지막 퀴즈라면 전체 quizzes 배열 끝에 추가
+      quizzes = [...quizzes, quizToRepeat];
+    } else {
+      // 현재 위치에서 5개 후부터 필터링된 퀴즈 끝까지의 범위에서 랜덤 선택
+      const minFilteredPosition = Math.min(currentFilteredIndex + 5, filteredQuizzes.length);
+      const maxFilteredPosition = filteredQuizzes.length;
+      
+      if (minFilteredPosition >= maxFilteredPosition) {
+        // 범위가 없으면 끝에 추가
+        quizzes = [...quizzes, quizToRepeat];
+      } else {
+        // 랜덤 위치 선택 (필터링된 목록 기준)
+        const randomFilteredIndex = Math.floor(Math.random() * (maxFilteredPosition - minFilteredPosition)) + minFilteredPosition;
+        const targetQuiz = filteredQuizzes[randomFilteredIndex];
+        
+        // 전체 quizzes 배열에서 해당 퀴즈의 실제 위치 찾기
+        const actualIndex = quizzes.findIndex(q => q.id === targetQuiz.id);
+        
+        if (actualIndex !== -1) {
+          const newQuizzes = [...quizzes];
+          newQuizzes.splice(actualIndex, 0, quizToRepeat);
+          quizzes = newQuizzes;
+        } else {
+          // 찾지 못하면 끝에 추가
+          quizzes = [...quizzes, quizToRepeat];
+        }
+      }
+    }
     
-    quizzes = newQuizzes;
-    // nextQuiz() 호출 시 filteredQuizzes 기준으로 동작
     nextQuiz();
     showToast('이 문제가 나중에 다시 나타납니다.', 'info');
   }
@@ -360,12 +379,22 @@
     }
   }
 
+  // 수정 버튼 클릭 핸들러
+  function handleEditClick() {
+    startEditing();
+  }
+
   // 수정 모드 진입
   function startEditing() {
-    if (!currentQuiz) return;
+    if (!currentQuiz) {
+      return;
+    }
+    
     isEditing = true;
     editedQuestion = currentQuiz.question;
     editedAnswer = currentQuiz.answer || '';
+    editedWho = currentQuiz.who || '';
+    editedCategory = currentQuiz.category || '';
     showAnswer = true; // 수정 시 답변 보이도록
   }
 
@@ -377,21 +406,36 @@
 
   // 퀴즈 수정 API 호출
   async function saveChanges() {
-    if (!currentQuiz) return;
+    if (!currentQuiz) {
+      return;
+    }
     
     if (!editedQuestion.trim()) {
       showToast('질문은 필수 입력 사항입니다.', 'error');
       return;
     }
 
+    if (!editedCategory.trim()) {
+      showToast('카테고리는 필수 입력 사항입니다.', 'error');
+      return;
+    }
+
+    // repeat 퀴즈인지 확인하고 원본 ID 추출
+    const isRepeatQuiz = currentQuiz.id.includes('_repeat_');
+    const originalId = isRepeatQuiz ? currentQuiz.id.split('_repeat_')[0] : currentQuiz.id;
+
     const updatedQuizData = {
       ...currentQuiz,
+      id: originalId, // 원본 ID 사용
       question: editedQuestion,
       answer: editedAnswer,
+      category: editedCategory,
+      who: editedWho,
     };
 
     try {
-      const apiUrl = getApiUrl(`/api/quiz/${currentQuiz.id}`);
+      const apiUrl = getApiUrl(`/api/quiz/${originalId}`); // 원본 ID로 API 호출
+      
       const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
@@ -401,30 +445,50 @@
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
         throw new Error('퀴즈 수정에 실패했습니다.');
       }
 
       const savedQuiz = await response.json();
       const savedQuizId = savedQuiz.id;
 
+      // 수정 완료 후 현재 퀴즈 유지를 위해 ID 저장
+      const currentQuizId = currentQuiz.id;
+
       // 로컬 데이터 업데이트
-      quizzes = quizzes.map(quiz => 
-        quiz.id === savedQuizId ? savedQuiz : quiz
-      );
+      // repeat 퀴즈였다면 현재 퀴즈를 업데이트하고, 원본 퀴즈도 업데이트
+      quizzes = quizzes.map(quiz => {
+        if (quiz.id === currentQuiz.id) {
+          // 현재 repeat 퀴즈 업데이트
+          return { ...savedQuiz, id: currentQuiz.id }; // repeat ID 유지
+        } else if (quiz.id === originalId) {
+          // 원본 퀴즈 업데이트
+          return savedQuiz;
+        }
+        return quiz;
+      });
+      
       performSort(sortOrder); // 정렬 유지
       isEditing = false;
-      showToast('퀴즈가 성공적으로 수정되었습니다.', 'success');
-
-      // Adjust currentIndex after quiz data changes
-      const editedQuizIdxInFiltered = filteredQuizzes.findIndex(q => q.id === savedQuizId);
-      if (editedQuizIdxInFiltered !== -1) {
-        currentIndex = editedQuizIdxInFiltered;
+      
+      if (isRepeatQuiz) {
+        showToast('다시하기 퀴즈가 성공적으로 수정되었습니다. (원본도 함께 업데이트됨)', 'success');
       } else {
-        if (filteredQuizzes.length === 0) {
-          currentIndex = 0;
-        } else {
+        showToast('퀴즈가 성공적으로 수정되었습니다.', 'success');
+      }
+
+      // 수정된 퀴즈를 찾아서 currentIndex 설정
+      const updatedQuizIndex = filteredQuizzes.findIndex(q => q.id === currentQuizId);
+      
+      if (updatedQuizIndex !== -1) {
+        currentIndex = updatedQuizIndex;
+      } else {
+        // 찾지 못한 경우 (필터링으로 인해 보이지 않을 수 있음)
+        if (filteredQuizzes.length > 0) {
           currentIndex = Math.min(currentIndex, filteredQuizzes.length - 1);
           if (currentIndex < 0) currentIndex = 0;
+        } else {
+          currentIndex = 0;
         }
       }
     } catch (error) {
@@ -533,6 +597,16 @@
     isQuizListOpen = !isQuizListOpen;
   }
 
+  // 필터링 섹션 토글 함수
+  function toggleFilterSection() {
+    isFilterSectionVisible = !isFilterSectionVisible;
+    if (!isFilterSectionVisible) {
+      // 필터링 섹션을 숨길 때 퀴즈 목록과 카테고리 필터도 닫기
+      isQuizListOpen = false;
+      isCategoryFilterOpen = false;
+    }
+  }
+
   // 특정 퀴즈로 이동 함수
   function goToQuiz(index: number) {
     if (index >= 0 && index < filteredQuizzes.length) {
@@ -540,6 +614,39 @@
       showAnswer = false;
       isQuizListOpen = false; // 퀴즈 선택 후 목록 닫기
     }
+  }
+
+  // "다시하기" 퀴즈들 초기화 함수
+  function resetRepeatQuizzes() {
+    const originalQuizzesCount = quizzes.length;
+    const repeatQuizzesCount = quizzes.filter(quiz => quiz.id.includes('_repeat_')).length;
+    
+    if (repeatQuizzesCount === 0) {
+      showToast('초기화할 다시하기 퀴즈가 없습니다.', 'info');
+      return;
+    }
+    
+    // repeat 퀴즈들을 제거
+    quizzes = quizzes.filter(quiz => !quiz.id.includes('_repeat_'));
+    
+    // 현재 인덱스 조정
+    if (filteredQuizzes.length > 0) {
+      if (currentIndex >= filteredQuizzes.length) {
+        currentIndex = filteredQuizzes.length - 1;
+      }
+      if (currentIndex < 0) {
+        currentIndex = 0;
+      }
+    } else {
+      currentIndex = 0;
+    }
+    
+    showAnswer = false;
+    
+    // 로컬 스토리지 즉시 업데이트 (repeat 퀴즈 제거된 상태로)
+    saveProgressToLocalStorage();
+    
+    showToast(`${repeatQuizzesCount}개의 다시하기 퀴즈가 초기화되었습니다.`, 'success');
   }
 
   // 키보드 이벤트 핸들러
@@ -750,6 +857,7 @@
       <!-- 퀴즈 카테고리 및 컨트롤 영역 -->
       <div class="mb-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 transition-all duration-300 dark:ring-1 dark:ring-gray-700">
         <!-- 퀴즈 목록 토글 버튼 및 목록 -->
+        {#if isFilterSectionVisible}
         <div class="mb-3">
           <Button
             variant="outline"
@@ -812,6 +920,7 @@
             {/if}
           </div>
         {/if}
+        {/if}
 
         <!-- 퀴즈 컨트롤 영역 -->
         <div class="flex items-center justify-between flex-wrap gap-2">
@@ -855,13 +964,37 @@
             {#if !isEditing && currentQuiz}  
               <Button 
                 variant="secondary" 
-                on:click={startEditing} 
+                on:click={handleEditClick} 
                 class="text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
                 수정
+              </Button>
+              <Button 
+                variant="secondary" 
+                on:click={resetRepeatQuizzes} 
+                class="text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                초기화
+              </Button>
+              <Button 
+                variant={isFilterSectionVisible ? "default" : "secondary"}
+                on:click={toggleFilterSection} 
+                class="text-xs py-1 px-2 h-auto transition-all duration-300 {
+                  isFilterSectionVisible 
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
+                }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                필터링
               </Button>
             {/if}
           </div>
@@ -895,15 +1028,40 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden dark:ring-1 dark:ring-gray-700">
           <!-- 카테고리 및 작성자 정보 -->
           <div class="p-4 bg-white dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
-            {#if currentQuiz.category}
-              <span class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
-                {currentQuiz.category}
-              </span>
-            {/if}
-            {#if currentQuiz.who}
-              <span class="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
-                {currentQuiz.who}
-              </span>
+            {#if isEditing}
+              <div class="w-full space-y-3">
+                <div>
+                  <label for="edit-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">카테고리 *</label>
+                  <Input 
+                    id="edit-category"
+                    type="text" 
+                    bind:value={editedCategory} 
+                    placeholder="카테고리 (필수, 쉼표로 여러개 가능)"
+                    class="w-full dark:bg-gray-700 dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label for="edit-who" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">작성자</label>
+                  <Input 
+                    id="edit-who"
+                    type="text" 
+                    bind:value={editedWho} 
+                    placeholder="작성자 (선택)"
+                    class="w-full dark:bg-gray-700 dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            {:else}
+              {#if currentQuiz.category}
+                <span class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
+                  {currentQuiz.category}
+                </span>
+              {/if}
+              {#if currentQuiz.who}
+                <span class="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
+                  {currentQuiz.who}
+                </span>
+              {/if}
             {/if}
           </div>
           
@@ -914,7 +1072,8 @@
                 <Textarea 
                   bind:value={editedQuestion} 
                   class="w-full dark:bg-gray-700 dark:text-white text-lg font-semibold resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300" 
-                  rows={3}
+                  rows={4}
+                  style="height: 120px; min-height: 120px; max-height: 120px;"
                 />
               {:else}
                 <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100" transition:fade={{ duration: 200 }}>
