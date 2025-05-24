@@ -82,5 +82,5 @@
   {#if $currentPath !== '/quiz'}
     <Footer />
   {/if}
-  <Toaster />
+  <Toaster position="top-center" duration={800} />
 </div>

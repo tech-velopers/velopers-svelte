@@ -2,6 +2,8 @@
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
   import { Textarea } from "$lib/components/ui/textarea";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import { toast } from "svelte-sonner";
   import { onMount } from "svelte";
   import { getApiUrl } from '$lib/config';
   import { fade } from 'svelte/transition';
@@ -34,8 +36,8 @@
   let isLoading = true;
   let isAuthenticated = false;
   let passwordInput = '';
-  const correctPassword = '4120';
-  let isEditing = false;
+  let correctPassword = '4120';
+  let isEditDialogOpen = false; // Dialog 상태로 변경
   let editedQuestion = '';
   let editedAnswer = '';
   let editedWho = '';
@@ -48,11 +50,6 @@
 
   let sortOrder: 'asc' | 'desc' = 'desc'; // 'desc'가 최신순 (id 내림차순)
   let isQuizListOpen = false; // 퀴즈 목록 표시 여부
-
-  // UI 개선을 위한 추가 상태 변수
-  let showNotification = false;
-  let notificationMessage = '';
-  let notificationType: 'success' | 'error' | 'info' = 'info';
 
   // 카테고리 필터 상태
   let selectedCategories: string[] = [];
@@ -94,16 +91,8 @@
     allUniqueCategories = Array.from(categorySet).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
   }
   
-  // 알림 표시 함수
-  function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
-    notificationMessage = message;
-    notificationType = type;
-    showNotification = true;
-    
-    setTimeout(() => {
-      showNotification = false;
-    }, 3000);
-  }
+  // 다시하기 퀴즈 개수 계산
+  $: repeatQuizCount = quizzes.filter(quiz => quiz.id.includes('_repeat_')).length;
   
   // 퀴즈 데이터 가져오기 및 상태 복원
   onMount(async () => {
@@ -210,7 +199,7 @@
       }
     } catch (error) {
       console.error('퀴즈 데이터를 불러오는데 실패했습니다:', error);
-      showToast('퀴즈 데이터를 불러오는데 실패했습니다.', 'error');
+      toast.error('퀴즈 데이터를 불러오는데 실패했습니다.');
     } finally {
       isLoading = false;
     }
@@ -267,7 +256,7 @@
       currentIndex += 1;
       showAnswer = false;
     } else {
-      showToast('마지막 퀴즈입니다!', 'info');
+      toast.info('마지막 퀴즈입니다!');
     }
   }
   
@@ -277,7 +266,7 @@
       currentIndex -= 1;
       showAnswer = false;
     } else {
-      showToast('첫 번째 퀴즈입니다!', 'info');
+      toast.info('첫 번째 퀴즈입니다!');
     }
   }
   
@@ -293,7 +282,7 @@
     isRandomMode = true; 
     currentIndex = 0; 
     showAnswer = false;
-    showToast('퀴즈 순서가 무작위로 섞였습니다.', 'success');
+    toast.success('퀴즈 순서가 무작위로 섞였습니다.');
   }
   
   // 정렬 순서 토글 함수
@@ -304,7 +293,7 @@
     currentIndex = 0;
     showAnswer = false;
     const message = sortOrder === 'desc' ? '최신 순으로 정렬되었습니다.' : '오래된 순으로 정렬되었습니다.';
-    showToast(message, 'info');
+    toast.info(message);
   }
   
   // 다시하기 - 현재 질문을 랜덤한 위치에 다시 추가
@@ -356,7 +345,7 @@
     }
     
     nextQuiz();
-    showToast('이 문제가 나중에 다시 나타납니다.', 'info');
+    toast.info('이 문제가 나중에 다시 나타납니다.');
   }
 
   // 비밀번호 확인 함수
@@ -364,9 +353,9 @@
     if (passwordInput === correctPassword) {
       isAuthenticated = true;
       console.log('[Quiz] checkPassword: Password correct, isAuthenticated set to true.');
-      showToast('로그인 성공! 퀴즈를 시작합니다.', 'success');
+      toast.success('로그인 성공! 퀴즈를 시작합니다.');
     } else {
-      showToast('비밀번호가 틀렸습니다.', 'error');
+      toast.error('비밀번호가 틀렸습니다.');
       passwordInput = '';
       console.log('[Quiz] checkPassword: Password incorrect.');
     }
@@ -390,7 +379,7 @@
       return;
     }
     
-    isEditing = true;
+    isEditDialogOpen = true;
     editedQuestion = currentQuiz.question;
     editedAnswer = currentQuiz.answer || '';
     editedWho = currentQuiz.who || '';
@@ -400,8 +389,8 @@
 
   // 수정 취소
   function cancelEditing() {
-    isEditing = false;
-    showToast('수정이 취소되었습니다.', 'info');
+    isEditDialogOpen = false;
+    toast.info('수정이 취소되었습니다.');
   }
 
   // 퀴즈 수정 API 호출
@@ -411,12 +400,12 @@
     }
     
     if (!editedQuestion.trim()) {
-      showToast('질문은 필수 입력 사항입니다.', 'error');
+      toast.error('질문은 필수 입력 사항입니다.');
       return;
     }
 
     if (!editedCategory.trim()) {
-      showToast('카테고리는 필수 입력 사항입니다.', 'error');
+      toast.error('카테고리는 필수 입력 사항입니다.');
       return;
     }
 
@@ -455,7 +444,7 @@
       // 수정 완료 후 현재 퀴즈 유지를 위해 ID 저장
       const currentQuizId = currentQuiz.id;
 
-      // 로컬 데이터 업데이트
+      // 로컬 데이터 업데이트 (순서 유지)
       // repeat 퀴즈였다면 현재 퀴즈를 업데이트하고, 원본 퀴즈도 업데이트
       quizzes = quizzes.map(quiz => {
         if (quiz.id === currentQuiz.id) {
@@ -468,16 +457,16 @@
         return quiz;
       });
       
-      performSort(sortOrder); // 정렬 유지
-      isEditing = false;
+      // 순서를 유지하기 위해 performSort 호출하지 않음
+      isEditDialogOpen = false;
       
       if (isRepeatQuiz) {
-        showToast('다시하기 퀴즈가 성공적으로 수정되었습니다. (원본도 함께 업데이트됨)', 'success');
+        toast.success('다시하기 퀴즈가 성공적으로 수정되었습니다. (원본도 함께 업데이트됨)');
       } else {
-        showToast('퀴즈가 성공적으로 수정되었습니다.', 'success');
+        toast.success('퀴즈가 성공적으로 수정되었습니다.');
       }
 
-      // 수정된 퀴즈를 찾아서 currentIndex 설정
+      // 수정된 퀴즈를 찾아서 currentIndex 설정 (순서 유지됨)
       const updatedQuizIndex = filteredQuizzes.findIndex(q => q.id === currentQuizId);
       
       if (updatedQuizIndex !== -1) {
@@ -493,7 +482,7 @@
       }
     } catch (error) {
       console.error('퀴즈 수정 중 오류 발생:', error);
-      showToast('퀴즈 수정 중 오류가 발생했습니다.', 'error');
+      toast.error('퀴즈 수정 중 오류가 발생했습니다.');
     }
   }
 
@@ -509,13 +498,13 @@
   // 생성 취소
   function cancelCreating() {
     isCreating = false;
-    showToast('새 퀴즈 생성이 취소되었습니다.', 'info');
+    toast.info('새 퀴즈 생성이 취소되었습니다.');
   }
 
   // 새 퀴즈 저장 API 호출
   async function saveNewQuiz() {
     if (!newQuestion || !newCategory) {
-      showToast('질문과 카테고리는 필수 입력 사항입니다.', 'error');
+      toast.error('질문과 카테고리는 필수 입력 사항입니다.');
       return;
     }
 
@@ -545,7 +534,7 @@
       quizzes = [...quizzes, createdQuiz];
       performSort(sortOrder); // 정렬 유지
       isCreating = false;
-      showToast('새 퀴즈가 성공적으로 생성되었습니다.', 'success');
+      toast.success('새 퀴즈가 성공적으로 생성되었습니다.');
       
       const newQuizId = createdQuiz.id;
       const idxInFiltered = filteredQuizzes.findIndex(q => q.id === newQuizId);
@@ -562,7 +551,7 @@
       }
     } catch (error) {
       console.error('퀴즈 생성 중 오류 발생:', error);
-      showToast('퀴즈 생성 중 오류가 발생했습니다.', 'error');
+      toast.error('퀴즈 생성 중 오류가 발생했습니다.');
     }
   }
 
@@ -576,7 +565,7 @@
     }
     currentIndex = 0; // 필터 변경 시 첫 번째 퀴즈로
     showAnswer = false;
-    showToast(`카테고리: ${selectedCategories.length === 0 ? '모든 카테고리' : selectedCategories.join(', ')}`, 'info');
+    toast.info(`카테고리: ${selectedCategories.length === 0 ? '모든 카테고리' : selectedCategories.join(', ')}`);
   }
 
   // 카테고리 필터 토글 함수
@@ -589,7 +578,7 @@
     selectedCategories = [];
     currentIndex = 0;
     showAnswer = false;
-    showToast('모든 카테고리가 선택 해제되었습니다.', 'info');
+    toast.info('모든 카테고리가 선택 해제되었습니다.');
   }
 
   // 퀴즈 목록 토글 함수
@@ -622,36 +611,27 @@
     const repeatQuizzesCount = quizzes.filter(quiz => quiz.id.includes('_repeat_')).length;
     
     if (repeatQuizzesCount === 0) {
-      showToast('초기화할 다시하기 퀴즈가 없습니다.', 'info');
+      toast.info('초기화할 다시하기 퀴즈가 없습니다.');
       return;
     }
     
     // repeat 퀴즈들을 제거
     quizzes = quizzes.filter(quiz => !quiz.id.includes('_repeat_'));
     
-    // 현재 인덱스 조정
-    if (filteredQuizzes.length > 0) {
-      if (currentIndex >= filteredQuizzes.length) {
-        currentIndex = filteredQuizzes.length - 1;
-      }
-      if (currentIndex < 0) {
-        currentIndex = 0;
-      }
-    } else {
-      currentIndex = 0;
-    }
+    // 현재 인덱스를 맨 처음으로 이동
+    currentIndex = 0;
     
     showAnswer = false;
     
     // 로컬 스토리지 즉시 업데이트 (repeat 퀴즈 제거된 상태로)
     saveProgressToLocalStorage();
     
-    showToast(`${repeatQuizzesCount}개의 다시하기 퀴즈가 초기화되었습니다.`, 'success');
+    toast.success(`${repeatQuizzesCount}개의 다시하기 퀴즈가 초기화되었습니다.`);
   }
 
   // 키보드 이벤트 핸들러
   function handleGlobalKeydown(event: KeyboardEvent) {
-    if (!isAuthenticated || isEditing || isCreating) return;
+    if (!isAuthenticated || isEditDialogOpen || isCreating) return;
 
     // 퀴즈 목록이 열려있을 때는 Enter, Space, Arrow 키들의 기본 동작만 허용 (목록 내 탐색 등)
     if (isQuizListOpen) {
@@ -683,18 +663,18 @@
 
     switch (event.key) {
       case 'ArrowLeft':
-        if (!isEditing && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
+        if (!isEditDialogOpen && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
           prevQuiz();
         }
         break;
       case 'ArrowRight':
-        if (!isEditing && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
+        if (!isEditDialogOpen && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
           nextQuiz();
         }
         break;
       case ' ': // Space bar
         event.preventDefault(); // 스페이스바의 기본 동작(페이지 스크롤 등) 방지
-        if (!isEditing && !isCreating && currentQuiz) {
+        if (!isEditDialogOpen && !isCreating && currentQuiz) {
           // Input 또는 Textarea가 포커스되어 있지 않을 때만 답변 토글
           if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA')) {
             toggleAnswer();
@@ -702,7 +682,7 @@
         }
         break;
       case '?':
-        if (event.shiftKey && !isEditing && !isCreating && currentQuiz) {
+        if (event.shiftKey && !isEditDialogOpen && !isCreating && currentQuiz) {
           repeatQuiz();
         }
         break;
@@ -713,35 +693,6 @@
 <svelte:window on:keydown={handleGlobalKeydown} />
 
 <div class="container mx-auto px-4 py-6 max-w-3xl pb-24">
-  
-  <!-- 알림 표시 영역 -->
-  {#if showNotification}
-    <div 
-      transition:fade={{ duration: 300 }}
-      class="quiz-toast-notification fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg max-w-md {
-        notificationType === 'success' ? 'bg-green-500 text-white' : 
-        notificationType === 'error' ? 'bg-red-500 text-white' : 
-        'bg-blue-500 text-white'
-      }"
-    >
-      <div class="flex items-center">
-        {#if notificationType === 'success'}
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-        {:else if notificationType === 'error'}
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        {:else}
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        {/if}
-        <span>{notificationMessage}</span>
-      </div>
-    </div>
-  {/if}
   
   {#if !isAuthenticated}
     <div class="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
@@ -863,7 +814,7 @@
             variant="outline"
             on:click={toggleQuizList}
             class="w-full text-sm py-2 justify-between border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
-            disabled={isEditing || isCreating || quizzes.length === 0}
+            disabled={isEditDialogOpen || isCreating || quizzes.length === 0}
           >
             <span class="font-medium">{isQuizListOpen ? '퀴즈 목록 숨기기' : '퀴즈 목록 보기'} ({filteredQuizzes.length}개)</span>
             <span class="transition-transform duration-300" style={isQuizListOpen ? "transform: rotate(180deg)" : ""}>▼</span>
@@ -924,16 +875,16 @@
 
         <!-- 퀴즈 컨트롤 영역 -->
         <div class="flex items-center justify-between flex-wrap gap-2">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
             <Button 
               variant="outline"
               on:click={startCreating}
               class="text-xs py-1 px-2 h-auto hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              새 퀴즈
+              <span class="hidden sm:inline">새 퀴즈</span>
             </Button>
             <Button 
               variant={isRandomMode ? "default" : "secondary"}
@@ -943,44 +894,44 @@
                   ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                   : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
               }"
-              disabled={isEditing || quizzes.length === 0}
+              disabled={isEditDialogOpen || quizzes.length === 0}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              랜덤
+              <span class="hidden sm:inline">랜덤</span>
             </Button>
             <Button 
               variant="secondary"
               on:click={toggleSortOrder}
               class="text-xs py-1 px-2 h-auto transition-all duration-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-              disabled={isEditing || quizzes.length === 0}
+              disabled={isEditDialogOpen || quizzes.length === 0}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
               </svg>
-              {sortOrder === 'desc' ? '최신 순' : '오래된 순'}
+              <span class="hidden md:inline">{sortOrder === 'desc' ? '최신 순' : '오래된 순'}</span>
             </Button>
-            {#if !isEditing && currentQuiz}  
+            {#if !isEditDialogOpen && currentQuiz}  
               <Button 
                 variant="secondary" 
                 on:click={handleEditClick} 
                 class="text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                수정
+                <span class="hidden sm:inline">수정</span>
               </Button>
               <Button 
                 variant="secondary" 
                 on:click={resetRepeatQuizzes} 
                 class="text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                초기화
+                <span class="hidden md:inline">초기화</span>
               </Button>
               <Button 
                 variant={isFilterSectionVisible ? "default" : "secondary"}
@@ -991,20 +942,23 @@
                     : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
                 }"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                필터링
+                <span class="hidden md:inline">필터링</span>
               </Button>
             {/if}
           </div>
           
-          {#if !isEditing && filteredQuizzes.length > 0}
-            <div class="bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-600 dark:text-gray-300 flex items-center">
-              <span>{currentIndex + 1} / {filteredQuizzes.length}</span>
-              {#if filteredQuizzes.length > 0}
-                <span class="ml-1 text-blue-500 dark:text-blue-400 font-medium">({Math.round((currentIndex + 1) / filteredQuizzes.length * 100)}%)</span>
-              {/if}
+          {#if !isEditDialogOpen && filteredQuizzes.length > 0}
+            <div class="bg-gray-100 dark:bg-gray-700 rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300 flex items-center shrink-0">
+              <span class="font-medium">
+                {currentIndex + 1}/{filteredQuizzes.length}
+                {#if repeatQuizCount > 0}
+                  <span class="text-orange-500 dark:text-orange-400">(+{repeatQuizCount})</span>
+                {/if}
+                <span class="text-blue-500 dark:text-blue-400 ml-1">[{Math.round((currentIndex + 1) / filteredQuizzes.length * 100)}%]</span>
+              </span>
             </div>
           {/if}
         </div>
@@ -1028,58 +982,24 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden dark:ring-1 dark:ring-gray-700">
           <!-- 카테고리 및 작성자 정보 -->
           <div class="p-4 bg-white dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
-            {#if isEditing}
-              <div class="w-full space-y-3">
-                <div>
-                  <label for="edit-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">카테고리 *</label>
-                  <Input 
-                    id="edit-category"
-                    type="text" 
-                    bind:value={editedCategory} 
-                    placeholder="카테고리 (필수, 쉼표로 여러개 가능)"
-                    class="w-full dark:bg-gray-700 dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label for="edit-who" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">작성자</label>
-                  <Input 
-                    id="edit-who"
-                    type="text" 
-                    bind:value={editedWho} 
-                    placeholder="작성자 (선택)"
-                    class="w-full dark:bg-gray-700 dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            {:else}
-              {#if currentQuiz.category}
-                <span class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
-                  {currentQuiz.category}
-                </span>
-              {/if}
-              {#if currentQuiz.who}
-                <span class="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
-                  {currentQuiz.who}
-                </span>
-              {/if}
+            {#if currentQuiz.category}
+              <span class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
+                {currentQuiz.category}
+              </span>
+            {/if}
+            {#if currentQuiz.who}
+              <span class="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
+                {currentQuiz.who}
+              </span>
             {/if}
           </div>
           
           <!-- 질문 영역 -->
           <div class="p-4 sm:p-5">
             <div class="question-container min-h-[120px] flex items-center mb-5">
-              {#if isEditing}
-                <Textarea 
-                  bind:value={editedQuestion} 
-                  class="w-full dark:bg-gray-700 dark:text-white text-lg font-semibold resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300" 
-                  rows={4}
-                  style="height: 120px; min-height: 120px; max-height: 120px;"
-                />
-              {:else}
-                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100" transition:fade={{ duration: 200 }}>
-                  {currentQuiz.question}
-                </h2>
-              {/if}
+              <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100" transition:fade={{ duration: 200 }}>
+                {currentQuiz.question}
+              </h2>
             </div>
             
             <!-- 답변 영역 -->
@@ -1087,14 +1007,8 @@
               class="answer-container w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-5"
             >
               <div class="w-full">
-                {#if showAnswer || isEditing}
-                  {#if isEditing}
-                    <Textarea 
-                      bind:value={editedAnswer} 
-                      class="w-full dark:bg-gray-700 dark:text-white text-sm leading-relaxed resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-                      rows={10}
-                    />
-                  {:else if currentQuiz.answer}
+                {#if showAnswer}
+                  {#if currentQuiz.answer}
                     <p class="whitespace-pre-line text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{currentQuiz.answer}</p>
                   {:else}
                     <p class="text-center text-gray-500 dark:text-gray-400 text-sm py-10">답변이 제공되지 않은 질문입니다.</p>
@@ -1117,22 +1031,7 @@
     <!-- 푸터 대체 고정 버튼 -->
     <div class="quiz-fixed-footer fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 px-4 shadow-lg z-20 transition-all duration-300">
       <div class="container mx-auto max-w-3xl flex justify-between gap-3">
-        {#if isEditing}
-          <Button 
-            variant="outline" 
-            on:click={cancelEditing} 
-            class="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300"
-          >
-            취소
-          </Button>
-          <Button 
-            variant="default" 
-            on:click={saveChanges} 
-            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300"
-          >
-            저장
-          </Button>
-        {:else if currentQuiz}
+        {#if currentQuiz}
           <div class="grid grid-cols-3 gap-3 w-full">
             <Button 
               variant={showAnswer ? "default" : "outline"} 
@@ -1199,6 +1098,73 @@
   {/if}
 </div>
 
+<!-- 퀴즈 수정 Dialog -->
+<Dialog.Root bind:open={isEditDialogOpen}>
+  <Dialog.Content class="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+    <Dialog.Header>
+      <Dialog.Title>퀴즈 수정</Dialog.Title>
+      <Dialog.Description>
+        퀴즈의 내용을 수정할 수 있습니다. 변경사항을 저장하려면 저장 버튼을 클릭하세요.
+      </Dialog.Description>
+    </Dialog.Header>
+    
+    <div class="grid gap-4 py-4">
+      <div>
+        <label for="edit-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">카테고리 *</label>
+        <Input 
+          id="edit-category"
+          type="text" 
+          bind:value={editedCategory} 
+          placeholder="카테고리 (필수, 쉼표로 여러개 가능)"
+          class="w-full"
+        />
+      </div>
+      
+      <div>
+        <label for="edit-who" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">작성자</label>
+        <Input 
+          id="edit-who"
+          type="text" 
+          bind:value={editedWho} 
+          placeholder="작성자 (선택)"
+          class="w-full"
+        />
+      </div>
+      
+      <div>
+        <label for="edit-question" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">질문 *</label>
+        <Textarea 
+          id="edit-question"
+          bind:value={editedQuestion} 
+          placeholder="질문 (필수)"
+          class="w-full min-h-[100px]"
+          rows={4}
+        />
+      </div>
+      
+      <div>
+        <label for="edit-answer" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">답변</label>
+        <Textarea
+          id="edit-answer"
+          bind:value={editedAnswer}
+          placeholder="답변 (선택)"
+          class="w-full min-h-[200px]"
+          rows={8}
+        />
+      </div>
+    </div>
+    
+    <Dialog.Footer>
+      <Button variant="outline" on:click={cancelEditing}>
+        취소
+      </Button>
+      <Button on:click={saveChanges}>
+        저장
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
+
 <style>
   .answer-container {
     min-height: 220px;
@@ -1234,18 +1200,6 @@
     .quiz-fixed-footer {
       /* 기본 1rem 패딩 + 안전 영역 (iPhone X 등 노치 디자인 대응) */
       padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-    }
-
-    .quiz-toast-notification {
-      max-width: calc(100vw - 32px); /* 16px (1rem) margin on each side */
-      padding: 0.5rem 0.75rem; /* py-2 px-3 */
-      font-size: 0.875rem; /* text-sm */
-    }
-
-    .quiz-toast-notification svg {
-      width: 1rem; /* w-4 */
-      height: 1rem; /* h-4 */
-      /* margin-right: 0.5rem; /* mr-2, already applied by class, usually fine */
     }
   }
 
