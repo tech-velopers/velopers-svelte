@@ -2,10 +2,9 @@
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
   import { Textarea } from "$lib/components/ui/textarea";
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import { getApiUrl } from '$lib/config';
-  import { fade, slide } from 'svelte/transition';
-  import { quintOut } from 'svelte/easing';
+  import { fade } from 'svelte/transition';
   
   const QUIZ_PROGRESS_KEY = 'velopersQuizProgress';
 
@@ -145,20 +144,45 @@
         // 랜덤 모드였고, 저장된 퀴즈 순서가 있다면 quizzes 배열을 재정렬합니다.
         if (progressToRestore.isRandomMode && progressToRestore.quizOrder && progressToRestore.quizOrder.length > 0) {
           const orderedQuizIdsFromStorage = progressToRestore.quizOrder;
-          const currentQuizMap = new Map(quizzes.map(q => [q.id, q]));
+          const availableQuizzes = [...quizzes]; // API에서 가져온 원본 퀴즈들
           const reorderedQuizzes: Quiz[] = [];
           
           // 1. 저장된 순서에 따라 퀴즈를 배치합니다.
-          for (const quizId of orderedQuizIdsFromStorage) {
-            if (currentQuizMap.has(quizId)) {
-              reorderedQuizzes.push(currentQuizMap.get(quizId)!);
-              currentQuizMap.delete(quizId); // 처리된 퀴즈는 맵에서 제거
+          for (const savedId of orderedQuizIdsFromStorage) {
+            // repeat 퀴즈인지 확인 (ID에 '_repeat_'가 포함된 경우)
+            if (savedId.includes('_repeat_')) {
+              // repeat 퀴즈는 원본 ID를 찾아서 복사해서 추가
+              const originalId = savedId.split('_repeat_')[0];
+              const originalQuiz = availableQuizzes.find(q => q.id === originalId);
+              if (originalQuiz) {
+                reorderedQuizzes.push({
+                  ...originalQuiz,
+                  id: savedId // 저장된 고유 ID 유지
+                });
+              }
+            } else {
+              // 일반 퀴즈는 API 결과에서 찾아서 추가
+              const foundQuiz = availableQuizzes.find(q => q.id === savedId);
+              if (foundQuiz) {
+                reorderedQuizzes.push(foundQuiz);
+              }
             }
           }
-          // 2. 저장된 순서에는 없지만 현재 API 결과에는 있는 나머지 퀴즈들을 뒤에 추가합니다.
-          // (예: 퀴즈가 새로 추가된 경우)
-          quizzes = [...reorderedQuizzes, ...Array.from(currentQuizMap.values())];
-          console.log('[Quiz] onMount: Quizzes reordered based on saved quizOrder.');
+          
+          // 2. 저장된 순서에는 없지만 현재 API 결과에는 있는 새로운 퀴즈들을 뒤에 추가합니다.
+          const restoredOriginalIds = new Set(
+            orderedQuizIdsFromStorage
+              .filter(id => !id.includes('_repeat_'))
+              .concat(
+                orderedQuizIdsFromStorage
+                  .filter(id => id.includes('_repeat_'))
+                  .map(id => id.split('_repeat_')[0])
+              )
+          );
+          const newQuizzes = availableQuizzes.filter(q => !restoredOriginalIds.has(q.id));
+          
+          quizzes = [...reorderedQuizzes, ...newQuizzes];
+          console.log('[Quiz] onMount: Quizzes reordered based on saved quizOrder. Restored repeat quizzes.');
           isRandomMode = true; // 랜덤 모드 상태 유지
         } else {
           // 랜덤 모드가 아니거나 저장된 순서가 없으면 현재 sortOrder에 따라 정렬
@@ -293,7 +317,15 @@
   function repeatQuiz() {
     if (!currentQuiz) return;
     
-    const quizToRepeat = { ...currentQuiz };
+    // 중복 퀴즈에 고유한 ID 생성 (원본 ID + timestamp + random)
+    const timestamp = Date.now();
+    const randomSuffix = Math.floor(Math.random() * 10000);
+    const uniqueId = `${currentQuiz.id}_repeat_${timestamp}_${randomSuffix}`;
+    
+    const quizToRepeat = { 
+      ...currentQuiz, 
+      id: uniqueId // 고유한 ID 할당
+    };
     
     const minPosition = Math.min(currentIndex + 5, quizzes.length);
     const maxPosition = quizzes.length;
@@ -730,20 +762,17 @@
           </Button>
           {#if isQuizListOpen && filteredQuizzes.length > 0}
             <div class="mt-2 p-3 bg-gray-50 dark:bg-gray-700/60 rounded-md shadow max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-600 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
-              <ul class="space-y-1">
+              <div class="space-y-1">
                 {#each filteredQuizzes as quiz, i}
-                  <li 
-                    class="p-2 text-sm rounded-md cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors duration-150 {currentIndex === i ? 'bg-blue-100 dark:bg-blue-900/70 font-semibold text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}"
+                  <button 
+                    class="w-full text-left p-2 text-sm rounded-md cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors duration-150 {currentIndex === i ? 'bg-blue-100 dark:bg-blue-900/70 font-semibold text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}"
                     on:click={() => goToQuiz(i)}
-                    on:keydown={(e) => { if (e.key === 'Enter') goToQuiz(i); }}
-                    role="button"
-                    tabindex="0"
                   >
                     <span>{i + 1}. </span>
                     <span>{quiz.question.substring(0, 50)}{quiz.question.length > 50 ? '...' : ''}</span>
-                  </li>
+                  </button>
                 {/each}
-              </ul>
+              </div>
             </div>
           {/if}
         </div>
