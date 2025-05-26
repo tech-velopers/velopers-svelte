@@ -100,10 +100,15 @@
     let progressToRestore: SavedProgress | null = null;
 
     if (typeof window !== 'undefined' && window.localStorage) {
+      // 먼저 잘못된 데이터 정리
+      clearInvalidLocalStorage();
+      
       const savedProgressString = localStorage.getItem(QUIZ_PROGRESS_KEY);
-      if (savedProgressString) {
+      
+              if (savedProgressString) {
         try {
           const parsed = JSON.parse(savedProgressString) as SavedProgress;
+          
           if (parsed.isAuthenticated) {
             isAuthenticated = true;
             loadedAuth = true;
@@ -111,7 +116,6 @@
             if (parsed.sortOrder) { // 저장된 정렬 순서 복원
               sortOrder = parsed.sortOrder;
             }
-          } else {
           }
         } catch (e) {
           localStorage.removeItem(QUIZ_PROGRESS_KEY);
@@ -183,9 +187,11 @@
         
         selectedCategories = progressToRestore.selectedCategories || [];
         
-        await new Promise(resolve => setTimeout(resolve, 0)); 
+        // 필터링된 퀴즈 목록이 계산될 때까지 대기
+        await new Promise(resolve => setTimeout(resolve, 100)); 
 
         const targetIndex = progressToRestore.currentIndex || 0;
+        
         if (targetIndex >= 0 && targetIndex < filteredQuizzes.length) {
           currentIndex = targetIndex;
         } else if (filteredQuizzes.length > 0) {
@@ -197,6 +203,11 @@
       } else {
         performSort(sortOrder); // 기본 정렬 적용
       }
+      
+      // 퀴즈 데이터 로드 완료 후 저장 (인증된 사용자인 경우)
+      if (isAuthenticated && quizzes.length > 0) {
+        saveProgressToLocalStorage();
+      }
     } catch (error) {
       console.error('퀴즈 데이터를 불러오는데 실패했습니다:', error);
       toast.error('퀴즈 데이터를 불러오는데 실패했습니다.');
@@ -207,7 +218,7 @@
   
   // 진행 상황 저장 (즉시 실행)
   const saveProgressToLocalStorage = () => {
-    if (isAuthenticated && !isLoading && typeof window !== 'undefined' && window.localStorage) {
+    if (isAuthenticated && !isLoading && quizzes.length > 0 && typeof window !== 'undefined' && window.localStorage) {
       const progress: SavedProgress = {
         currentIndex,
         selectedCategories,
@@ -224,8 +235,11 @@
     }
   };
 
-  $: if (typeof window !== 'undefined') {
-    saveProgressToLocalStorage();
+  // 상태 변경 시 자동 저장 (즉시 실행)
+  $: {
+    if (typeof window !== 'undefined' && isAuthenticated && !isLoading && quizzes.length > 0) {
+      saveProgressToLocalStorage();
+    }
   }
   
   // 배열 섞기 함수 (피셔-예이츠 알고리즘)
@@ -352,12 +366,10 @@
   function checkPassword() {
     if (passwordInput === correctPassword) {
       isAuthenticated = true;
-      console.log('[Quiz] checkPassword: Password correct, isAuthenticated set to true.');
       toast.success('로그인 성공! 퀴즈를 시작합니다.');
     } else {
       toast.error('비밀번호가 틀렸습니다.');
       passwordInput = '';
-      console.log('[Quiz] checkPassword: Password incorrect.');
     }
   }
 
@@ -627,6 +639,52 @@
     saveProgressToLocalStorage();
     
     toast.success(`${repeatQuizzesCount}개의 다시하기 퀴즈가 초기화되었습니다.`);
+  }
+
+  // 로컬 스토리지 상태 확인 함수 (디버깅용)
+  function checkLocalStorageStatus() {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const saved = localStorage.getItem(QUIZ_PROGRESS_KEY);
+      console.log('[Quiz] 현재 로컬 스토리지 상태:', {
+        exists: !!saved,
+        data: saved ? JSON.parse(saved) : null,
+        currentState: {
+          currentIndex,
+          selectedCategories,
+          isRandomMode,
+          isAuthenticated,
+          sortOrder,
+          quizzesLength: quizzes.length
+        }
+      });
+    }
+  }
+
+  // 잘못된 로컬 스토리지 데이터 정리 함수
+  function clearInvalidLocalStorage() {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const saved = localStorage.getItem(QUIZ_PROGRESS_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // quizOrder가 빈 배열이거나 없으면 삭제
+          if (!parsed.quizOrder || parsed.quizOrder.length === 0) {
+            localStorage.removeItem(QUIZ_PROGRESS_KEY);
+            return true;
+          }
+        } catch (e) {
+          localStorage.removeItem(QUIZ_PROGRESS_KEY);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // 개발자 도구에서 접근 가능하도록 전역 함수로 노출
+  if (typeof window !== 'undefined') {
+    (window as any).checkQuizStorage = checkLocalStorageStatus;
+    (window as any).clearQuizStorage = clearInvalidLocalStorage;
   }
 
   // 키보드 이벤트 핸들러

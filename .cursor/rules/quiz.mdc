@@ -16,7 +16,7 @@ Quiz 페이지(`src/lib/pages/Quiz.svelte`)는 사용자가 퀴즈를 풀고, �
 - **다시하기 초기화**: "다시하기"로 추가된 모든 퀴즈를 한 번에 제거하고 맨 처음으로 이동 (`resetRepeatQuizzes`)
 - **정렬 기능**: 최신순/오래된순으로 퀴즈 정렬 (`sortOrder`)
 - **퀴즈 목록 보기**: 전체 퀴즈 목록 탐색 및 직접 이동
-- **진행 상태 저장**: 로컬 스토리지 기반 진행 상태 복원
+- **실시간 진행 상태 저장**: 로컬 스토리지 기반 즉시 저장 및 복원
 - **비밀번호 인증**: 접근 제한 (비밀번호: `4120`)
 
 ### 관리 기능
@@ -25,7 +25,7 @@ Quiz 페이지(`src/lib/pages/Quiz.svelte`)는 사용자가 퀴즈를 풀고, �
 - **Sonner 토스트**: shadcn-svelte Sonner 기반 알림 시스템 (800ms 지속)
 
 ### 키보드 단축키
-- **← / →**: 이전/다음 퀴즈 이동
+- **← / →**: 이전/다음 퀴즈 이동 (자동 저장)
 - **스페이스바**: 답변 보기/숨기기 토글
 - **Shift + ?**: 현재 퀴즈 다시하기
 - **ESC**: 퀴즈 목록 닫기
@@ -63,7 +63,7 @@ interface SavedProgress {
 
 2. **진행 상태**
    - `currentIndex`: 필터링된 목록 기준 현재 인덱스
-   - `showAnswer`: 답변 표시 여부
+   - `showAnswer`: 답변 표시 여부 (저장되지 않음)
    - `progressPercentage`: 진행률 계산 (reactive)
 
 3. **모드 및 정렬**
@@ -81,14 +81,102 @@ interface SavedProgress {
    - `selectedCategories`: 선택된 카테고리 배열
    - `allUniqueCategories`: 전체 고유 카테고리 목록 (reactive)
 
-### 로컬 스토리지 활용
+### 실시간 로컬 스토리지 시스템
 
+#### 저장 조건 및 최적화
 - **저장 키**: `velopersQuizProgress`
-- **저장 내용**: 
-  - 현재 인덱스, 선택된 카테고리, 랜덤/정렬 모드
-  - 인증 상태, 퀴즈 순서 (랜덤 모드에서 순서 복원용)
-- **자동 저장**: 상태 변경 시 reactive하게 저장
-- **복원**: `onMount`에서 인증된 사용자의 이전 상태 복원
+- **저장 조건**: `isAuthenticated && !isLoading && quizzes.length > 0`
+- **즉시 저장**: 상태 변경 시 reactive statement로 즉시 저장
+- **데이터 검증**: 잘못된 데이터(빈 quizOrder) 자동 정리
+
+```typescript
+// 자동 저장 시스템
+$: {
+  if (typeof window !== 'undefined' && isAuthenticated && !isLoading && quizzes.length > 0) {
+    saveProgressToLocalStorage();
+  }
+}
+
+// 저장 함수
+const saveProgressToLocalStorage = () => {
+  if (isAuthenticated && !isLoading && quizzes.length > 0 && typeof window !== 'undefined' && window.localStorage) {
+    const progress: SavedProgress = {
+      currentIndex,
+      selectedCategories,
+      isRandomMode,
+      isAuthenticated,
+      quizOrder: quizzes.map(q => q.id),
+      sortOrder: sortOrder
+    };
+    try {
+      localStorage.setItem(QUIZ_PROGRESS_KEY, JSON.stringify(progress));
+    } catch (e) {
+      console.error('localStorage 저장 중 오류 발생:', e);
+    }
+  }
+};
+```
+
+#### 상태 복원 시스템
+- **자동 인증**: 저장된 인증 정보로 재방문 시 자동 로그인
+- **순서 복원**: 랜덤 모드 시 저장된 퀴즈 순서 완전 복원
+- **repeat 퀴즈 복원**: `_repeat_` ID를 가진 퀴즈들도 정확히 복원
+- **필터 복원**: 선택된 카테고리 및 정렬 순서 복원
+
+```typescript
+// 복원 로직 (onMount에서)
+if (progressToRestore.isRandomMode && progressToRestore.quizOrder && progressToRestore.quizOrder.length > 0) {
+  const orderedQuizIdsFromStorage = progressToRestore.quizOrder;
+  const reorderedQuizzes: Quiz[] = [];
+  
+  // 저장된 순서에 따라 퀴즈 재배치 (repeat 퀴즈 포함)
+  for (const savedId of orderedQuizIdsFromStorage) {
+    if (savedId.includes('_repeat_')) {
+      const originalId = savedId.split('_repeat_')[0];
+      const originalQuiz = availableQuizzes.find(q => q.id === originalId);
+      if (originalQuiz) {
+        reorderedQuizzes.push({ ...originalQuiz, id: savedId });
+      }
+    } else {
+      const foundQuiz = availableQuizzes.find(q => q.id === savedId);
+      if (foundQuiz) reorderedQuizzes.push(foundQuiz);
+    }
+  }
+}
+```
+
+#### 데이터 정리 시스템
+```typescript
+// 잘못된 로컬 스토리지 데이터 정리
+function clearInvalidLocalStorage() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const saved = localStorage.getItem(QUIZ_PROGRESS_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // quizOrder가 빈 배열이거나 없으면 삭제
+        if (!parsed.quizOrder || parsed.quizOrder.length === 0) {
+          localStorage.removeItem(QUIZ_PROGRESS_KEY);
+          return true;
+        }
+      } catch (e) {
+        localStorage.removeItem(QUIZ_PROGRESS_KEY);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+```
+
+### 퀴즈 이동 시 자동 저장
+
+모든 퀴즈 이동 액션에서 상태가 즉시 저장됩니다:
+
+1. **버튼 클릭**: `nextQuiz()`, `prevQuiz()` → reactive statement → 자동 저장
+2. **키보드 이동**: 화살표 키 → 위 함수들 호출 → 자동 저장
+3. **목록 선택**: `goToQuiz()` → currentIndex 변경 → 자동 저장
+4. **카테고리 변경**: `toggleCategory()` → selectedCategories 변경 → 자동 저장
 
 ### 퀴즈 순서 관리
 
@@ -136,6 +224,9 @@ function resetRepeatQuizzes() {
   // 현재 인덱스를 맨 처음으로 이동
   currentIndex = 0;
   showAnswer = false;
+  
+  // 즉시 저장
+  saveProgressToLocalStorage();
 }
 ```
 
@@ -275,7 +366,7 @@ const updatedQuizData = {
 
 #### 하단 고정 영역
 - **답변 보기/가리기**: 답변 표시 토글
-- **이전/다음**: 퀴즈 네비게이션
+- **이전/다음**: 퀴즈 네비게이션 (자동 저장)
 - **다시하기**: 현재 퀴즈를 후순위에 추가
 
 ### 스타일링 특징
@@ -298,6 +389,7 @@ const updatedQuizData = {
 5. **접근성**: ARIA 라벨, 키보드 네비게이션 지원
 6. **Dialog 사용**: 복잡한 폼은 Dialog로 분리하여 메인 UI 방해 최소화
 7. **토스트 일관성**: Sonner 토스트로 통일된 알림 제공
+8. **자동 저장**: 상태 변경 시 reactive statement가 자동으로 저장 처리
 
 ### 상태 관리 패턴
 ```typescript
@@ -309,9 +401,11 @@ $: filteredQuizzes = selectedCategories.length === 0
 // 다시하기 퀴즈 개수 계산
 $: repeatQuizCount = quizzes.filter(quiz => quiz.id.includes('_repeat_')).length;
 
-// 자동 저장
-$: if (typeof window !== 'undefined') {
-  saveProgressToLocalStorage();
+// 자동 저장 (즉시 실행)
+$: {
+  if (typeof window !== 'undefined' && isAuthenticated && !isLoading && quizzes.length > 0) {
+    saveProgressToLocalStorage();
+  }
 }
 ```
 
@@ -319,12 +413,25 @@ $: if (typeof window !== 'undefined') {
 - API 호출 실패 시 Sonner 토스트 알림
 - 로컬 스토리지 오류 시 기본값으로 복원
 - 존재하지 않는 인덱스 접근 시 안전한 범위로 조정
+- 잘못된 로컬 스토리지 데이터 자동 정리
+
+### 디버깅 도구
+
+개발자 도구에서 사용 가능한 전역 함수들:
+
+```javascript
+// 현재 로컬 스토리지 상태 확인
+checkQuizStorage()
+
+// 잘못된 로컬 스토리지 데이터 정리
+clearQuizStorage()
+```
 
 ## 주요 함수 목록
 
 ### 핵심 기능 함수
-- `nextQuiz()`: 다음 퀴즈로 이동
-- `prevQuiz()`: 이전 퀴즈로 이동
+- `nextQuiz()`: 다음 퀴즈로 이동 (자동 저장)
+- `prevQuiz()`: 이전 퀴즈로 이동 (자동 저장)
 - `toggleAnswer()`: 답변 표시/숨김 토글
 - `repeatQuiz()`: 현재 퀴즈를 후순위에 추가
 - `resetRepeatQuizzes()`: 모든 "다시하기" 퀴즈 제거하고 첫 번째로 이동
@@ -346,9 +453,14 @@ $: if (typeof window !== 'undefined') {
 - `toggleQuizList()`: 퀴즈 목록 표시/숨김
 - `toggleCategoryFilter()`: 카테고리 필터 펼침/접힘
 - `toggleFilterSection()`: 전체 필터링 섹션 표시/숨김
-- `toggleCategory()`: 특정 카테고리 선택/해제
+- `toggleCategory()`: 특정 카테고리 선택/해제 (자동 저장)
 - `clearAllCategories()`: 모든 카테고리 선택 해제
-- `goToQuiz()`: 특정 인덱스의 퀴즈로 이동
+- `goToQuiz()`: 특정 인덱스의 퀴즈로 이동 (자동 저장)
+
+### 로컬 스토리지 함수
+- `saveProgressToLocalStorage()`: 현재 상태를 로컬 스토리지에 저장
+- `clearInvalidLocalStorage()`: 잘못된 로컬 스토리지 데이터 정리
+- `checkLocalStorageStatus()`: 디버깅용 상태 확인 함수
 
 ## 유의사항
 
@@ -362,3 +474,5 @@ $: if (typeof window !== 'undefined') {
 8. **필터링 고려**: "다시하기" 기능은 사용자가 보는 필터링된 목록 기준으로 동작
 9. **모바일 최적화**: 텍스트 숨김/표시로 작은 화면에서도 모든 기능 접근 가능
 10. **토스트 통일**: 모든 알림은 Sonner 토스트로 일관성 유지
+11. **자동 저장**: 모든 상태 변경은 즉시 로컬 스토리지에 저장됨
+12. **로깅 최소화**: 오류 발생 시에만 콘솔 로그 출력, 디버깅은 전역 함수 활용
