@@ -43,6 +43,7 @@
   let editedWho = '';
   let editedCategory = '';
   let isCreating = false;
+  let isCreateDialogOpen = false; // 새 퀴즈 생성 Dialog 상태 변수 추가
   let newQuestion = '';
   let newAnswer = '';
   let newCategory = '';
@@ -269,6 +270,7 @@
     if (currentIndex < filteredQuizzes.length - 1) {
       currentIndex += 1;
       showAnswer = false;
+      saveProgressToLocalStorage(); // 직접 호출 추가
     } else {
       toast.info('마지막 퀴즈입니다!');
     }
@@ -279,6 +281,7 @@
     if (currentIndex > 0) {
       currentIndex -= 1;
       showAnswer = false;
+      saveProgressToLocalStorage(); // 직접 호출 추가
     } else {
       toast.info('첫 번째 퀴즈입니다!');
     }
@@ -500,7 +503,7 @@
 
   // 새 퀴즈 생성 모드 진입
   function startCreating() {
-    isCreating = true;
+    isCreateDialogOpen = true; // isCreating 대신 isCreateDialogOpen 사용
     newQuestion = '';
     newAnswer = '';
     newCategory = '';
@@ -509,7 +512,7 @@
 
   // 생성 취소
   function cancelCreating() {
-    isCreating = false;
+    isCreateDialogOpen = false; // isCreating 대신 isCreateDialogOpen 사용
     toast.info('새 퀴즈 생성이 취소되었습니다.');
   }
 
@@ -545,7 +548,7 @@
       
       quizzes = [...quizzes, createdQuiz];
       performSort(sortOrder); // 정렬 유지
-      isCreating = false;
+      isCreateDialogOpen = false; // isCreating 대신 isCreateDialogOpen 사용
       toast.success('새 퀴즈가 성공적으로 생성되었습니다.');
       
       const newQuizId = createdQuiz.id;
@@ -689,7 +692,7 @@
 
   // 키보드 이벤트 핸들러
   function handleGlobalKeydown(event: KeyboardEvent) {
-    if (!isAuthenticated || isEditDialogOpen || isCreating) return;
+    if (!isAuthenticated || isEditDialogOpen || isCreating || isCreateDialogOpen) return; // isCreateDialogOpen 조건 추가
 
     // 퀴즈 목록이 열려있을 때는 Enter, Space, Arrow 키들의 기본 동작만 허용 (목록 내 탐색 등)
     if (isQuizListOpen) {
@@ -721,18 +724,18 @@
 
     switch (event.key) {
       case 'ArrowLeft':
-        if (!isEditDialogOpen && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
+        if (!isEditDialogOpen && !isCreating && !isCreateDialogOpen && quizzes.length > 0 && filteredQuizzes.length > 0) { // isCreateDialogOpen 조건 추가
           prevQuiz();
         }
         break;
       case 'ArrowRight':
-        if (!isEditDialogOpen && !isCreating && quizzes.length > 0 && filteredQuizzes.length > 0) {
+        if (!isEditDialogOpen && !isCreating && !isCreateDialogOpen && quizzes.length > 0 && filteredQuizzes.length > 0) { // isCreateDialogOpen 조건 추가
           nextQuiz();
         }
         break;
       case ' ': // Space bar
         event.preventDefault(); // 스페이스바의 기본 동작(페이지 스크롤 등) 방지
-        if (!isEditDialogOpen && !isCreating && currentQuiz) {
+        if (!isEditDialogOpen && !isCreating && !isCreateDialogOpen && currentQuiz) { // isCreateDialogOpen 조건 추가
           // Input 또는 Textarea가 포커스되어 있지 않을 때만 답변 토글
           if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA')) {
             toggleAnswer();
@@ -740,7 +743,7 @@
         }
         break;
       case '?':
-        if (event.shiftKey && !isEditDialogOpen && !isCreating && currentQuiz) {
+        if (event.shiftKey && !isEditDialogOpen && !isCreating && !isCreateDialogOpen && currentQuiz) { // isCreateDialogOpen 조건 추가
           repeatQuiz();
         }
         break;
@@ -774,75 +777,7 @@
       </div>
     </div>
   {:else}
-    {#if isCreating}
-      <!-- 퀴즈 생성 폼 -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-5 shadow-md mb-6 transition-all duration-300 dark:ring-1 dark:ring-gray-700">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">새 퀴즈 만들기</h2>
-        
-        <div class="space-y-4">
-          <div>
-            <label for="new-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">카테고리 *</label>
-            <Input 
-              id="new-category"
-              type="text" 
-              bind:value={newCategory} 
-              placeholder="카테고리 (필수, 쉼표로 여러개 가능)"
-              class="w-full dark:bg-gray-700 dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label for="new-who" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">작성자</label>
-            <Input 
-              id="new-who"
-              type="text" 
-              bind:value={newWho} 
-              placeholder="작성자 (선택)"
-              class="w-full dark:bg-gray-700 dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label for="new-question" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">질문 *</label>
-            <Input
-              id="new-question"
-              type="text"
-              bind:value={newQuestion}
-              placeholder="질문 (필수)"
-              class="w-full dark:bg-gray-700 dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label for="new-answer" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">답변</label>
-            <Textarea
-              id="new-answer"
-              bind:value={newAnswer}
-              placeholder="답변 (선택)"
-              class="w-full dark:bg-gray-700 dark:text-white min-h-[100px] transition-all duration-300 focus:ring-2 focus:ring-blue-500"
-              rows={3}
-            />
-          </div>
-          
-          <div class="flex space-x-3 pt-4">
-            <Button 
-              variant="outline" 
-              on:click={cancelCreating} 
-              class="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
-            >
-              취소
-            </Button>
-            <Button 
-              variant="default" 
-              on:click={saveNewQuiz} 
-              class="flex-1 bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300"
-            >
-              저장
-            </Button>
-          </div>
-        </div>
-      </div>
-    {:else if isLoading}
+    {#if isLoading}
       <div class="flex items-center justify-center py-20">
         <div class="animate-pulse flex flex-col items-center">
           <div class="h-12 w-12 rounded-full bg-blue-500 opacity-75 animate-bounce mb-4"></div>
@@ -932,22 +867,57 @@
         {/if}
 
         <!-- 퀴즈 컨트롤 영역 -->
-        <div class="flex items-center justify-between flex-wrap gap-2">
-          <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+        <div class="flex items-center flex-wrap gap-2 w-full justify-between">
+          <div class="flex w-full items-center gap-1 sm:gap-2">
             <Button 
               variant="outline"
               on:click={startCreating}
-              class="text-xs py-1 px-2 h-auto hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
+              class="flex-1 text-xs py-1 px-2 h-auto hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
               <span class="hidden sm:inline">새 퀴즈</span>
             </Button>
+            {#if !isEditDialogOpen && currentQuiz}  
+              <Button 
+                variant="secondary" 
+                on:click={handleEditClick} 
+                class="flex-1 text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span class="hidden sm:inline">수정</span>
+              </Button>
+            {/if}
+            <Button 
+              variant="secondary"
+              on:click={toggleSortOrder}
+              class="flex-1 text-xs py-1 px-2 h-auto transition-all duration-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+              disabled={isEditDialogOpen || quizzes.length === 0}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              <span class="hidden md:inline">{sortOrder === 'desc' ? '최신 순' : '오래된 순'}</span>
+            </Button>
+            {#if !isEditDialogOpen && currentQuiz}  
+              <Button 
+                variant="secondary" 
+                on:click={resetRepeatQuizzes} 
+                class="flex-1 text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span class="hidden md:inline">초기화</span>
+              </Button>
+            {/if}
             <Button 
               variant={isRandomMode ? "default" : "secondary"}
               on:click={randomQuiz}
-              class="text-xs py-1 px-2 h-auto transition-all duration-300 {
+              class="flex-1 text-xs py-1 px-2 h-auto transition-all duration-300 {
                 isRandomMode 
                   ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                   : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
@@ -959,66 +929,23 @@
               </svg>
               <span class="hidden sm:inline">랜덤</span>
             </Button>
-            <Button 
-              variant="secondary"
-              on:click={toggleSortOrder}
-              class="text-xs py-1 px-2 h-auto transition-all duration-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-              disabled={isEditDialogOpen || quizzes.length === 0}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-              </svg>
-              <span class="hidden md:inline">{sortOrder === 'desc' ? '최신 순' : '오래된 순'}</span>
-            </Button>
             {#if !isEditDialogOpen && currentQuiz}  
-              <Button 
-                variant="secondary" 
-                on:click={handleEditClick} 
-                class="text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                <span class="hidden sm:inline">수정</span>
-              </Button>
-              <Button 
-                variant="secondary" 
-                on:click={resetRepeatQuizzes} 
-                class="text-xs py-1 px-2 h-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span class="hidden md:inline">초기화</span>
-              </Button>
               <Button 
                 variant={isFilterSectionVisible ? "default" : "secondary"}
                 on:click={toggleFilterSection} 
-                class="text-xs py-1 px-2 h-auto transition-all duration-300 {
+                class="flex-1 text-xs py-1 px-2 h-auto transition-all duration-300 {
                   isFilterSectionVisible 
                     ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                     : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
                 }"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
                 <span class="hidden md:inline">필터링</span>
               </Button>
             {/if}
           </div>
-          
-          {#if !isEditDialogOpen && filteredQuizzes.length > 0}
-            <div class="bg-gray-100 dark:bg-gray-700 rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300 flex items-center shrink-0">
-              <span class="font-medium">
-                {currentIndex + 1}/{filteredQuizzes.length}
-                {#if repeatQuizCount > 0}
-                  <span class="text-orange-500 dark:text-orange-400">(+{repeatQuizCount})</span>
-                {/if}
-                <span class="text-blue-500 dark:text-blue-400 ml-1">[{Math.round((currentIndex + 1) / filteredQuizzes.length * 100)}%]</span>
-              </span>
-            </div>
-          {/if}
         </div>
       </div>
 
@@ -1039,16 +966,29 @@
       {:else if currentQuiz}
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden dark:ring-1 dark:ring-gray-700">
           <!-- 카테고리 및 작성자 정보 -->
-          <div class="p-4 bg-white dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
-            {#if currentQuiz.category}
-              <span class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
-                {currentQuiz.category}
-              </span>
-            {/if}
-            {#if currentQuiz.who}
-              <span class="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
-                {currentQuiz.who}
-              </span>
+          <div class="p-4 bg-white dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-2 items-center">
+            <div class="flex flex-wrap gap-2">
+              {#if currentQuiz.category}
+                <span class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
+                  {currentQuiz.category}
+                </span>
+              {/if}
+              {#if currentQuiz.who}
+                <span class="text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
+                  {currentQuiz.who}
+                </span>
+              {/if}
+            </div>
+            {#if !isEditDialogOpen && filteredQuizzes.length > 0}
+              <div class="bg-gray-100 dark:bg-gray-700 rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300 flex items-center shrink-0 ml-auto">
+                <span class="font-medium">
+                  {currentIndex + 1}/{filteredQuizzes.length}
+                  {#if repeatQuizCount > 0}
+                    <span class="text-orange-500 dark:text-orange-400">(+{repeatQuizCount})</span>
+                  {/if}
+                  <span class="text-blue-500 dark:text-blue-400 ml-1">[{Math.round((currentIndex + 1) / filteredQuizzes.length * 100)}%]</span>
+                </span>
+              </div>
             {/if}
           </div>
           
@@ -1217,6 +1157,73 @@
         취소
       </Button>
       <Button on:click={saveChanges}>
+        저장
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
+
+<!-- 새 퀴즈 추가 Dialog -->
+<Dialog.Root bind:open={isCreateDialogOpen}>
+  <Dialog.Content class="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+    <Dialog.Header>
+      <Dialog.Title>새 퀴즈 만들기</Dialog.Title>
+      <Dialog.Description>
+        새로운 퀴즈 정보를 입력하고 저장 버튼을 클릭하세요.
+      </Dialog.Description>
+    </Dialog.Header>
+    
+    <div class="grid gap-4 py-4">
+      <div>
+        <label for="new-category-dialog" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">카테고리 *</label>
+        <Input 
+          id="new-category-dialog"
+          type="text" 
+          bind:value={newCategory} 
+          placeholder="카테고리 (필수, 쉼표로 여러개 가능)"
+          class="w-full"
+        />
+      </div>
+      
+      <div>
+        <label for="new-who-dialog" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">작성자</label>
+        <Input 
+          id="new-who-dialog"
+          type="text" 
+          bind:value={newWho} 
+          placeholder="작성자 (선택)"
+          class="w-full"
+        />
+      </div>
+      
+      <div>
+        <label for="new-question-dialog" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">질문 *</label>
+        <Textarea 
+          id="new-question-dialog"
+          bind:value={newQuestion} 
+          placeholder="질문 (필수)"
+          class="w-full min-h-[100px]"
+          rows={4}
+        />
+      </div>
+      
+      <div>
+        <label for="new-answer-dialog" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">답변</label>
+        <Textarea
+          id="new-answer-dialog"
+          bind:value={newAnswer}
+          placeholder="답변 (선택)"
+          class="w-full min-h-[150px]"
+          rows={6}
+        />
+      </div>
+    </div>
+    
+    <Dialog.Footer>
+      <Button variant="outline" on:click={cancelCreating}>
+        취소
+      </Button>
+      <Button on:click={saveNewQuiz}>
         저장
       </Button>
     </Dialog.Footer>
