@@ -111,11 +111,11 @@
 
 <div class="space-y-4">
   <!-- Google AdSense 광고 -->
-  <div class="w-full my-4 h-[90px] overflow-hidden flex justify-center">
-    <div class="h-[90px] overflow-hidden">
+  <div class="bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
+    <div class="h-[90px] overflow-hidden flex justify-center items-center">
       <!-- 수평 포스트 광고 -->
       <ins class="adsbygoogle"
-           style="display:inline-block;width:728px;height:90px"
+           style="display:block;width:100%;height:90px"
            data-ad-client="ca-pub-2560054260004649"
            data-ad-slot="5725112112"></ins>
     </div>
