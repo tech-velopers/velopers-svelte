@@ -114,11 +114,9 @@
   <div class="w-full my-4 max-h-[120px] overflow-hidden">
     <!-- 수평 포스트 광고 -->
     <ins class="adsbygoogle"
-         style="display:block"
+         style="display:inline-block;width:728px;height:90px"
          data-ad-client="ca-pub-2560054260004649"
-         data-ad-slot="5725112112"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
+         data-ad-slot="5725112112"></ins>
   </div>
 
   <!-- <Alert.Root class="mb-4">
