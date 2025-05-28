@@ -111,12 +111,14 @@
 
 <div class="space-y-4">
   <!-- Google AdSense 광고 -->
-  <div class="w-full my-4 max-h-[120px] overflow-hidden">
+  <div class="w-full my-4 h-[90px] overflow-hidden">
     <!-- 수평 포스트 광고 -->
     <ins class="adsbygoogle"
-         style="display:inline-block;width:728px;height:90px"
+         style="display:block"
          data-ad-client="ca-pub-2560054260004649"
-         data-ad-slot="5725112112"></ins>
+         data-ad-slot="5725112112"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
   </div>
 
   <!-- <Alert.Root class="mb-4">
