@@ -1,6 +1,5 @@
 <script lang="ts">
   import Sidebar from "$lib/components/sidebar/Sidebar.svelte";
-  import { onMount } from 'svelte';
 
   export let allTags: Array<{ id: number; tagName: string; }>;
   export let searchWithSelected: (data: any) => void;
@@ -9,36 +8,6 @@
   export let showLogo = true;
   export let showSidebar = true;
   
-  let adLoaded = false;
-  
-  // 타입 정의
-  interface ExtendedWindow extends Window {
-    adsbygoogle?: any[];
-  }
-  
-  // 광고 초기화
-  onMount(() => {
-    // 이미 AdSense가 로드되어 있는지 확인
-    if (!document.querySelector('script[src*="adsbygoogle.js"]')) {
-      // AdSense 스크립트 로드
-      const adScript = document.createElement('script');
-      adScript.async = true;
-      adScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649';
-      adScript.crossOrigin = 'anonymous';
-      document.head.appendChild(adScript);
-    }
-    
-    // 광고 초기화
-    setTimeout(() => {
-      try {
-        const extWindow = window as ExtendedWindow;
-        (extWindow.adsbygoogle = extWindow.adsbygoogle || []).push({});
-        adLoaded = true;
-      } catch (e) {
-        console.error('AdSense 초기화 오류:', e);
-      }
-    }, 500);
-  });
 </script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
@@ -64,20 +33,6 @@
           {onReset}
         />
       {/if}
-    </div>
-  </div>
-  
-  <!-- 왼쪽 광고 영역 - 데스크톱에서만 표시 (lg 이상) -->
-  <div class="hidden lg:block absolute top-4 ml-4">
-    <div class="p-2 rounded-lg">
-      <div class="text-xs text-gray-500 dark:text-gray-400 mb-1 text-center">광고</div>
-      <!-- 왼쪽 사이드 광고 -->
-      <ins class="adsbygoogle"
-          style="display:block; width:200px; height:400px;"
-          data-ad-client="ca-pub-2560054260004649"
-          data-ad-slot="3835436676"
-          data-ad-format="auto"
-          data-full-width-responsive="false"></ins>
     </div>
   </div>
 </div>

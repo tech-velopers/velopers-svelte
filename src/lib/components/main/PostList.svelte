@@ -6,9 +6,6 @@
   import { onMount } from 'svelte';
   import { Button } from "$lib/components/ui/button";
   import { cn } from "$lib/utils";
-  import * as Alert from "$lib/components/ui/alert/index.js";
-  import { Rss, ArrowRight } from "lucide-svelte";
-  import { navigate } from "$lib/stores/router";
 
   export let posts: any[];
   export let currentPage: number;
@@ -50,6 +47,24 @@
   
   // 컴포넌트가 마운트될 때 랜덤 인덱스 설정
   onMount(() => {
+    // Google AdSense 스크립트 로드
+    if (typeof window !== 'undefined') {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649';
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+      
+      // AdSense 광고 초기화
+      setTimeout(() => {
+        try {
+          ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        } catch (e) {
+          console.error('AdSense 초기화 실패:', e);
+        }
+      }, 1000);
+    }
+    
     // 현재 시간을 기준으로 5분 간격으로 일정한 랜덤값 생성
     const timeBasedRandom = () => {
       const now = new Date();
@@ -95,6 +110,17 @@
 </script>
 
 <div class="space-y-4">
+  <!-- Google AdSense 광고 -->
+  <div class="w-full my-4 max-h-[120px] overflow-hidden">
+    <!-- 수평 포스트 광고 -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-2560054260004649"
+         data-ad-slot="5725112112"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
+
   <!-- <Alert.Root class="mb-4">
     <Rss class="h-4 w-4" />
     <Alert.Title class="flex items-center justify-between">

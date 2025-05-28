@@ -13,6 +13,7 @@
   import { store as tagsStore, type Tag } from '$lib/stores/tags';
   import { onMount } from 'svelte';
 
+  export let allTags: Array<{ id: number; tagName: string; }>;
   export let searchWithSelected: (data: any) => void;
   export let onSearch: (event: CustomEvent<{ query: string }>) => void;
   export let onReset: () => void;
