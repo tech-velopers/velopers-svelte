@@ -708,7 +708,7 @@
     // 현재 포커스된 요소가 input 또는 textarea인지 확인
     const activeElement = document.activeElement;
     if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
-      // 비밀번호 입력 필드는 예외적으로 Enter 키만 허용 (이미 handleKeydown에서 처리)
+      // 비밀번호 입력 필드는 예외적으로 Enter 키만 허용 (이미 handleKeydown에서 처리됨)
       if (activeElement.getAttribute('type') === 'password' && event.key === 'Enter') {
         // checkPassword(); // 이미 Input 컴포넌트의 on:keydown에서 처리됨
       } else if (activeElement.getAttribute('type') === 'password') {
@@ -1275,7 +1275,8 @@
     -webkit-tap-highlight-color: transparent;
   }
   
-  :global(*) {
+  /* 텍스트 선택을 허용하되, 특정 UI 요소에서만 선택 방지 */
+  :global(.no-select) {
     -webkit-user-select: none;
     user-select: none;
   }

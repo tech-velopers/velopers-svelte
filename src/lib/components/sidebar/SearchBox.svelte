@@ -313,7 +313,7 @@
                   : index === selectedSuggestionIndex ? 'bg-blue-100 dark:bg-blue-800' 
                   : suggestion.isSelected ? 'bg-blue-50 dark:bg-blue-900/20' 
                   : ''}"
-                on:mousedown|preventDefault={() => { 
+                on:click={() => { 
                    selectSuggestion(suggestion);
                 }}
                 role="option"
