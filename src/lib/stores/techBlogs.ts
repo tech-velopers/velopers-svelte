@@ -6,6 +6,7 @@ export interface TechBlog {
   techBlogName: string;
   icon: string;
   baseUrl: string;
+  noticeMessage?: string; // 공지사항 메시지 (선택적)
   postCnt: number;
   totalPostViewCnt: number;
   lastCreatedAt?: number[]; // 마지막 게시글 작성 일자 [년, 월, 일, 시, 분, 초] 형식

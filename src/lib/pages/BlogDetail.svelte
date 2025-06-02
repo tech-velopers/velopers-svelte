@@ -3,9 +3,10 @@
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
   import { currentPath, navigate } from '$lib/stores/router';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+  import * as Alert from "$lib/components/ui/alert/index.js";
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
-  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase, Grid2x2, Eye } from 'lucide-svelte';
+  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase, Grid2x2, Eye, Info } from 'lucide-svelte';
   import { toast } from "svelte-sonner";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import PostCard from "$lib/components/main/PostCard.svelte";
@@ -429,6 +430,16 @@
           </div>
         </div>
       </div>
+      
+      <!-- 공지사항 섹션 -->
+      {#if blog.noticeMessage}
+        <Alert.Root class="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+          <Info class="h-4 w-4" />
+          <Alert.Description class="text-sm md:text-base">
+            {blog.noticeMessage}
+          </Alert.Description>
+        </Alert.Root>
+      {/if}
       
       <!-- 블로그 게시글 섹션 -->
       <div class="space-y-3 md:space-y-4">
