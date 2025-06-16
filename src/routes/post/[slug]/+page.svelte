@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getApiUrl } from '$lib/config';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
@@ -12,25 +11,13 @@
   import { Button } from "$lib/components/ui/button";
   import { cn } from "$lib/utils";
   import { formatDate, dateArrayToISOString } from '$lib/utils/dateUtils';
+  import type { PageData } from './$types';
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
 
-  let post: {
-    id: number;
-    title: string;
-    preview: string;
-    gptSummary: string;
-    imageUrl: string;
-    url: string;
-    techBlogName: string;
-    category: string;
-    tags: string[];
-    createdAt: number[];
-    viewCnt?: number;
-  } | null = null;
-
-  let loading = true;
-  let error: string | null = null;
+  export let data: PageData;
+  
+  $: post = data.post;
   let imageLoaded = false;
 
   // 카테고리별 아이콘 매핑
@@ -55,36 +42,15 @@
 
   onMount(() => {
     techBlogsStore.fetchTechBlogs();
+    
+    // 페이지 조회 로깅
+    if (post) {
+      logger.logPageView('POST', post.id);
+    }
+    
+    // 즉시 맨 위로 스크롤
+    window.scrollTo(0, 0);
   });
-
-  async function fetchPost(postId: string) {
-    try {
-      loading = true;
-      imageLoaded = false;
-      const response = await fetch(getApiUrl(`/api/post/${postId}`));
-      if (!response.ok) throw new Error('포스트를 불러오는데 실패했습니다.');
-      post = await response.json();
-      
-      // 페이지 조회 로깅
-      if (post) {
-        logger.logPageView('POST', post.id);
-      }
-      
-      // 즉시 맨 위로 스크롤
-      window.scrollTo(0, 0);
-    } catch (e) {
-      error = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
-    } finally {
-      loading = false;
-    }
-  }
-
-  $: {
-    const postId = $page.params.slug || $page.url.pathname.split('/').pop();
-    if (postId) {
-      fetchPost(postId);
-    }
-  }
 
   function handleOriginalPostClick() {
     if (post?.url) {
@@ -171,10 +137,10 @@
     <title>{post.title} - {post.techBlogName} | Velopers</title>
     <meta name="title" property="og:title" content={`${post.title} - ${post.techBlogName}`} />
     <meta name="description" property="og:description" content={post.preview} />
-    <meta name="image" property="og:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
-    <meta name="type" property="og:type" content="article" />
-    <meta name="url" property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
-    <meta name="site_name" property="og:site_name" content="Velopers" />
+    <meta property="og:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : `https://www.velopers.kr${post.imageUrl}`) : `https://www.velopers.kr/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
+    <meta property="og:site_name" content="Velopers" />
     <meta property="og:locale" content="ko_KR" />
     <meta property="article:published_time" content={dateArrayToISOString(post.createdAt)} />
     <meta property="article:section" content={post.category || '기술 블로그'} />
@@ -188,78 +154,14 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${post.title} - ${post.techBlogName}`} />
     <meta name="twitter:description" content={post.preview} />
-    <meta name="twitter:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : 'https://www.velopers.kr/default-post-image.jpg') : `/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
+    <meta name="twitter:image" content={post.imageUrl ? (post.imageUrl.startsWith('http') ? post.imageUrl : `https://www.velopers.kr${post.imageUrl}`) : `https://www.velopers.kr/icons/${$techBlogMap[post.techBlogName]?.icon}`} />
     <meta name="keywords" content={post.tags.join(', ')} />
     <meta name="author" content={post.techBlogName} />
     <link rel="canonical" href={`https://www.velopers.kr/post/${post.id}`} />
   {/if}
 </svelte:head>
 
-{#if loading}
-  <MainLayout allTags={[]} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
-    <article class="max-w-4xl mx-auto pt-2 pb-3 sm:pt-3 sm:pb-4 md:pt-4 md:pb-5 px-3 sm:px-4 md:px-5 space-y-4 sm:space-y-5 md:space-y-6">
-      <!-- 이미지 로딩 스켈레톤 -->
-      <div class="w-full h-48 sm:h-64 md:h-72 relative rounded-lg overflow-hidden border shadow-sm dark:ring-1 dark:ring-gray-800">
-        <Skeleton class="w-full h-full" />
-      </div>
-      
-      <!-- 헤더 로딩 스켈레톤 -->
-      <div class="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-5 bg-card text-card-foreground rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
-        <Skeleton class="w-3/4 h-8 sm:h-10 md:h-12" />
-        
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 md:gap-4">
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <Skeleton class="w-32 h-9 rounded-md" />
-            <Skeleton class="w-24 h-9 rounded-md" />
-          </div>
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <Skeleton class="w-20 h-6 rounded-md" />
-            <Skeleton class="w-16 h-6 rounded-md" />
-          </div>
-        </div>
-        
-        <div class="flex flex-wrap gap-1.5">
-          <Skeleton class="w-16 h-8 rounded-md" />
-          <Skeleton class="w-20 h-8 rounded-md" />
-          <Skeleton class="w-24 h-8 rounded-md" />
-          <Skeleton class="w-16 h-8 rounded-md" />
-        </div>
-      </div>
-      
-      <!-- AI 요약 로딩 스켈레톤 -->
-      <div class="bg-card p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
-        <div class="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-          <Skeleton class="w-5 h-5 rounded-full" />
-          <Skeleton class="w-20 h-6 rounded-md" />
-        </div>
-        <Skeleton class="w-full h-4 mt-2 mb-4" />
-        <div class="space-y-2">
-          <Skeleton class="w-full h-4" />
-          <Skeleton class="w-full h-4" />
-          <Skeleton class="w-full h-4" />
-          <Skeleton class="w-5/6 h-4" />
-          <Skeleton class="w-full h-4" />
-          <Skeleton class="w-4/5 h-4" />
-        </div>
-      </div>
-      
-      <!-- 버튼 로딩 스켈레톤 -->
-      <div class="flex justify-center items-center gap-3">
-        <Skeleton class="w-28 h-9 rounded-md" />
-        <Skeleton class="w-28 h-9 rounded-md" />
-        <Skeleton class="w-28 h-9 rounded-md" />
-      </div>
-    </article>
-  </MainLayout>
-{:else if error}
-  <MainLayout allTags={[]} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
-    <div class="max-w-4xl mx-auto p-3 sm:p-4 md:p-5">
-      <div class="bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
-        <p class="text-red-600 dark:text-red-400">{error}</p>
-      </div>
-    </div>
-  </MainLayout>
-{:else if post}
+{#if post}
   <MainLayout allTags={[]} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
     <article class="max-w-4xl mx-auto pt-2 pb-3 sm:pt-3 sm:pb-4 md:pt-4 md:pb-5 px-3 sm:px-4 md:px-5 space-y-4 sm:space-y-5 md:space-y-6">
       <div class="w-full h-48 sm:h-64 md:h-72 relative rounded-lg overflow-hidden shadow-sm border dark:ring-1 dark:ring-gray-800 transition-all duration-300">
