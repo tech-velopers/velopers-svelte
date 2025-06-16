@@ -381,17 +381,18 @@
         </div>
       {/if}
 
-      <!-- Ad Container -->
-      <div class="bg-card w-full my-4 sm:my-5 md:my-6 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800 transition-all duration-300 overflow-hidden h-40 sm:h-32 md:h-24"> 
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649" crossorigin="anonymous"></script>
+      <!-- Advertisement -->
+      <div class="w-full my-4 sm:my-5 md:my-6 text-center">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649"
+             crossorigin="anonymous"></script>
         <ins class="adsbygoogle"
-            style="display:block; text-align:center;"
-            data-ad-layout="in-article"
-            data-ad-format="auto" 
-            data-ad-client="ca-pub-2560054260004649"
-            data-ad-slot="4577187600"></ins>
+             style="display:block; text-align:center;"
+             data-ad-layout="in-article"
+             data-ad-format="fluid"
+             data-ad-client="ca-pub-2560054260004649"
+             data-ad-slot="4577187600"></ins>
         <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
+             (adsbygoogle = window.adsbygoogle || []).push({});
         </script>
       </div>
 

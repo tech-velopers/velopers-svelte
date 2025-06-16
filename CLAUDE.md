@@ -35,7 +35,7 @@ npm run check
 - 페이지 상태: `$page` 스토어 사용 (`$app/stores`)
 
 ### 상태 관리
-- Svelte 스토어를 활용한 중앙 집중식 상태 관리 (`src/lib/stores/`)
+- Svelte 스토어를 활용한 중앙 집중식 상태 관리 (`src/l@ib/stores/`)
 - 주요 스토어들:
   - `posts.ts`: 포스트 데이터 및 필터링 상태
   - `techBlogs.ts`: 테크블로그 정보 관리
