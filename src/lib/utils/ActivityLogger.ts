@@ -17,8 +17,9 @@ export class ActivityLogger {
     this.isDevelopment = import.meta.env.MODE === 'dev' ||
                          import.meta.env.MODE === 'development' ||
                          import.meta.env.MODE === 'qa' ||
-                         window.location.hostname === 'localhost' ||
-                         window.location.hostname === '127.0.0.1';
+                         (typeof window !== 'undefined' && 
+                          (window.location.hostname === 'localhost' ||
+                           window.location.hostname === '127.0.0.1'));
                          
     if (this.isDevelopment) {
       console.log('[ActivityLogger] 개발 환경 감지: 로그는 로컬스토리지에만 저장되고 서버로 전송되지 않습니다.');
@@ -29,6 +30,10 @@ export class ActivityLogger {
    * 세션 ID를 가져오거나 생성합니다.
    */
   private getOrCreateSessionId(): string {
+    if (typeof localStorage === 'undefined') {
+      return this.generateUUID(); // SSR에서는 임시 ID 사용
+    }
+    
     let sessionId = localStorage.getItem('session_id');
     if (!sessionId) {
       sessionId = this.generateUUID();

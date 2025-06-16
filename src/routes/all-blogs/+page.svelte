@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import * as Avatar from "$lib/components/ui/avatar";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
-  import { selectedBlogs, toggleBlog, resetSelected, addBlogsGroup, selectedTags } from '$lib/stores/search';
-  import { navigate } from '$lib/stores/router';
+  import { selectedBlogs, toggleBlog, resetSelected, addBlogsGroup, selectedTags, getSearchParamsUrl } from '$lib/stores/search';
+  import { goto } from '$app/navigation';
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
   import { store as tagsStore } from '$lib/stores/tags';
@@ -204,7 +204,7 @@
     logger.logClick('BLOG_CARD', blog.id, blog.techBlogName, {
       postCount: blog.postCnt
     });
-    navigate(`/blog/${blog.id}`);
+    goto(`/blog/${blog.id}`);
   }
 
   // 블로그 선택 함수 (별도 버튼용)
@@ -286,7 +286,9 @@
         tagCount: $selectedTags.length
       });
     }
-    navigate('/');
+    // URL 파라미터와 함께 메인 페이지로 이동
+    const urlWithParams = getSearchParamsUrl('/');
+    goto(urlWithParams);
   }
 
   function handleReset() {

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
-  import { selectedTags, toggleTag, resetSelected } from '$lib/stores/search';
-  import { navigate } from '$lib/stores/router';
+  import { selectedTags, toggleTag, resetSelected, getSearchParamsUrl } from '$lib/stores/search';
+  import { goto } from '$app/navigation';
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
   import * as Popover from "$lib/components/ui/popover";
@@ -152,7 +152,9 @@
         tagCount: $selectedTags.length
       });
     }
-    navigate('/');
+    // URL 파라미터와 함께 메인 페이지로 이동
+    const urlWithParams = getSearchParamsUrl('/');
+    goto(urlWithParams);
   }
 
   function handleReset() {

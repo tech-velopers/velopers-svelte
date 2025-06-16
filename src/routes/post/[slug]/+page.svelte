@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getApiUrl } from '$lib/config';
-  import { currentPath, navigate } from '$lib/stores/router';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { Bot, ExternalLink, Undo2, Server, Home, Palette, GitBranch, Network, Wind, Share2, Eye } from 'lucide-svelte';
@@ -9,7 +10,7 @@
   import { toast } from "svelte-sonner";
   import logger from '$lib/utils/ActivityLogger';
   import { Button } from "$lib/components/ui/button";
-  import { cn } from "$lib/utils.js";
+  import { cn } from "$lib/utils";
   import { formatDate, dateArrayToISOString } from '$lib/utils/dateUtils';
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
@@ -79,7 +80,7 @@
   }
 
   $: {
-    const postId = $currentPath.split('/').pop();
+    const postId = $page.params.slug || $page.url.pathname.split('/').pop();
     if (postId) {
       fetchPost(postId);
     }
@@ -108,7 +109,7 @@
     if (category) {
       // 카테고리 클릭 로깅
       logger.logClick('CATEGORY', undefined, category, { from: 'post_detail' });
-      navigate(`/?page=1&category=${category.toLowerCase()}`);
+      goto(`/?page=1&category=${category.toLowerCase()}`);
     }
   }
 
@@ -121,7 +122,7 @@
       // techBlogMap에서 블로그 ID 찾기
       const blogInfo = $techBlogMap[blogName];
       if (blogInfo && blogInfo.id) {
-        navigate(`/blog/${blogInfo.id}`);
+        goto(`/blog/${blogInfo.id}`);
       } else {
         console.error(`블로그 정보를 찾을 수 없음: ${blogName}`);
       }
@@ -156,7 +157,7 @@
   // 태그 클릭 핸들러 추가
   function handleTagClick(tag: string) {
     logger.logClick('TAG', undefined, tag, { from: 'post_detail' });
-    navigate(`/?tags=${tag}`);
+    goto(`/?tags=${tag}`);
   }
 
   // 검색 관련 함수들

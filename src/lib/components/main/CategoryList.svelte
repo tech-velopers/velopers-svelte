@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Server, Home, Palette, Bot, GitBranch, Network, Wind } from 'lucide-svelte';
   import { Button } from "$lib/components/ui/button";
-  import { cn } from "$lib/utils.js";
+  import { cn } from "$lib/utils";
   
   export let currentCategory: string;
   export let selectCategory: (category: string) => void;

@@ -11,13 +11,14 @@
     toggleBlog, 
     toggleTag, 
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    getSearchParamsUrl
   } from '$lib/stores/search';
-  import { updateUrl } from '$lib/stores/router';
+  import { goto } from '$app/navigation';
   import { Search, RotateCcw, X, Check, Tag as TagIcon } from 'lucide-svelte';
   import { Input } from "$lib/components/ui/input";
   import { Button } from "$lib/components/ui/button";
-  import { cn } from "$lib/utils.js";
+  import { cn } from "$lib/utils";
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import type { TechBlog } from '$lib/stores/techBlogs';
   import { store as tagsStore } from '$lib/stores/tags';
@@ -151,7 +152,7 @@
       toggleTag(nameToToggle);
     }
 
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
   }
 
   async function trySelectBlogByExactMatch(): Promise<boolean> {
@@ -170,7 +171,7 @@
       await tick();
 
       toggleBlog(blogToToggle);
-      updateUrl();
+      goto(getSearchParamsUrl('/'), { replaceState: true });
       return true;
     }
     return false;
@@ -192,7 +193,7 @@
       await tick();
 
       toggleTag(tagToToggle);
-      updateUrl();
+      goto(getSearchParamsUrl('/'), { replaceState: true });
       return true;
     }
     return false;
@@ -213,11 +214,11 @@
     if (trimmedQuery) {
       setSearchQuery(trimmedQuery);
       dispatch('search', { query: trimmedQuery });
-      updateUrl();
+      goto(getSearchParamsUrl('/'), { replaceState: true });
     } else if ($selectedTags.length > 0 || $selectedBlogs.length > 0) {
       setSearchQuery('');
       searchWithSelected();
-      updateUrl();
+      goto(getSearchParamsUrl('/'), { replaceState: true });
     }
     
     showSuggestions = false;
@@ -366,7 +367,7 @@
                 transition:fade|local={{ duration: 200 }}
                 on:click={() => {
                   toggleBlog(blog);
-                  updateUrl();
+                  goto(getSearchParamsUrl('/'), { replaceState: true });
                 }}
                 class={cn(
                   "group flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
@@ -405,7 +406,7 @@
                 transition:fade|local={{ duration: 200 }}
                 on:click={() => {
                   toggleTag(tag);
-                  updateUrl();
+                  goto(getSearchParamsUrl('/'), { replaceState: true });
                 }}
                 class={cn(
                   "group flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
@@ -440,7 +441,7 @@
         onReset();
         inputQuery = '';
         setSearchQuery('');
-        updateUrl();
+        goto(getSearchParamsUrl('/'), { replaceState: true });
       }}
       class="text-sm px-4 py-2 h-9"
     >

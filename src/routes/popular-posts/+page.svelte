@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import { selectedBlogs, selectedTags, resetSelected, toggleBlog, toggleTag } from '$lib/stores/search';
-  import { navigate } from '$lib/stores/router';
+  import { goto } from '$app/navigation';
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
@@ -134,7 +134,7 @@
         tagCount: $selectedTags.length
       });
     }
-    navigate('/');
+    goto('/');
   }
 
   function handleReset() {

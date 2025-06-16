@@ -1,12 +1,12 @@
 <script lang="ts">
   import * as HoverCard from "$lib/components/ui/hover-card";
   import * as Avatar from "$lib/components/ui/avatar";
-  import { navigate } from "$lib/stores/router";
+  import { goto } from '$app/navigation';
   import { selectedBlogs, toggleBlog } from '$lib/stores/search';
   import { techBlogMap } from '$lib/stores/techBlogs';
   import { Button } from "$lib/components/ui/button";
   import { Badge } from "$lib/components/ui/badge";
-  import { cn } from "$lib/utils.js";
+  import { cn } from "$lib/utils";
   import { Check, ExternalLink, FileText, Eye, CalendarDays } from 'lucide-svelte';
   import { formatRelativeDate } from '$lib/utils/dateUtils';
 
@@ -47,9 +47,9 @@
     event.stopPropagation();
     
     if (blogId) {
-      navigate(`/blog/${blogId}`);
+      goto(`/blog/${blogId}`);
     } else if (blogName && $techBlogMap[blogName]?.id) {
-      navigate(`/blog/${$techBlogMap[blogName].id}`);
+      goto(`/blog/${$techBlogMap[blogName].id}`);
     }
   }
 

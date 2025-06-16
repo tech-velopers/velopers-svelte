@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
-  import { currentPath, navigate } from '$lib/stores/router';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import * as Alert from "$lib/components/ui/alert/index.js";
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
@@ -46,7 +47,7 @@
   
   // URL에서 블로그 ID 가져오기
   $: {
-    const pathParts = $currentPath.split('/');
+    const pathParts = $page.url.pathname.split('/');
     if (pathParts.length >= 3 && pathParts[1] === 'blog') {
       try {
         const id = parseInt(pathParts[2]);
@@ -209,7 +210,7 @@
 
   // 홈으로 이동 함수
   function goToHome() {
-    navigate('/');
+    goto('/');
   }
 
   // 뒤로가기 함수
@@ -303,7 +304,7 @@
         }
       });
     }
-    navigate('/all-blogs');
+    goto('/all-blogs');
   }
 
   // 검색 관련 함수들 (MainLayout에 필요)

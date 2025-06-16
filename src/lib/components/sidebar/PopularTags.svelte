@@ -1,9 +1,9 @@
 <script lang="ts">
   import { selectedTags, toggleTag } from '$lib/stores/search';
-  import { navigate } from "$lib/stores/router";
+  import { goto } from '$app/navigation';
   import { Button } from "$lib/components/ui/button";
   import { Badge } from "$lib/components/ui/badge";
-  import { cn } from "$lib/utils.js";
+  import { cn } from "$lib/utils";
   import { Tag as TagIcon, ChevronRight } from 'lucide-svelte';
   import { Skeleton } from "$lib/components/ui/skeleton";
   import logger from '$lib/utils/ActivityLogger';
@@ -37,7 +37,7 @@
       variant="ghost"
       size="sm"
       class="h-auto p-0 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-transparent"
-      on:click={() => navigate('/all-tags')}
+      on:click={() => goto('/all-tags')}
     >
       전체보기
     </Button>

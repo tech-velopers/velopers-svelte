@@ -1,6 +1,6 @@
 <script>
   import { MessageSquare, PlusCircle, Rss } from 'lucide-svelte';
-  import { navigate } from '$lib/stores/router';
+  import { goto } from '$app/navigation';
 </script>
 
 <footer class="border-t dark:border-gray-800">
@@ -11,7 +11,7 @@
         <!-- <a href="/" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">개인정보처리방침</a> -->
         <!-- <a href="/" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm">문의하기</a> -->
         <button 
-          on:click={() => navigate('/rss-info')} 
+          on:click={() => goto('/rss-info')} 
           class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm flex items-center"
           tabindex="0"
         >

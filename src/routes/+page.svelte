@@ -14,13 +14,15 @@
     updateSearchStateFromUrl,
     setPage,
     setCategory,
-    setSearchQuery
+    setSearchQuery,
+    getSearchParamsUrl
   } from '$lib/stores/search';
   import { store as techBlogsStore } from '$lib/stores/techBlogs';
   import { store as postsStore } from '$lib/stores/posts';
   import { store as tagsStore } from '$lib/stores/tags';
   import type { Tag } from '$lib/stores/tags';
-  import { currentUrl, updateUrl } from '$lib/stores/router';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import { get } from 'svelte/store';
   import logger from '$lib/utils/ActivityLogger';
 
@@ -77,7 +79,7 @@
       initialLoadComplete = true;
       
       // URL 설정 (이제 반응형 블록이 실행될 수 있음)
-      currentUrl.set(window.location.href);
+      // currentUrl.set(window.location.href); // Not needed with SvelteKit
     });
 
     return () => {
@@ -87,8 +89,8 @@
 
   $: {
     // 초기 로드가 완료된 후에만 URL 변경 감지 로직 실행
-    if (initialLoadComplete && prevUrl !== $currentUrl) {
-      console.log('URL changed:', prevUrl, '->', $currentUrl);
+    if (initialLoadComplete && prevUrl !== $page.url.href) {
+      console.log('URL changed:', prevUrl, '->', $page.url.href);
       
       // URL에서 검색 상태 업데이트
       updateSearchStateFromUrl();
@@ -96,7 +98,7 @@
       // 상태가 변경되었으므로 포스트 다시 가져오기
       postsStore.fetchPosts();
       
-      prevUrl = $currentUrl;
+      prevUrl = $page.url.href;
     }
   }
 
@@ -119,7 +121,7 @@
     setPage(1);
     
     // URL 업데이트
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
     
     // 데이터 가져오기
     postsStore.fetchPosts();
@@ -138,7 +140,7 @@
     setPage(page);
     
     // URL 업데이트
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
     
     // 데이터 가져오기
     postsStore.fetchPosts();
@@ -162,7 +164,7 @@
     toggleTag(tagName);
     
     // URL 업데이트
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
     
     // 데이터 가져오기
     postsStore.fetchPosts();
@@ -179,7 +181,7 @@
     toggleBlog(blog);
     
     // URL 업데이트
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
     
     // 데이터 가져오기
     postsStore.fetchPosts();
@@ -193,7 +195,7 @@
     setSearchQuery(event.detail.query);
     
     // URL 업데이트
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
     
     // 데이터 가져오기
     postsStore.fetchPosts();
@@ -208,7 +210,7 @@
     });
     
     // URL 업데이트
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
     
     // 데이터 가져오기
     postsStore.fetchPosts();
@@ -225,7 +227,7 @@
     resetSelected();
     
     // URL 업데이트
-    updateUrl();
+    goto(getSearchParamsUrl('/'), { replaceState: true });
     
     // 데이터 가져오기
     postsStore.fetchPosts();

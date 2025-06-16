@@ -5,7 +5,8 @@
   import { techBlogMap } from '$lib/stores/techBlogs';
   import { selectedBlogs, selectedTags } from '$lib/stores/search';
   import { onMount } from "svelte";
-  import { navigate, visitedPosts, markPostAsVisited } from '$lib/stores/router';
+  import { goto } from '$app/navigation';
+  import { visitedPosts, markPostAsVisited } from '$lib/stores/visitedPosts';
   import { ExternalLink, Eye, Bot } from 'lucide-svelte';
   import { cn } from '$lib/utils';
   import { Button } from "$lib/components/ui/button";
@@ -75,7 +76,7 @@
     });
     
     markPostAsVisited(post.id);
-    navigate(`/post/${post.id}`);
+    goto(`/post/${post.id}`);
   }
 
   // 블로그 선택 함수 - 선택만 하고 검색은 하지 않음
@@ -121,7 +122,7 @@
     // techBlogMap에서 블로그 ID 찾기
     const blogInfo = $techBlogMap[blogName];
     if (blogInfo && blogInfo.id) {
-      navigate(`/blog/${blogInfo.id}`);
+      goto(`/blog/${blogInfo.id}`);
     } else {
       console.error(`블로그 정보를 찾을 수 없음: ${blogName}`);
     }

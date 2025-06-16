@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as HoverCard from "$lib/components/ui/hover-card";
-  import { navigate } from "$lib/stores/router";
+  import { goto } from '$app/navigation';
   import { resetSelected } from "$lib/stores/search";
   
   export let isDarkMode: boolean;
@@ -9,7 +9,7 @@
   // 로고 또는 홈 클릭 시 검색 파라미터 초기화 후 홈으로 이동
   function handleHomeNavigation() {
     // resetSearchState 옵션을 true로 설정하여 검색 파라미터 초기화 및 홈으로 이동
-    navigate("/", false, true);
+    goto("/");
   }
 </script>
 
@@ -47,25 +47,25 @@
         >
         <span class="hidden sm:block border-l border-gray-200 dark:border-gray-700 h-4 mx-1"></span>
         <button
-          on:click={() => navigate("/all-blogs")}
+          on:click={() => goto("/all-blogs")}
           class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >모든 블로그</button
         >
         <span class="border-l border-gray-200 dark:border-gray-700 h-4 mx-1"></span>
         <button
-          on:click={() => navigate("/all-tags")}
+          on:click={() => goto("/all-tags")}
           class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >모든 태그</button
         >
         <span class="border-l border-gray-200 dark:border-gray-700 h-4 mx-1"></span>
         <button
-          on:click={() => navigate("/about")}
+          on:click={() => goto("/about")}
           class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >소개</button
         >
         <span class="border-l border-gray-200 dark:border-gray-700 h-4 mx-1"></span>
         <button
-          on:click={() => navigate("/popular-posts")}
+          on:click={() => goto("/popular-posts")}
           class="p-1 sm:p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-[11px] sm:text-base whitespace-nowrap"
           >인기 게시글</button
         >

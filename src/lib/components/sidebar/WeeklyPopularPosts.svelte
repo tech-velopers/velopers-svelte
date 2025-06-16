@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getApiUrl, API_ENDPOINTS } from '$lib/config';
-  import { navigate } from '$lib/stores/router';
+  import { goto } from '$app/navigation';
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { TrendingUp, ExternalLink } from 'lucide-svelte';
   import { Skeleton } from "$lib/components/ui/skeleton";
   import { Button } from "$lib/components/ui/button";
   import * as Avatar from "$lib/components/ui/avatar";
-  import { cn } from "$lib/utils.js";
+  import { cn } from "$lib/utils";
   import logger from '$lib/utils/ActivityLogger';
   import { formatDateString } from '$lib/utils/dateUtils';
 
@@ -57,7 +57,7 @@
       location: 'sidebar'
     });
     
-    navigate(`/post/${postId}`);
+    goto(`/post/${postId}`);
   }
 
   // 블로그 상세 페이지로 이동
@@ -70,7 +70,7 @@
         location: 'sidebar'
       });
       
-      navigate(`/blog/${blogInfo.id}`);
+      goto(`/blog/${blogInfo.id}`);
     }
   }
 </script>
@@ -85,7 +85,7 @@
       variant="ghost"
       size="sm"
       class="h-auto p-0 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-transparent"
-      on:click={() => navigate('/popular-posts')}
+      on:click={() => goto('/popular-posts')}
     >
       카테고리별 인기 게시글
     </Button>

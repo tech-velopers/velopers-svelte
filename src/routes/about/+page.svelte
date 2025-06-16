@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import logger from '$lib/utils/ActivityLogger';
-  import Changelog from './Changelog.svelte';
+  import Changelog from '../changelog/+page.svelte';
 
   onMount(() => {
     // About 페이지 조회 로깅

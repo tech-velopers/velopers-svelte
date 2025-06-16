@@ -152,7 +152,99 @@ export function addBlogsGroup(blogs: Blog[]) {
   });
 }
 
-// 전체 검색 상태 가져오기
+// URL 파라미터 생성 함수
+export function getSearchParamsUrl(basePath: string = '/'): string {
+  const blogs = get(selectedBlogs);
+  const tags = get(selectedTags);
+  const query = get(searchQuery);
+  const category = get(selectedCategory);
+  const page = get(currentPage);
+  
+  const url = new URL(basePath, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+  
+  // 기본값이 아닌 경우에만 URL 파라미터에 추가
+  if (page > 1) {
+    url.searchParams.set('page', page.toString());
+  }
+  
+  if (category !== 'all') {
+    url.searchParams.set('category', category);
+  }
+  
+  if (query) {
+    url.searchParams.set('query', query);
+  }
+  
+  if (blogs.length > 0) {
+    const blogNames = blogs.map(blog => blog.name.trim());
+    url.searchParams.set('blogs', blogNames.join(','));
+  }
+  
+  if (tags.length > 0) {
+    url.searchParams.set('tags', tags.join(','));
+  }
+  
+  return url.pathname + url.search;
+}
+
+// URL에서 검색 상태 업데이트
+export function updateSearchStateFromUrl() {
+  if (typeof window === 'undefined') return;
+  
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+
+  // 페이지 파라미터
+  const pageParam = params.get('page');
+  if (pageParam) {
+    const page = parseInt(pageParam);
+    if (!isNaN(page) && page > 0) {
+      setPage(page);
+    }
+  } else {
+    setPage(1);
+  }
+
+  // 카테고리 파라미터
+  const categoryParam = params.get('category');
+  if (categoryParam) {
+    setCategory(categoryParam);
+  } else {
+    setCategory('all');
+  }
+
+  // 검색어 파라미터
+  const queryParam = params.get('query');
+  if (queryParam) {
+    setSearchQuery(queryParam);
+  } else {
+    setSearchQuery('');
+  }
+
+  // 블로그 파라미터
+  const blogsParam = params.get('blogs');
+  if (blogsParam) {
+    const blogNames = blogsParam.split(',');
+    const blogs = blogNames.map(name => ({ 
+      name: name.trim(), 
+      avatar: '' // 아바타는 나중에 techBlogsStore에서 매칭
+    }));
+    selectedBlogs.set(blogs);
+  } else {
+    selectedBlogs.set([]);
+  }
+
+  // 태그 파라미터
+  const tagsParam = params.get('tags');
+  if (tagsParam) {
+    const tags = tagsParam.split(',').map(tag => tag.trim());
+    selectedTags.set(tags);
+  } else {
+    selectedTags.set([]);
+  }
+}
+
+// 검색 상태 반환
 export function getSearchState() {
   return {
     blogs: get(selectedBlogs),
@@ -162,49 +254,3 @@ export function getSearchState() {
     page: get(currentPage)
   };
 }
-
-// URL에서 파라미터를 파싱하여 검색 상태 업데이트
-export function updateSearchStateFromUrl() {
-  if (typeof window === 'undefined') return;
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const page = parseInt(urlParams.get('page') || '1');
-  const category = urlParams.get('category') || 'all';
-  const query = urlParams.get('query') || '';
-  
-  // 블로그와 태그 정보 파싱
-  const blogsParam = urlParams.get('blogs');
-  const tagsParam = urlParams.get('tags');
-  
-  // 기존 선택된 블로그 정보 가져오기 (아바타 정보 유지를 위해)
-  const currentBlogs = get(selectedBlogs);
-  
-  if (blogsParam) {
-    const blogNames = blogsParam.split(',').map(blog => blog.trim());
-    
-    // 기존 블로그 중에서 URL에 포함된 블로그만 선택
-    const filteredBlogs = currentBlogs.filter(blog => 
-      blogNames.some(name => name.toLowerCase() === blog.name.toLowerCase())
-    );
-    
-    // URL에는 있지만 현재 선택에 없는 블로그는 기본 아바타로 추가
-    const newBlogs = blogNames
-      .filter(name => !filteredBlogs.some(blog => blog.name.toLowerCase() === name.toLowerCase()))
-      .map(name => ({ name, avatar: `${name.toLowerCase().replace(/\s+/g, '')}.png` }));
-    
-    selectedBlogs.set([...filteredBlogs, ...newBlogs]);
-  } else {
-    selectedBlogs.set([]);
-  }
-  
-  if (tagsParam) {
-    const tagNames = tagsParam.split(',').map(tag => tag.trim());
-    selectedTags.set(tagNames);
-  } else {
-    selectedTags.set([]);
-  }
-  
-  setSearchQuery(query);
-  setCategory(category);
-  setPage(page);
-} 

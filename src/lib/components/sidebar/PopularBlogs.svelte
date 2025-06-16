@@ -1,6 +1,6 @@
 <script lang="ts">
   import BlogHoverCard from "$lib/components/sidebar/BlogHoverCard.svelte";
-  import { navigate } from "$lib/stores/router";
+  import { goto } from '$app/navigation';
   import { addBlogsGroup } from '$lib/stores/search';
   import { store as techBlogsStore, techBlogMap } from '$lib/stores/techBlogs';
   import { Button } from "$lib/components/ui/button";
@@ -133,7 +133,7 @@
       variant="ghost"
       size="sm"
       class="h-auto p-0 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-transparent"
-      on:click={() => navigate('/all-blogs')}
+      on:click={() => goto('/all-blogs')}
     >
       전체보기
     </Button>
