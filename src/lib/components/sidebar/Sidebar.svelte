@@ -14,7 +14,6 @@
   import { onMount } from 'svelte';
   import * as Dialog from "$lib/components/ui/dialog";
 
-  export let allTags: Array<{ id: number; tagName: string; }>;
   export let searchWithSelected: (data: any) => void;
   export let onSearch: (event: CustomEvent<{ query: string }>) => void;
   export let onReset: () => void;
