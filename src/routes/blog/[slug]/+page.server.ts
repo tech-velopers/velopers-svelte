@@ -1,4 +1,4 @@
-import { getApiUrl } from '$lib/config';
+import { getApiUrl, API_ENDPOINTS } from '$lib/config';
 import { error } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
 
@@ -13,7 +13,7 @@ export const load: ServerLoad = async ({ params }) => {
 		}
 		
 		// 모든 블로그 데이터 가져오기
-		const response = await fetch(getApiUrl('/api/tech-blogs'));
+		const response = await fetch(getApiUrl(API_ENDPOINTS.techBlogs));
 		
 		if (!response.ok) {
 			throw error(500, '블로그 데이터를 불러오는데 실패했습니다.');
