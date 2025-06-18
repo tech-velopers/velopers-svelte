@@ -316,12 +316,12 @@
 <svelte:head>
   {#if blog}
     <title>{blog.techBlogName} | Velopers</title>
-    <meta name="title" property="og:title" content={`${blog.techBlogName} - 기술 블로그`} />
-    <meta name="description" property="og:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
-    <meta name="image" property="og:image" content={`/icons/${blog.icon}`} />
-    <meta name="type" property="og:type" content="website" />
-    <meta name="url" property="og:url" content={`https://www.velopers.kr/blog/${blog.id}`} />
-    <meta name="site_name" property="og:site_name" content="Velopers" />
+    <meta property="og:title" content={`${blog.techBlogName} - 기술 블로그`} />
+    <meta property="og:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
+    <meta property="og:image" content={`https://www.velopers.kr/icons/${blog.icon}`} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={`https://www.velopers.kr/blog/${blog.id}`} />
+    <meta property="og:site_name" content="Velopers" />
     <meta property="og:locale" content="ko_KR" />
     {#if blog.lastCreatedAt}
       <meta property="article:published_time" content={typeof blog.lastCreatedAt === 'string' ? blog.lastCreatedAt : dateArrayToISOString(blog.lastCreatedAt)} />
@@ -332,7 +332,9 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${blog.techBlogName} - 기술 블로그`} />
     <meta name="twitter:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
-    <meta name="twitter:image" content={`/icons/${blog.icon}`} />
+    <meta name="twitter:image" content={`https://www.velopers.kr/icons/${blog.icon}`} />
+    <meta name="description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
+    <meta name="keywords" content={`${blog.techBlogName}, 기술 블로그, 개발자, 프로그래밍`} />
     <link rel="canonical" href={`https://www.velopers.kr/blog/${blog.id}`} />
   {/if}
 </svelte:head>

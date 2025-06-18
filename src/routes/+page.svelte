@@ -1,3 +1,21 @@
+<svelte:head>
+  <title>Velopers - 국내 IT 기업 기술 블로그 모음</title>
+  <meta property="og:title" content="Velopers - 국내 IT 기업 기술 블로그 모음" />
+  <meta property="og:description" content="국내 주요 IT 기업들의 기술 블로그를 한 곳에서 확인하세요. 최신 기술 트렌드와 개발 인사이트를 제공합니다." />
+  <meta property="og:image" content="https://www.velopers.kr/velopers.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.velopers.kr" />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Velopers - 국내 IT 기업 기술 블로그 모음" />
+  <meta name="twitter:description" content="국내 주요 IT 기업들의 기술 블로그를 한 곳에서 확인하세요. 최신 기술 트렌드와 개발 인사이트를 제공합니다." />
+  <meta name="twitter:image" content="https://www.velopers.kr/velopers.png" />
+  <meta name="description" content="국내 주요 IT 기업들의 기술 블로그를 한 곳에서 확인하세요. 최신 기술 트렌드와 개발 인사이트를 제공합니다." />
+  <meta name="keywords" content="기술 블로그, IT 기업, 개발자, 프로그래밍, 기술 트렌드, 네이버, 카카오, 쿠팡, 우아한형제들" />
+  <link rel="canonical" href="https://www.velopers.kr" />
+</svelte:head>
+
 <script lang="ts">
   import CategoryList from "$lib/components/main/CategoryList.svelte";
   import PostList from "$lib/components/main/PostList.svelte";

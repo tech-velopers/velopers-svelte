@@ -1,3 +1,21 @@
+<svelte:head>
+  <title>주간 인기 게시글 | Velopers</title>
+  <meta property="og:title" content="주간 인기 게시글 - Velopers" />
+  <meta property="og:description" content="카테고리별로 인기 있는 기술 블로그 게시글을 확인해보세요. Frontend, Backend, AI, DevOps 등 다양한 분야의 트렌딩 게시글을 제공합니다." />
+  <meta property="og:image" content="https://www.velopers.kr/velopers.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.velopers.kr/popular-posts" />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="주간 인기 게시글 - Velopers" />
+  <meta name="twitter:description" content="카테고리별로 인기 있는 기술 블로그 게시글을 확인해보세요. Frontend, Backend, AI, DevOps 등 다양한 분야의 트렌딩 게시글을 제공합니다." />
+  <meta name="twitter:image" content="https://www.velopers.kr/velopers.png" />
+  <meta name="description" content="카테고리별로 인기 있는 기술 블로그 게시글을 확인해보세요. Frontend, Backend, AI, DevOps 등 다양한 분야의 트렌딩 게시글을 제공합니다." />
+  <meta name="keywords" content="인기 게시글, 주간 인기, 기술 트렌드, Frontend, Backend, AI, DevOps, 개발자" />
+  <link rel="canonical" href="https://www.velopers.kr/popular-posts" />
+</svelte:head>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";

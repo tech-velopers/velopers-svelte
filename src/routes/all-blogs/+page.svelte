@@ -1,3 +1,21 @@
+<svelte:head>
+  <title>모든 블로그 | Velopers</title>
+  <meta property="og:title" content="모든 블로그 - Velopers" />
+  <meta property="og:description" content="국내 IT 기업들의 모든 기술 블로그를 한 눈에 확인하세요. 네이버, 카카오, 쿠팡, 우아한형제들 등 주요 기업들의 기술 블로그 정보를 제공합니다." />
+  <meta property="og:image" content="https://www.velopers.kr/velopers.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.velopers.kr/all-blogs" />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="모든 블로그 - Velopers" />
+  <meta name="twitter:description" content="국내 IT 기업들의 모든 기술 블로그를 한 눈에 확인하세요. 네이버, 카카오, 쿠팡, 우아한형제들 등 주요 기업들의 기술 블로그 정보를 제공합니다." />
+  <meta name="twitter:image" content="https://www.velopers.kr/velopers.png" />
+  <meta name="description" content="국내 IT 기업들의 모든 기술 블로그를 한 눈에 확인하세요. 네이버, 카카오, 쿠팡, 우아한형제들 등 주요 기업들의 기술 블로그 정보를 제공합니다." />
+  <meta name="keywords" content="기술 블로그, IT 기업, 모든 블로그, 네이버, 카카오, 쿠팡, 우아한형제들, 개발자" />
+  <link rel="canonical" href="https://www.velopers.kr/all-blogs" />
+</svelte:head>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import * as Avatar from "$lib/components/ui/avatar";

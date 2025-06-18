@@ -1,3 +1,21 @@
+<svelte:head>
+  <title>RSS 피드 안내 | Velopers</title>
+  <meta property="og:title" content="RSS 피드 안내 - Velopers" />
+  <meta property="og:description" content="Velopers RSS 피드를 구독하여 최신 기술 블로그 게시글을 놓치지 마세요. 전체 콘텐츠와 요약 RSS 두 가지 옵션을 제공합니다." />
+  <meta property="og:image" content="https://www.velopers.kr/velopers.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.velopers.kr/rss-info" />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RSS 피드 안내 - Velopers" />
+  <meta name="twitter:description" content="Velopers RSS 피드를 구독하여 최신 기술 블로그 게시글을 놓치지 마세요. 전체 콘텐츠와 요약 RSS 두 가지 옵션을 제공합니다." />
+  <meta name="twitter:image" content="https://www.velopers.kr/velopers.png" />
+  <meta name="description" content="Velopers RSS 피드를 구독하여 최신 기술 블로그 게시글을 놓치지 마세요. 전체 콘텐츠와 요약 RSS 두 가지 옵션을 제공합니다." />
+  <meta name="keywords" content="RSS 피드, RSS 구독, 기술 블로그 RSS, 요약 RSS, 전체 콘텐츠 RSS" />
+  <link rel="canonical" href="https://www.velopers.kr/rss-info" />
+</svelte:head>
+
 <script lang="ts">
   import { ArrowUpRight, Copy } from 'lucide-svelte';
   import logger from '$lib/utils/ActivityLogger';

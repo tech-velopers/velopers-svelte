@@ -1,3 +1,21 @@
+<svelte:head>
+  <title>Velopers 소개 | Velopers</title>
+  <meta property="og:title" content="Velopers 소개" />
+  <meta property="og:description" content="Velopers는 국내 IT 기업들의 기술 블로그를 한곳에서 모아볼 수 있는 플랫폼입니다. 개발자들이 더 쉽게 기술 정보를 찾고 공유할 수 있도록 만들어졌습니다." />
+  <meta property="og:image" content="https://www.velopers.kr/velopers.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.velopers.kr/about" />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Velopers 소개" />
+  <meta name="twitter:description" content="Velopers는 국내 IT 기업들의 기술 블로그를 한곳에서 모아볼 수 있는 플랫폼입니다. 개발자들이 더 쉽게 기술 정보를 찾고 공유할 수 있도록 만들어졌습니다." />
+  <meta name="twitter:image" content="https://www.velopers.kr/velopers.png" />
+  <meta name="description" content="Velopers는 국내 IT 기업들의 기술 블로그를 한곳에서 모아볼 수 있는 플랫폼입니다. 개발자들이 더 쉽게 기술 정보를 찾고 공유할 수 있도록 만들어졌습니다." />
+  <meta name="keywords" content="Velopers, 소개, 기술 블로그, 플랫폼, 개발자, IT 기업" />
+  <link rel="canonical" href="https://www.velopers.kr/about" />
+</svelte:head>
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import logger from '$lib/utils/ActivityLogger';

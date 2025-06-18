@@ -1,3 +1,21 @@
+<svelte:head>
+  <title>모든 태그 | Velopers</title>
+  <meta property="og:title" content="모든 태그 - Velopers" />
+  <meta property="og:description" content="기술 블로그 게시글의 모든 태그를 확인하고 원하는 기술 스택의 글을 찾아보세요. Frontend, Backend, AI, DevOps 등 다양한 기술 태그를 제공합니다." />
+  <meta property="og:image" content="https://www.velopers.kr/velopers.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.velopers.kr/all-tags" />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="모든 태그 - Velopers" />
+  <meta name="twitter:description" content="기술 블로그 게시글의 모든 태그를 확인하고 원하는 기술 스택의 글을 찾아보세요. Frontend, Backend, AI, DevOps 등 다양한 기술 태그를 제공합니다." />
+  <meta name="twitter:image" content="https://www.velopers.kr/velopers.png" />
+  <meta name="description" content="기술 블로그 게시글의 모든 태그를 확인하고 원하는 기술 스택의 글을 찾아보세요. Frontend, Backend, AI, DevOps 등 다양한 기술 태그를 제공합니다." />
+  <meta name="keywords" content="기술 태그, 프로그래밍 언어, 기술 스택, Frontend, Backend, AI, DevOps, 개발자" />
+  <link rel="canonical" href="https://www.velopers.kr/all-tags" />
+</svelte:head>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
