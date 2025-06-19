@@ -3,6 +3,7 @@ description: 블로그명, 태그, 쿼리, 카테고리 기준으로 게시글�
 globs: src/lib/stores/search.ts, src/lib/components/sidebar/SearchBox.svelte
 ---
 # 검색 기능 규칙
+# 검색 규칙
 
 ## 검색 Store 사용
 
@@ -55,27 +56,86 @@ $: console.log($selectedBlogs, $selectedTags, $searchQuery, $selectedCategory, $
 - 페이지를 새로고침하거나 브라우저를 닫았다가 다시 열어도 검색 상태가 유지됩니다.
 - URL 파라미터로도 검색 상태를 표현하여 페이지 공유 및 북마크 시 상태가 유지됩니다.
 
-### URL과 상태 동기화
-- 검색 상태가 변경되면 URL이 자동으로 업데이트됩니다.
-- URL의 쿼리 파라미터가 변경되면 검색 상태도 업데이트됩니다.
-- 뒤로가기/앞으로가기 시 이전/이후 검색 상태로 복원됩니다.
+### URL과 상태 동기화 (SvelteKit)
+검색 상태가 변경되면 URL을 업데이트하고, URL이 변경되면 검색 상태를 업데이트합니다.
 
 ```typescript
-import { updateUrl } from '$lib/stores/router';
+import { page } from '$app/stores';
+import { goto } from '$app/navigation';
 
-// 상태 변경 후 URL 업데이트
-toggleTag('typescript');
-updateUrl();
+// URL에서 검색 상태 읽기
+$: {
+  const searchParams = $page.url.searchParams;
+  const blogs = searchParams.get('blogs')?.split(',') || [];
+  const tags = searchParams.get('tags')?.split(',') || [];
+  const query = searchParams.get('q') || '';
+  const category = searchParams.get('category') || 'all';
+  const pageNum = parseInt(searchParams.get('page') || '1');
+  
+  // Store 상태 업데이트
+  // 필요한 경우 store 메서드 호출
+}
+
+// 검색 상태를 URL에 반영
+function updateSearchUrl() {
+  const url = new URL($page.url);
+  
+  // 선택된 블로그
+  if ($selectedBlogs.length > 0) {
+    url.searchParams.set('blogs', $selectedBlogs.map(b => b.name).join(','));
+  } else {
+    url.searchParams.delete('blogs');
+  }
+  
+  // 선택된 태그
+  if ($selectedTags.length > 0) {
+    url.searchParams.set('tags', $selectedTags.join(','));
+  } else {
+    url.searchParams.delete('tags');
+  }
+  
+  // 검색어
+  if ($searchQuery) {
+    url.searchParams.set('q', $searchQuery);
+  } else {
+    url.searchParams.delete('q');
+  }
+  
+  // 카테고리
+  if ($selectedCategory && $selectedCategory !== 'all') {
+    url.searchParams.set('category', $selectedCategory);
+  } else {
+    url.searchParams.delete('category');
+  }
+  
+  // 페이지
+  if ($currentPage > 1) {
+    url.searchParams.set('page', $currentPage.toString());
+  } else {
+    url.searchParams.delete('page');
+  }
+  
+  // URL 업데이트 (히스토리 대체)
+  goto(url.toString(), { replaceState: true });
+}
+```
+
+### 검색 상태 초기화
+홈으로 이동하거나 로고 클릭 시 검색 상태를 초기화합니다.
+
+```typescript
+import { goto } from '$app/navigation';
+
+// 검색 상태 초기화 및 홈으로 이동
+function resetAndGoHome() {
+  resetSelected();
+  goto('/');
+}
 ```
 
 ### 주의사항
 - 검색 관련 상태 변경은 반드시 store의 메서드를 통해 수행해야 합니다.
 - 컴포넌트에서 직접 검색 상태를 관리하지 않습니다.
-- 로고나 홈 버튼 클릭 시 검색 상태가 초기화됩니다.
-- 검색 상태 초기화 후에는 반드시 URL도 업데이트해야 합니다.
-
-```typescript
-// 검색 상태 초기화 및 홈으로 이동 (Header.svelte에서 사용)
-import { navigate } from '$lib/stores/router';
-navigate('/', false, true); // 세 번째 파라미터: resetSearchState
-```
+- URL과 store 상태의 동기화는 양방향으로 이루어져야 합니다.
+- 브라우저의 뒤로가기/앞으로가기 시 검색 상태가 올바르게 복원되어야 합니다.
+- 서버 사이드 렌더링을 고려하여 초기 상태를 URL에서 읽어와야 합니다.
