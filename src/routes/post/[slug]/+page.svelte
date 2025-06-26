@@ -183,8 +183,15 @@
       </div>
 
       <header class="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-5 bg-card text-card-foreground rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800 transition-all duration-300">
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">
+        <h1 
+          class="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300 cursor-pointer inline-flex items-center gap-2"
+          on:click={handleOriginalPostClick}
+          on:keydown={(e) => e.key === 'Enter' && handleOriginalPostClick()}
+          role="link"
+          tabindex="0"
+        >
           {post.title}
+          <ExternalLink class="h-5 w-5 sm:h-6 sm:w-6 text-current opacity-60" />
         </h1>
 
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 md:gap-4">
