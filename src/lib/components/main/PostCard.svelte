@@ -191,7 +191,7 @@
                 isTagSelected(tag) 
                   ? "bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
                   : isVisited 
-                    ? "bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-400" 
+                    ? "bg-gray-200 text-gray-600 border-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700" 
                     : "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
               )}
               on:click={(e) => handleTagClick(tag, e)}
