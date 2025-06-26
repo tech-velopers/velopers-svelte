@@ -2,6 +2,9 @@
   import PostCard from './PostCard.svelte';
   import Pagination from './Pagination.svelte';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
+  import * as Alert from "$lib/components/ui/alert";
+  import { MousePointer, ArrowRight } from "lucide-svelte";
+  import { goto } from "$app/navigation";
   import logger from '$lib/utils/ActivityLogger';
   import { onMount } from 'svelte';
   import { Button } from "$lib/components/ui/button";
@@ -121,26 +124,15 @@
     </div>
   </div>
 
-  <!-- <Alert.Root class="mb-4">
-    <Rss class="h-4 w-4" />
+  <Alert.Root class="mb-4">
+    <MousePointer class="h-4 w-4" />
     <Alert.Title class="flex items-center justify-between">
-      <span>RSS 피드로 새 글을 구독하세요!</span>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        class="ml-auto px-3 py-1 h-auto text-xs"
-        on:click={() => navigate('/rss-info')}
-        role="button"
-        tabindex={0}
-      >
-        자세히 보기
-        <ArrowRight class="w-3 h-3 ml-1" />
-      </Button>
+      <span>포스트 페이지에서 제목을 클릭해보세요!</span>
     </Alert.Title>
     <Alert.Description>
-      전체 글 또는 <span class="font-medium text-blue-600 dark:text-blue-400">요약본</span> RSS 피드를 통해 관심 있는 기술 블로그의 업데이트를 놓치지 마세요.
+      이제 원문 보기 버튼이 아니라 제목을 클릭하면 바로 원문으로 이동합니다.
     </Alert.Description>
-  </Alert.Root> -->
+  </Alert.Root>
 
   {#if loading}
     {#each Array(5) as _}
