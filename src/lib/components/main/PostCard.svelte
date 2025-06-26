@@ -137,7 +137,7 @@
   href="/post/{post.id}"
   data-sveltekit-preload-data="hover"
   on:click={() => markPostAsVisited(post.id)}
-  class="w-full text-left">
+  class="w-full text-left block">
   <article 
     class={cn(
       "bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300",
