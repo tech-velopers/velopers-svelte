@@ -68,17 +68,6 @@
     }
   }
 
-  function handlePostClick() {
-    // 포스트 클릭 로깅
-    logger.logClick('POST_CARD', post.id, post.title, {
-      techBlogName: post.techBlogName,
-      isVisited: isVisited
-    });
-    
-    markPostAsVisited(post.id);
-    goto(`/post/${post.id}`);
-  }
-
   // 블로그 선택 함수 - 선택만 하고 검색은 하지 않음
   function handleToggleBlog(blog: { name: string; avatar: string }) {
     // 블로그 토글 상태 확인
@@ -144,12 +133,11 @@
   }
 </script>
 
-<div 
-  on:click={handlePostClick}
-  on:keydown={e => e.key === 'Enter' && handlePostClick()}
-  role="button"
-  tabindex="0" 
-  class="w-full text-left cursor-pointer">
+<a 
+  href="/post/{post.id}"
+  data-sveltekit-preload-data="hover"
+  on:click={() => markPostAsVisited(post.id)}
+  class="w-full text-left">
   <article 
     class={cn(
       "bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm hover:shadow-md transition-all duration-300",
@@ -336,4 +324,4 @@
       </div>
     </div>
   </article>
-</div> 
+</a> 
