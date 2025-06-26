@@ -3,6 +3,7 @@ description: 포스트 관련 모든 상태와 로직은 posts store에서 관�
 globs: src/lib/stores/posts.ts, src/lib/components/main/PostList.svelte, src/lib/components/main/PostCard.svelte
 ---
 # 포스트 관리 규칙
+# Posts 규칙
 
 ## Posts Store 사용
 
@@ -39,13 +40,82 @@ postsStore.reset();  // 상태 초기화
 - store 값이 변경될 때마다 자동으로 포스트 목록이 업데이트됩니다.
 - 검색 조건은 AND 조건으로 적용됩니다.
 
+### URL 동기화
+SvelteKit에서는 URL 파라미터와 store 상태를 동기화해야 합니다.
+
+```typescript
+import { page } from '$app/stores';
+import { goto } from '$app/navigation';
+
+// URL 파라미터에서 상태 읽기
+$: {
+  const searchParams = $page.url.searchParams;
+  const page = parseInt(searchParams.get('page') || '1');
+  const category = searchParams.get('category') || 'all';
+  const query = searchParams.get('q') || '';
+  
+  // Store 상태 업데이트
+  postsStore.setPage(page);
+  postsStore.setCategory(category);
+  postsStore.setSearchQuery(query);
+}
+
+// Store 상태를 URL에 반영
+function updateUrl() {
+  const url = new URL($page.url);
+  url.searchParams.set('page', $postsStore.currentPage.toString());
+  url.searchParams.set('category', $postsStore.currentCategory);
+  if ($postsStore.searchQuery) {
+    url.searchParams.set('q', $postsStore.searchQuery);
+  }
+  goto(url.toString(), { replaceState: true });
+}
+```
+
 ### 주의사항
 1. 포스트 관련 상태 변경은 반드시 store의 메서드를 통해 수행해야 합니다.
 2. 검색, 필터링 등의 로직은 컴포넌트에서 직접 구현하지 않고 store를 사용합니다.
 3. URL 파라미터와 store 상태를 동기화해야 하는 경우 컴포넌트에서 처리합니다.
 4. 에러 처리는 store의 error 상태를 통해 확인합니다.
 
-## 포스트 상세 페이지 (Post.svelte)
+## 포스트 상세 페이지
+
+### 서버 사이드 데이터 로딩
+SvelteKit에서는 `+page.server.ts`를 사용하여 서버에서 데이터를 미리 로드합니다.
+
+```typescript
+// +page.server.ts
+import type { PageServerLoad } from './$types';
+import { error } from '@sveltejs/kit';
+
+export const load: PageServerLoad = async ({ params, fetch }) => {
+  const { slug } = params;
+  
+  try {
+    const response = await fetch(`/api/post/${slug}`);
+    
+    if (!response.ok) {
+      throw error(404, '포스트를 찾을 수 없습니다.');
+    }
+    
+    const post = await response.json();
+    
+    return {
+      post
+    };
+  } catch (e) {
+    throw error(500, '포스트를 불러오는데 실패했습니다.');
+  }
+};
+```
+
+```svelte
+<!-- +page.svelte -->
+<script>
+  export let data;
+  $: post = data.post;
+</script>
+```
 
 ### SEO 최적화
 포스트 상세 페이지는 SEO를 위해 다음 요소들을 포함해야 합니다:
@@ -57,7 +127,21 @@ postsStore.reset();  // 상태 초기화
   <meta property="og:title" content={`${post.title} - ${post.techBlogName}`} />
   <meta property="og:description" content={post.preview} />
   <meta property="og:image" content={post.imageUrl} />
+  <meta property="og:url" content={`https://www.velopers.kr/post/${post.id}`} />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={post.title} />
+  <meta name="twitter:description" content={post.preview} />
+  <meta name="twitter:image" content={post.imageUrl} />
   <meta name="keywords" content={post.tags.join(', ')} />
+  <link rel="canonical" href={`https://www.velopers.kr/post/${post.id}`} />
+  <meta property="article:published_time" content={post.createdAt} />
+  <meta property="article:author" content={post.author} />
+  {#each post.tags as tag}
+    <meta property="article:tag" content={tag} />
+  {/each}
 </svelte:head>
 ```
 
@@ -75,15 +159,53 @@ onMount(() => {
 <img src={`/icons/${$techBlogMap[post.techBlogName]?.icon}`} alt={post.techBlogName} />
 ```
 
+### 관련 포스트 로딩
+관련 포스트는 클라이언트 사이드에서 로드합니다:
+
+```typescript
+async function loadRelatedPosts() {
+  try {
+    const response = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        page: 1,
+        size: 5,
+        tags: post.tags,
+        excludeId: post.id
+      })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      relatedPosts = data.content;
+    }
+  } catch (e) {
+    console.error('관련 포스트 로딩 실패:', e);
+  }
+}
+```
+
 ### 에러 처리
 포스트 로딩 실패 시 적절한 에러 메시지를 표시해야 합니다:
 
+```svelte
+{#if error}
+  <div class="error-container">
+    <h2>포스트를 불러올 수 없습니다</h2>
+    <p>{error}</p>
+    <button on:click={() => goto('/')}>홈으로 돌아가기</button>
+  </div>
+{/if}
+```
+
+### 조회수 업데이트
+포스트 조회수는 클라이언트 사이드에서 업데이트합니다:
+
 ```typescript
-try {
-  const response = await fetch(getApiUrl(`/api/post/${postId}`));
-  if (!response.ok) throw new Error('포스트를 불러오는데 실패했습니다.');
-  post = await response.json();
-} catch (e) {
-  error = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
-}
+onMount(() => {
+  // 조회수 업데이트 API 호출
+  fetch(`/api/posts/${post.id}/view`, { method: 'POST' })
+    .catch(e => console.error('조회수 업데이트 실패:', e));
+});
 ```

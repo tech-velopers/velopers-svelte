@@ -17,16 +17,16 @@
   import { formatDate, formatDateString } from '$lib/utils/dateUtils';
   import logger from '$lib/utils/ActivityLogger';
 
-  let blog: TechBlog | null = null;
+  export let data: { blog: TechBlog };
+  let blog: TechBlog = data.blog;
   let blogPosts: any[] = [];
-  let loading = true;
+  let loading = false; // 서버에서 이미 로드됨
   let postsLoading = true;
   let error: string | null = null;
   let allTags: Tag[] = [];
   let loadedImages = new Set<string>();
   let currentPage = 1;
   let totalPages = 1;
-  let blogId: number | null = null;
   
   // 날짜 포맷 헬퍼 함수
   function formatBlogDate(dateValue: string | number[]): string {
@@ -45,51 +45,29 @@
     return date.toISOString();
   }
   
-  // URL에서 블로그 ID 가져오기
-  $: {
-    const pathParts = $page.url.pathname.split('/');
-    if (pathParts.length >= 3 && pathParts[1] === 'blog') {
-      try {
-        const id = parseInt(pathParts[2]);
-        if (!isNaN(id)) {
-          blogId = id;
-          fetchBlogDetails(id);
-        } else {
-          error = '잘못된 블로그 ID입니다.';
-        }
-      } catch (e) {
-        console.error('URL 파싱 오류:', e);
-        error = '잘못된 URL 형식입니다.';
-      }
-    }
-  }
+  // 블로그 데이터가 이미 서버에서 로드됨
 
   let techBlogsUnsubscribe: () => void;
 
   onMount(() => {
-    loading = true;
-    
-    // 데이터 로드 함수 정의
-    async function loadData() {
-      try {
-        // 데이터 로드
-        await Promise.all([
-          techBlogsStore.fetchTechBlogs(),
-          tagsStore.fetchTags()
-        ]);
-        
-        // 태그 데이터 구독
-        tagsStore.subscribe(tags => {
-          allTags = tags;
-        });
-      } catch (e) {
-        console.error('데이터 로드 오류:', e);
-        error = e instanceof Error ? e.message : '데이터를 불러오는데 실패했습니다.';
+    // 비동기 초기화 함수
+    async function init() {
+      // 태그 데이터 로드
+      await tagsStore.fetchTags();
+      tagsStore.subscribe(tags => {
+        allTags = tags;
+      });
+      
+      // 블로그 게시글 로드
+      if (blog) {
+        logger.logPageView('BLOG_DETAIL', blog.id);
+        fetchBlogPosts(blog.techBlogName, currentPage);
+        window.scrollTo({ top: 0, behavior: 'auto' });
       }
     }
     
-    // 비동기 함수 호출
-    loadData();
+    // 비동기 초기화 실행
+    init();
     
     const handlePopState = () => {
       console.log('popstate 이벤트 발생');
@@ -109,39 +87,13 @@
     
     window.addEventListener('popstate', handlePopState);
     
-    // 정리 함수 직접 반환
+    // 정리 함수 반환
     return () => {
       window.removeEventListener('popstate', handlePopState);
-      if (techBlogsUnsubscribe) techBlogsUnsubscribe();
     };
   });
 
-  // 블로그 정보 가져오기
-  async function fetchBlogDetails(id: number) {
-    try {
-      error = null;
-      
-      // techBlogsStore에서 블로그 정보 가져오기
-      techBlogsUnsubscribe = techBlogsStore.subscribe(blogs => {
-        const foundBlog = blogs.find(b => b.id === id);
-        if (foundBlog) {
-          blog = foundBlog;
-          // 블로그 데이터가 로드된 후 페이지 뷰 로깅
-          logger.logPageView('BLOG_DETAIL', foundBlog.id);
-          fetchBlogPosts(foundBlog.techBlogName, currentPage);
-          window.scrollTo({ top: 0, behavior: 'auto' });
-        } else if (blogs.length > 0) {
-          // 스토어에 데이터는 있지만 해당 ID의 블로그가 없는 경우
-          error = '블로그를 찾을 수 없습니다.';
-          console.error(`블로그를 찾을 수 없음: ID ${id}`);
-          loading = false;
-        }
-      });
-    } catch (e) {
-      error = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
-      loading = false;
-    }
-  }
+
 
   // 블로그 게시글 가져오기
   async function fetchBlogPosts(blogName: string, page: number) {
@@ -314,27 +266,21 @@
 </script>
 
 <svelte:head>
-  {#if blog}
-    <title>{blog.techBlogName} | Velopers</title>
-    <meta name="title" property="og:title" content={`${blog.techBlogName} - 기술 블로그`} />
-    <meta name="description" property="og:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
-    <meta name="image" property="og:image" content={`/icons/${blog.icon}`} />
-    <meta name="type" property="og:type" content="website" />
-    <meta name="url" property="og:url" content={`https://www.velopers.kr/blog/${blog.id}`} />
-    <meta name="site_name" property="og:site_name" content="Velopers" />
-    <meta property="og:locale" content="ko_KR" />
-    {#if blog.lastCreatedAt}
-      <meta property="article:published_time" content={typeof blog.lastCreatedAt === 'string' ? blog.lastCreatedAt : dateArrayToISOString(blog.lastCreatedAt)} />
-      <meta property="article:modified_time" content={typeof blog.lastCreatedAt === 'string' ? blog.lastCreatedAt : dateArrayToISOString(blog.lastCreatedAt)} />
-    {/if}
-    <meta property="article:section" content="기술 블로그" />
-    <meta property="article:publisher" content="https://www.velopers.kr" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={`${blog.techBlogName} - 기술 블로그`} />
-    <meta name="twitter:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
-    <meta name="twitter:image" content={`/icons/${blog.icon}`} />
-    <link rel="canonical" href={`https://www.velopers.kr/blog/${blog.id}`} />
-  {/if}
+  <title>{blog.techBlogName} | Velopers</title>
+  <meta property="og:title" content={`${blog.techBlogName} - 기술 블로그`} />
+  <meta property="og:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
+  <meta property="og:image" content={`https://www.velopers.kr/icons/${blog.icon}`} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={`https://www.velopers.kr/blog/${blog.id}`} />
+  <meta property="og:site_name" content="Velopers" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={`${blog.techBlogName} - 기술 블로그`} />
+  <meta name="twitter:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
+  <meta name="twitter:image" content={`https://www.velopers.kr/icons/${blog.icon}`} />
+  <meta name="description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
+  <meta name="keywords" content={`${blog.techBlogName}, 기술 블로그, 개발자, 프로그래밍`} />
+  <link rel="canonical" href={`https://www.velopers.kr/blog/${blog.id}`} />
 </svelte:head>
 
 <MainLayout allTags={allTags} {searchWithSelected} {onSearch} {onReset} showLogo={false} showSidebar={false}>
@@ -356,7 +302,7 @@
         </button>
       </div>
     </div>
-  {:else if blog}
+  {:else}
     <div class="max-w-4xl mx-auto p-2 sm:p-4 space-y-4 sm:space-y-8">
       <!-- 블로그 헤더 섹션 -->
       <div class="bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">

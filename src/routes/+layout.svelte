@@ -2,9 +2,20 @@
   import "../app.css";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
+  import { afterNavigate } from "$app/navigation";
   import Header from "$lib/components/layout/Header.svelte";
   import Footer from "$lib/components/layout/Footer.svelte";
   import { Toaster } from "$lib/components/ui/sonner";
+
+  // Google Analytics 페이지 뷰 추적
+  afterNavigate(() => {
+    if (typeof gtag !== 'undefined') {
+      gtag('config', 'G-JHCWNJ506V', {
+        page_path: $page.url.pathname + $page.url.search,
+        page_title: document.title
+      });
+    }
+  });
 
   // 다크모드 상태 관리
   let isDarkMode = false;

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+    <style>
+        @font-face {
+        font-family: 'Pretendard-Regular';
+        src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+        font-weight: 400;
+        font-style: bold;
+        }
+    </style>
+    <rect width="100%" height="100%" fill="white"/>
+    <polygon points="15,120 45,90 45,150" fill="#D2691E"/>
+    <text x="40" y="160" font-family="Arial, sans-serif" font-size="180" fill="black" font-weight="bold">V</text>
+    <polygon points="185,120 155,90 155,150" fill="#D2691E"/>
+</svg>

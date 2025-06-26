@@ -3,59 +3,136 @@ description: 커스텀 라우팅, 다른 페이지 이동 시 사용
 globs: src/lib/stores/router.ts, src/lib/pages/*.svelte
 ---
 # 라우팅 규칙
+# 라우팅 규칙
 
-## 커스텀 라우터 사용
+## SvelteKit 라우팅
 
-### 페이지 이동
-페이지 이동은 반드시 `navigate` 함수를 사용해야 합니다.
+### 파일 기반 라우팅
+SvelteKit은 파일 기반 라우팅을 사용합니다. `src/routes` 디렉토리 구조가 URL 경로가 됩니다.
 
-```typescript
-import { navigate } from '$lib/stores/router';
-navigate('/about');
+```
+src/routes/
+├── +page.svelte          # / (홈)
+├── +layout.svelte        # 모든 페이지에 적용되는 레이아웃
+├── about/
+│   └── +page.svelte      # /about
+├── blog/
+│   └── [slug]/
+│       ├── +page.svelte  # /blog/:slug (동적 라우트)
+│       └── +page.server.ts # 서버 사이드 로직
+└── api/
+    └── [...path]/
+        └── +server.ts    # API 라우트
 ```
 
-### 현재 경로 구독
-현재 경로는 `currentPath`와 `currentUrl` store를 구독하여 사용합니다.
+### 페이지 이동
+페이지 이동은 `goto` 함수를 사용합니다.
 
 ```typescript
-import { currentPath, currentUrl } from '$lib/stores/router';
-$: console.log($currentPath); // 경로만 필요할 때
-$: console.log($currentUrl);  // 쿼리 파라미터를 포함한 전체 URL이 필요할 때
+import { goto } from '$app/navigation';
+
+// 페이지 이동
+goto('/about');
+
+// 쿼리 파라미터와 함께 이동
+goto('/posts?page=2&category=frontend');
+
+// replaceState 옵션 사용 (히스토리 대체)
+goto('/posts', { replaceState: true });
+
+// 외부 링크는 일반 anchor 태그 사용
+<a href="https://external.com" target="_blank" rel="noopener noreferrer">외부 링크</a>
+```
+
+### 현재 경로 접근
+현재 경로 정보는 `$page` store를 통해 접근합니다.
+
+```typescript
+import { page } from '$app/stores';
+
+// 현재 경로
+$: currentPath = $page.url.pathname;
+
+// 쿼리 파라미터
+$: searchParams = $page.url.searchParams;
+$: pageNumber = searchParams.get('page') || '1';
+
+// 전체 URL
+$: currentUrl = $page.url.href;
 ```
 
 ### URL 상태 관리
-URL의 쿼리 파라미터가 변경될 때 (예: 페이지 번호, 카테고리 변경) 반드시 `window.history.pushState`를 사용하여 브라우저 히스토리에 기록해야 합니다.
+URL의 쿼리 파라미터를 업데이트할 때는 새로운 URL을 생성하여 `goto` 함수로 이동합니다.
 
 ```typescript
-function updateUrl(page: number, category: string) {
-  const url = new URL(window.location.href);
-  url.searchParams.set('page', page.toString());
-  url.searchParams.set('category', category);
-  window.history.pushState({}, '', url.toString());
+function updateUrlParams(params: Record<string, string>) {
+  const url = new URL($page.url);
+  
+  // 파라미터 설정
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) {
+      url.searchParams.set(key, value);
+    } else {
+      url.searchParams.delete(key);
+    }
+  });
+  
+  // URL 업데이트
+  goto(url.toString(), { replaceState: true });
 }
 ```
 
-### 뒤로가기 처리
-브라우저의 뒤로가기/앞으로가기는 `popstate` 이벤트를 통해 자동으로 처리됩니다. 
-컴포넌트에서는 `currentUrl` store를 구독하여 URL 변경을 감지하고 필요한 상태를 업데이트해야 합니다.
+### 동적 라우트 파라미터
+동적 라우트의 파라미터는 `+page.svelte`나 `+page.server.ts`에서 접근할 수 있습니다.
 
 ```typescript
-// URL 변경 감지 및 상태 업데이트
-let prevUrl = '';
-$: {
-  if (prevUrl !== $currentUrl) {
-    const { page, category } = getParamsFromUrl();
-    if (page !== currentPage || category !== currentCategory) {
-      updateState(page, category);
-    }
-    prevUrl = $currentUrl;
-  }
+// +page.svelte
+export let data; // +page.server.ts에서 전달된 데이터
+
+// +page.server.ts
+export async function load({ params }) {
+  const { slug } = params; // [slug] 폴더의 경우
+  // 데이터 로드 로직
+  return {
+    blog: await fetchBlog(slug)
+  };
 }
+```
+
+### 네비게이션 상태 감지
+페이지 이동 전후 이벤트를 감지할 수 있습니다.
+
+```typescript
+import { beforeNavigate, afterNavigate } from '$app/navigation';
+
+beforeNavigate(({ to, from, cancel }) => {
+  // 페이지 이동 전 처리
+  if (needsConfirmation) {
+    if (!confirm('페이지를 떠나시겠습니까?')) {
+      cancel();
+    }
+  }
+});
+
+afterNavigate(() => {
+  // 페이지 이동 후 처리
+  window.scrollTo(0, 0);
+});
+```
+
+### 프로그래매틱 뒤로가기
+브라우저의 뒤로가기 기능을 프로그래매틱하게 실행할 수 있습니다.
+
+```typescript
+// 뒤로가기
+window.history.back();
+
+// 또는 goto로 이전 페이지 URL 지정
+goto($page.url.searchParams.get('from') || '/');
 ```
 
 ### 주의사항
-- `<a href>` 태그 대신 `navigate` 함수를 사용해야 합니다.
-- 외부 링크는 일반 `<a>` 태그를 사용할 수 있습니다.
-- 새로운 페이지 추가 시 `App.svelte`의 라우팅 조건문에 추가해야 합니다.
-- URL 상태 변경 시 반드시 브라우저 히스토리에 기록하여 뒤로가기가 정상 동작하도록 해야 합니다.
-- 컴포넌트 마운트 시점에 현재 URL의 상태를 반영해야 합니다. 
+- 내부 링크는 `goto` 함수를 사용하여 SPA 방식으로 이동합니다.
+- 외부 링크는 일반 `<a>` 태그를 사용합니다.  
+- URL 파라미터 변경 시 `goto`와 `replaceState: true` 옵션을 사용하여 히스토리를 오염시키지 않습니다.
+- 서버 사이드 렌더링을 고려하여 브라우저 전용 API는 `onMount`나 `browser` 체크 후 사용합니다. 
