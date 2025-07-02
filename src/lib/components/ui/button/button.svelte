@@ -1,25 +1,30 @@
 <script lang="ts">
-	import { Button as ButtonPrimitive } from "bits-ui";
-	import { type Events, type Props, buttonVariants } from "./index.js";
+	import { buttonVariants, type Variant, type Size } from ".";
 	import { cn } from "$lib/utils";
 
-	type $$Props = Props;
-	type $$Events = Events;
+	type $Props = {
+		href?: string;
+		variant?: Variant;
+		size?: Size;
+		class?: string;
+	} & (
+		| import('svelte/elements').HTMLButtonAttributes
+		| import('svelte/elements').HTMLAnchorAttributes
+	);
 
-	let className: $$Props["class"] = undefined;
-	export let variant: $$Props["variant"] = "default";
-	export let size: $$Props["size"] = "default";
-	export let builders: $$Props["builders"] = [];
+	let className: $Props["class"] = undefined;
 	export { className as class };
+	export let variant: Variant = "default";
+	export let size: Size = "default";
+	export let href: $Props["href"] = undefined;
 </script>
 
-<ButtonPrimitive.Root
-	{builders}
-	class={cn(buttonVariants({ variant, size, className }))}
-	type="button"
-	{...$$restProps}
-	on:click
-	on:keydown
->
-	<slot />
-</ButtonPrimitive.Root>
+{#if href}
+	<a {href} class="{cn(buttonVariants({ variant, size, class: className }))}" {...$$restProps}>
+		<slot />
+	</a>
+{:else}
+	<button class="{cn(buttonVariants({ variant, size, class: className }))}" on:click {...$$restProps}>
+		<slot />
+	</button>
+{/if}

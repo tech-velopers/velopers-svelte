@@ -6,5 +6,8 @@ export default defineConfig({
   plugins: [sveltekit()],
   define: {
     global: 'globalThis'
+  },
+  ssr: {
+    external: ['svelte/elements']
   }
 })

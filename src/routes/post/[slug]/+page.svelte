@@ -13,6 +13,7 @@
   import type { PageData } from './$types';
 
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
+  import CommentsWrapper from '$lib/components/comments/CommentsWrapper.svelte';
 
   export let data: PageData;
   
@@ -335,6 +336,10 @@
         </Button>
       </div>
     </article>
+
+    <section class="max-w-4xl mx-auto px-3 sm:px-4 md:px-5 py-6">
+      <CommentsWrapper postId={post.id} />
+    </section>
   </MainLayout>
 {/if}
 
