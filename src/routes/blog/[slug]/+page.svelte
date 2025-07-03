@@ -5,8 +5,6 @@
   import { goto } from '$app/navigation';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import * as Alert from "$lib/components/ui/alert/index.js";
-  import { store as techBlogsStore } from '$lib/stores/techBlogs';
-  import type { TechBlog } from '$lib/stores/techBlogs';
   import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase, Grid2x2, Eye, Info } from 'lucide-svelte';
   import { toast } from "svelte-sonner";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
@@ -294,7 +292,7 @@
 </script>
 
 <svelte:head>
-  <title>{blog.techBlogName} | Velopers</title>
+  <title>{blog.techBlogName} - 기술 블로그</title>
   <meta property="og:title" content={`${blog.techBlogName} - 기술 블로그`} />
   <meta property="og:description" content={`${blog.techBlogName}의 기술 블로그 정보와 최신 게시글을 확인하세요.`} />
   <meta property="og:image" content={`https://www.velopers.kr/icons/${blog.icon}`} />
