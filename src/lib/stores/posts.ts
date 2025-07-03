@@ -105,6 +105,16 @@ function createPostsStore() {
     setPage: setPostsPage,
     setSearchQuery: setPostsSearchQuery,
     reset,
+    // SSR 데이터로 초기화하는 메서드 추가
+    setData: (posts: Post[], totalPages: number) => {
+      update(state => ({
+        ...state,
+        posts,
+        totalPages,
+        isLoading: false,
+        error: null
+      }));
+    },
     // 현재 페이지, 검색어, 카테고리 등의 상태는 search 스토어에서 직접 구독해야 함
     get currentPage() { return get(currentPageStore); },
     get currentCategory() { return get(selectedCategory); },

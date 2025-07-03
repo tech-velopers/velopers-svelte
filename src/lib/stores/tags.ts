@@ -10,6 +10,7 @@ export interface Tag {
 interface TagsStore {
   subscribe: (run: (value: Tag[]) => void) => () => void;
   fetchTags: () => Promise<void>;
+  setData: (data: Tag[]) => void;
 }
 
 function createTagsStore(): TagsStore {
@@ -41,7 +42,10 @@ function createTagsStore(): TagsStore {
 
   return {
     subscribe,
-    fetchTags
+    fetchTags,
+    setData: (data: Tag[]) => {
+      set(data);
+    }
   };
 }
 

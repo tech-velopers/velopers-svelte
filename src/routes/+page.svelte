@@ -41,8 +41,10 @@
   import type { Tag } from '$lib/stores/tags';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { get } from 'svelte/store';
   import logger from '$lib/utils/ActivityLogger';
+  import type { PageData } from './$types';
+
+  export let data: PageData;
 
   // 상태 관리
   let allTags: Tag[] = [];
@@ -58,47 +60,61 @@
     // 초기 URL 상태 반영
     prevUrl = window.location.href;
     
-    // 먼저 필요한 데이터를 가져옵니다
-    Promise.all([
-      tagsStore.fetchTags(),
-      techBlogsStore.fetchTechBlogs()
-    ]).then(() => {
-      // URL에서 검색 상태 복원
-      updateSearchStateFromUrl();
-      
-      // 모든 상태 설정 후 한 번만 포스트 가져오기
-      postsStore.fetchPosts();
-      console.log('onMount fetchPosts');
-      
-      // 페이지 조회 로깅
-      logger.logPageView('HOME', undefined);
-      
-      // 초기 URL 파라미터 로깅
-      const category = get(selectedCategory);
-      const page = get(currentPage);
-      const blogs = get(selectedBlogs);
-      const tags = get(selectedTags);
-      
-      if (category !== 'all' || page > 1 || blogs.length > 0 || tags.length > 0) {
-        logger.logActivity({
-          activityType: 'FILTER',
-          targetType: 'HOME',
-          extraData: {
-            category,
-            page,
-            blogCount: blogs.length,
-            tagCount: tags.length,
-            initialLoad: true
-          }
-        });
-      }
-      
-      // 초기 로드 완료 표시
-      initialLoadComplete = true;
-      
-      // URL 설정 (이제 반응형 블록이 실행될 수 있음)
-      // currentUrl.set(window.location.href); // Not needed with SvelteKit
-    });
+    // 서버에서 받은 데이터로 store 초기화
+    const serverData = data as any; // 타입 오류 임시 해결
+    tagsStore.setData(serverData.allTags);
+    techBlogsStore.setData(serverData.techBlogs);
+    
+    // 포스트 store 초기화
+    postsStore.setData(serverData.posts, serverData.totalPages);
+    
+    // 검색 상태 초기화 (서버 데이터 기반)
+    const { searchParams } = serverData;
+    setPage(searchParams.page);
+    setCategory(searchParams.category);
+    setSearchQuery(searchParams.query);
+    
+    // 선택된 블로그들 초기화 (아바타 정보와 함께)
+    if (searchParams.selectedBlogNames.length > 0) {
+      const blogsWithAvatars = searchParams.selectedBlogNames
+        .map(name => {
+          const blog = serverData.techBlogs.find(b => b.techBlogName === name);
+          return blog ? { name: blog.techBlogName, avatar: blog.icon } : null;
+        })
+        .filter(blog => blog !== null);
+      selectedBlogs.set(blogsWithAvatars);
+    }
+    
+    // 선택된 태그들 초기화
+    selectedTags.set(searchParams.selectedTags);
+    
+    console.log('SSR data loaded');
+    
+    // 페이지 조회 로깅
+    logger.logPageView('HOME', undefined);
+    
+    // 초기 URL 파라미터 로깅
+    const category = searchParams.category;
+    const page = searchParams.page;
+    const blogs = searchParams.selectedBlogNames;
+    const tags = searchParams.selectedTags;
+    
+    if (category !== 'all' || page > 1 || blogs.length > 0 || tags.length > 0) {
+      logger.logActivity({
+        activityType: 'FILTER',
+        targetType: 'HOME',
+        extraData: {
+          category,
+          page,
+          blogCount: blogs.length,
+          tagCount: tags.length,
+          initialLoad: true
+        }
+      });
+    }
+    
+    // 초기 로드 완료 표시
+    initialLoadComplete = true;
 
     return () => {
       unsubscribe();
@@ -138,11 +154,8 @@
     setCategory(category);
     setPage(1);
     
-    // URL 업데이트
+    // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
     goto(getSearchParamsUrl('/'), { replaceState: true });
-    
-    // 데이터 가져오기
-    postsStore.fetchPosts();
   };
 
   // 페이지 변경 시 데이터 가져오기
@@ -157,18 +170,11 @@
     // 페이지 변경
     setPage(page);
     
-    // URL 업데이트
+    // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
     goto(getSearchParamsUrl('/'), { replaceState: true });
     
-    // 데이터 가져오기
-    postsStore.fetchPosts();
-    
-    // 모바일에서는 즉시 스크롤, 데스크톱에서는 부드럽게 스크롤
-    const isMobile = window.innerWidth < 1024; // lg 브레이크포인트
-    window.scrollTo({
-      top: 0,
-      behavior: isMobile ? 'auto' : 'smooth'
-    });
+    // 즉시 맨 위로 스크롤
+    window.scrollTo(0, 0);
   }
 
   // 태그 토글
@@ -181,11 +187,8 @@
     
     toggleTag(tagName);
     
-    // URL 업데이트
+    // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
     goto(getSearchParamsUrl('/'), { replaceState: true });
-    
-    // 데이터 가져오기
-    postsStore.fetchPosts();
   };
 
   // 블로그 토글
@@ -198,11 +201,8 @@
     
     toggleBlog(blog);
     
-    // URL 업데이트
+    // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
     goto(getSearchParamsUrl('/'), { replaceState: true });
-    
-    // 데이터 가져오기
-    postsStore.fetchPosts();
   };
 
   // 검색 및 초기화 함수
@@ -212,11 +212,8 @@
     
     setSearchQuery(event.detail.query);
     
-    // URL 업데이트
+    // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
     goto(getSearchParamsUrl('/'), { replaceState: true });
-    
-    // 데이터 가져오기
-    postsStore.fetchPosts();
   };
 
   const searchWithSelected = () => {
@@ -227,11 +224,8 @@
       category: $selectedCategory
     });
     
-    // URL 업데이트
+    // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
     goto(getSearchParamsUrl('/'), { replaceState: true });
-    
-    // 데이터 가져오기
-    postsStore.fetchPosts();
   };
 
   const handleResetSelected = () => {
@@ -244,11 +238,8 @@
     
     resetSelected();
     
-    // URL 업데이트
+    // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
     goto(getSearchParamsUrl('/'), { replaceState: true });
-    
-    // 데이터 가져오기
-    postsStore.fetchPosts();
   };
 </script>
 

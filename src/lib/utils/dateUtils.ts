@@ -44,14 +44,26 @@ export function formatDateString(dateString?: string): string {
 /**
  * 날짜 배열을 상대적 시간 문자열로 변환하는 함수
  * 
- * @param dateArray [year, month, day, hour, minute, second?] 형식의 날짜 배열
+ * @param dateArray [year, month, day] 또는 [year, month, day, hour, minute, second?] 형식의 날짜 배열
  * @returns 상대적 시간 문자열 (예: 오늘, 어제, n일 전, n주 전)
  */
 export function formatRelativeDate(dateArray?: number[]): string {
-  if (!dateArray) return '정보 없음';
+  if (!dateArray || dateArray.length < 3) return '정보 없음';
   
   const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
+  
+  // 유효한 날짜인지 검증
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    return '유효하지 않은 날짜';
+  }
+  
   const date = new Date(year, month - 1, day, hour, minute, second);
+  
+  // 생성된 Date 객체가 유효한지 확인
+  if (isNaN(date.getTime())) {
+    return '유효하지 않은 날짜';
+  }
+  
   const now = new Date();
   
   // 오늘 날짜인 경우
@@ -91,15 +103,27 @@ export function formatRelativeDate(dateArray?: number[]): string {
 /**
  * 날짜가 최근 업데이트되었는지 확인하는 함수
  * 
- * @param dateArray [year, month, day, hour, minute, second?] 형식의 날짜 배열
+ * @param dateArray [year, month, day] 또는 [year, month, day, hour, minute, second?] 형식의 날짜 배열
  * @param days 최근으로 간주할 일수 (기본값: 2)
  * @returns 최근 업데이트 여부
  */
 export function isRecentlyUpdated(dateArray?: number[], days: number = 2): boolean {
-  if (!dateArray) return false;
+  if (!dateArray || dateArray.length < 3) return false;
   
   const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
+  
+  // 유효한 날짜인지 검증
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    return false;
+  }
+  
   const date = new Date(year, month - 1, day, hour, minute, second);
+  
+  // 생성된 Date 객체가 유효한지 확인
+  if (isNaN(date.getTime())) {
+    return false;
+  }
+  
   const now = new Date();
   
   const daysAgo = new Date();
@@ -110,12 +134,28 @@ export function isRecentlyUpdated(dateArray?: number[], days: number = 2): boole
 /**
  * 날짜 배열을 ISO 문자열로 변환하는 함수
  * 
- * @param dateArray [year, month, day, hour, minute, second?] 형식의 날짜 배열
+ * @param dateArray [year, month, day] 또는 [year, month, day, hour, minute, second?] 형식의 날짜 배열
  * @returns ISO 형식의 날짜 문자열
  */
 export function dateArrayToISOString(dateArray: number[]): string {
+  if (!dateArray || dateArray.length < 3) {
+    return new Date().toISOString(); // 기본값으로 현재 시간 반환
+  }
+  
   const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
+  
+  // 유효한 날짜인지 검증
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    return new Date().toISOString(); // 기본값으로 현재 시간 반환
+  }
+  
   const date = new Date(year, month - 1, day, hour, minute, second);
+  
+  // 생성된 Date 객체가 유효한지 확인
+  if (isNaN(date.getTime())) {
+    return new Date().toISOString(); // 기본값으로 현재 시간 반환
+  }
+  
   return date.toISOString();
 }
 

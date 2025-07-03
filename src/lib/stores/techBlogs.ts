@@ -22,6 +22,7 @@ interface TechBlogsStore {
   techBlogMap: {
     subscribe: (run: (value: TechBlogMap) => void) => () => void;
   };
+  setData: (data: TechBlog[]) => void;
 }
 
 function createTechBlogsStore(): TechBlogsStore {
@@ -60,7 +61,10 @@ function createTechBlogsStore(): TechBlogsStore {
   return {
     subscribe,
     fetchTechBlogs,
-    techBlogMap
+    techBlogMap,
+    setData: (data: TechBlog[]) => {
+      set(data);
+    }
   };
 }
 
