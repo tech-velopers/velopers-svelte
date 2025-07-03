@@ -1,29 +1,15 @@
 /**
  * 날짜 배열을 포맷팅된 문자열로 변환하는 함수
  * 
- * @param dateArray [year, month, day] 또는 [year, month, day, hour, minute, second?] 형식의 날짜 배열
+ * @param dateArray [year, month, day, hour, minute, second?] 형식의 날짜 배열
  * @returns 포맷팅된 날짜 문자열 (예: 2023년 3월 15일)
  */
 export function formatDate(dateArray: number[]): string {
-  if (!dateArray || dateArray.length < 3) {
-    return '정보 없음';
-  }
+  // 필요한 값 추출, second가 없는 경우 0으로 설정
+  const [year, month, day, hour, minute, second = 0] = dateArray;
   
-  // 필요한 값 추출, 시간 정보가 없는 경우 0으로 설정
-  const [year, month, day, hour = 0, minute = 0, second = 0] = dateArray;
-  
-  // 유효한 날짜인지 검증
-  if (isNaN(year) || isNaN(month) || isNaN(day)) {
-    return '유효하지 않은 날짜';
-  }
-  
-  // Date 객체 생성 (월은 0부터 시작하므로 -1)
+  // Date 객체 생성
   const date = new Date(year, month - 1, day, hour, minute, second);
-  
-  // 생성된 Date 객체가 유효한지 확인
-  if (isNaN(date.getTime())) {
-    return '유효하지 않은 날짜';
-  }
   
   // 한국어 로케일로 날짜 포맷팅
   return date.toLocaleDateString('ko-KR', {
