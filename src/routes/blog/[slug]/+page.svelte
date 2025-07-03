@@ -16,17 +16,23 @@
   import type { Tag } from '$lib/stores/tags';
   import { formatDate, formatDateString } from '$lib/utils/dateUtils';
   import logger from '$lib/utils/ActivityLogger';
+  import type { PageData } from './$types';
 
-  export let data: { blog: TechBlog };
-  let blog: TechBlog = data.blog;
-  let blogPosts: any[] = [];
+  export let data: PageData;
+  
+  // 서버에서 받은 데이터로 초기화
+  $: blog = data.blog;
+  $: blogPosts = data.posts;
+  $: totalPages = data.totalPages;
+  $: currentPage = data.currentPage;
+  
   let loading = false; // 서버에서 이미 로드됨
-  let postsLoading = true;
+  let postsLoading = false;
   let error: string | null = null;
   let allTags: Tag[] = [];
   let loadedImages = new Set<string>();
-  let currentPage = 1;
-  let totalPages = 1;
+  let prevUrl = '';
+  let initialLoadComplete = false;
   
   // 날짜 포맷 헬퍼 함수
   function formatBlogDate(dateValue: string | number[]): string {
@@ -44,10 +50,6 @@
     const date = new Date(year, month - 1, day, hour, minute, second);
     return date.toISOString();
   }
-  
-  // 블로그 데이터가 이미 서버에서 로드됨
-
-  let techBlogsUnsubscribe: () => void;
 
   onMount(() => {
     // 비동기 초기화 함수
@@ -58,12 +60,19 @@
         allTags = tags;
       });
       
-      // 블로그 게시글 로드
+      // 초기 URL 상태 반영
+      prevUrl = window.location.href;
+      
+      // 페이지 조회 로깅
       if (blog) {
         logger.logPageView('BLOG_DETAIL', blog.id);
-        fetchBlogPosts(blog.techBlogName, currentPage);
-        window.scrollTo({ top: 0, behavior: 'auto' });
       }
+      
+      // 즉시 맨 위로 스크롤
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      
+      // 초기 로드 완료 표시
+      initialLoadComplete = true;
     }
     
     // 비동기 초기화 실행
@@ -93,9 +102,22 @@
     };
   });
 
+  // URL 변경 감지
+  $: {
+    if (initialLoadComplete && prevUrl !== $page.url.href) {
+      console.log('URL changed:', prevUrl, '->', $page.url.href);
+      
+      // URL에서 페이지 파라미터 읽기
+      const newPage = parseInt($page.url.searchParams.get('page') || '1');
+      if (newPage !== currentPage && blog) {
+        fetchBlogPosts(blog.techBlogName, newPage);
+      }
+      
+      prevUrl = $page.url.href;
+    }
+  }
 
-
-  // 블로그 게시글 가져오기
+  // 블로그 게시글 가져오기 (페이지 변경시에만 사용)
   async function fetchBlogPosts(blogName: string, page: number) {
     try {
       postsLoading = true;
@@ -123,10 +145,9 @@
       currentPage = page;
     } catch (e) {
       console.error('게시글 로딩 오류:', e);
-      loading = false;
+      error = '게시글을 불러오는데 실패했습니다.';
     } finally {
       postsLoading = false;
-      loading = false;
     }
   }
 
@@ -144,11 +165,18 @@
           from: 'blog_detail'
         }
       });
-      fetchBlogPosts(blog.techBlogName, page);
-      window.scrollTo({
-        top: 0,
-        behavior: 'auto'
-      });
+      
+      // URL 업데이트 (URL 변경 감지에서 자동으로 데이터 가져옴)
+      const url = new URL($page.url);
+      if (page > 1) {
+        url.searchParams.set('page', page.toString());
+      } else {
+        url.searchParams.delete('page');
+      }
+      goto(url.pathname + url.search, { replaceState: true });
+      
+      // 즉시 맨 위로 스크롤
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }
 
