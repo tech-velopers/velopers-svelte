@@ -287,6 +287,54 @@
         </div>
       {/if}
 
+      {#if data.relatedPosts && data.relatedPosts.length > 0}
+        <section class="my-4 sm:my-5 md:my-6">
+          <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4 md:mb-5 text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            <span>연관 게시글</span>
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
+            {#each data.relatedPosts as relatedPost (relatedPost.id)}
+              <a href={`/post/${relatedPost.id}`} 
+                 class="flex flex-col bg-card text-card-foreground rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden dark:ring-1 dark:ring-gray-800 group">
+                <div class="w-full h-32 sm:h-36 relative flex-shrink-0">
+                  <img 
+                    src={relatedPost.imageUrl ? relatedPost.imageUrl : `/icons/${$techBlogMap[relatedPost.techBlogName]?.icon}`}
+                    alt={relatedPost.title}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="p-3 sm:p-4 flex flex-col flex-grow">
+                  <h3 class="font-semibold text-sm sm:text-base leading-snug group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-300 truncate-2-lines">
+                    {relatedPost.title}
+                  </h3>
+                  <div class="mt-auto pt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <div class="flex items-center gap-1.5 truncate">
+                      <img 
+                        src={`/icons/${$techBlogMap[relatedPost.techBlogName]?.icon}`} 
+                        alt={relatedPost.techBlogName}
+                        class="w-4 h-4 rounded-full flex-shrink-0"
+                        loading="lazy"
+                      />
+                      <span class="truncate">{relatedPost.techBlogName}</span>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                      {#if relatedPost.viewCnt}
+                        <span class="flex items-center">
+                          <Eye class="w-3.5 h-3.5 mr-0.5" strokeWidth={1.5} />
+                          {relatedPost.viewCnt.toLocaleString()}
+                        </span>
+                      {/if}
+                      <time>{formatDate(relatedPost.createdAt)}</time>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            {/each}
+          </div>
+        </section>
+      {/if}
+
       <!-- Advertisement -->
       <div class="w-full my-4 sm:my-5 md:my-6 text-center">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2560054260004649"
@@ -339,6 +387,13 @@
 {/if}
 
 <style lang="postcss">
+  .truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   :global(.prose) {
     color: rgb(31, 41, 55);
   }
@@ -401,4 +456,4 @@
       margin-bottom: 0.4rem !important;
     }
   }
-</style> 
+</style>
