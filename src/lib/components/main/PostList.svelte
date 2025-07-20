@@ -3,12 +3,13 @@
   import Pagination from './Pagination.svelte';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import * as Alert from "$lib/components/ui/alert";
-  import { MousePointer, ArrowRight } from "lucide-svelte";
+  import { MousePointer, ArrowRight, List, Grid3x3 } from "lucide-svelte";
   import { goto } from "$app/navigation";
   import logger from '$lib/utils/ActivityLogger';
   import { onMount } from 'svelte';
   import { Button } from "$lib/components/ui/button";
   import { cn } from "$lib/utils";
+  import { viewMode } from '$lib/stores/viewMode';
 
   export let posts: any[];
   export let currentPage: number;
@@ -110,9 +111,51 @@
       url: 'https://link.coupang.com/a/cj6d0H'
     });
   }
+
+  function handleViewModeToggle() {
+    viewMode.toggleMode();
+    logger.logClick('VIEW_MODE_TOGGLE', undefined, $viewMode, {
+      from: 'post_list',
+      newMode: $viewMode === 'detailed' ? 'summary' : 'detailed'
+    });
+  }
 </script>
 
 <div class="space-y-4">
+  <!-- 보기 모드 토글 버튼 -->
+  <div class="flex justify-end mb-4">
+    <div class="flex items-center bg-card border rounded-lg p-1 shadow-sm dark:ring-1 dark:ring-gray-800">
+      <Button
+        variant={$viewMode === 'detailed' ? 'default' : 'ghost'}
+        size="sm"
+        class={cn(
+          "px-3 py-2 h-auto transition-all",
+          $viewMode === 'detailed' 
+            ? "bg-blue-500 hover:bg-blue-600 text-white" 
+            : "hover:bg-gray-100 dark:hover:bg-gray-800"
+        )}
+        on:click={handleViewModeToggle}
+        title="자세히 보기"
+      >
+        <Grid3x3 class="w-4 h-4" />
+      </Button>
+      <Button
+        variant={$viewMode === 'summary' ? 'default' : 'ghost'}
+        size="sm"
+        class={cn(
+          "px-3 py-2 h-auto transition-all",
+          $viewMode === 'summary' 
+            ? "bg-blue-500 hover:bg-blue-600 text-white" 
+            : "hover:bg-gray-100 dark:hover:bg-gray-800"
+        )}
+        on:click={handleViewModeToggle}
+        title="요약 보기"
+      >
+        <List class="w-4 h-4" />
+      </Button>
+    </div>
+  </div>
+
   <!-- Google AdSense 광고 -->
   <div class="bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
     <div class="h-[90px] overflow-hidden flex justify-center items-center">
@@ -162,6 +205,7 @@
         {toggleTag}
         {toggleBlog}
         {loadedImages}
+        viewMode={$viewMode}
       />
       
       {#if index + 1 === secondAdIndex}
@@ -184,26 +228,30 @@
                 <h2 class="text-sm sm:text-base md:text-lg font-semibold mb-2 text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors duration-300">
                   {getRandomAdTitle()}
                 </h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-0 sm:mb-3 text-xs sm:text-sm">
-                  이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
-                </p>
+                {#if $viewMode === 'detailed'}
+                  <p class="text-gray-600 dark:text-gray-300 mb-0 sm:mb-3 text-xs sm:text-sm">
+                    이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+                  </p>
+                {/if}
               </div>
               
               <div class="mt-auto space-y-3 hidden sm:block">
-                <div class="flex flex-wrap gap-1 sm:gap-1.5">
-                  {#each ["AD", "개발자", "노트북", "컴퓨터", "쿠팡"] as tag}
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      class={cn(
-                        "px-3 py-[0.3rem] h-auto font-normal text-sm transition-all",
-                        "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
-                      )}
-                    >
-                      {tag}
-                    </Button>
-                  {/each}
-                </div>
+                {#if $viewMode === 'detailed'}
+                  <div class="flex flex-wrap gap-1 sm:gap-1.5">
+                    {#each ["AD", "개발자", "노트북", "컴퓨터", "쿠팡"] as tag}
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        class={cn(
+                          "px-3 py-[0.3rem] h-auto font-normal text-sm transition-all",
+                          "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
+                        )}
+                      >
+                        {tag}
+                      </Button>
+                    {/each}
+                  </div>
+                {/if}
 
                 <div class="flex items-center text-xs md:text-sm text-gray-500 dark:text-gray-400">
                   <div class="flex items-center hover:text-blue-500 transition-colors">
@@ -219,35 +267,39 @@
                 </div>
               </div>
             </div>
-            <div class="w-16 sm:w-24 md:w-28 lg:w-36 h-16 sm:h-24 md:h-28 lg:h-36 flex-shrink-0 rounded-lg overflow-hidden relative group">
-              <iframe 
-                src={`https://ads-partners.coupang.com/widgets.html?id=${adId}&template=carousel&trackingCode=AF6109504&subId=&width=300&height=300&tsource=`}
-                width="100%" 
-                height="100%" 
-                frameborder="0" 
-                scrolling="no" 
-                referrerpolicy="unsafe-url"
-                title="쿠팡 파트너스 광고"
-              ></iframe>
-              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-            </div>
+{#if $viewMode === 'detailed'}
+              <div class="w-16 sm:w-24 md:w-28 lg:w-36 h-16 sm:h-24 md:h-28 lg:h-36 flex-shrink-0 rounded-lg overflow-hidden relative group">
+                <iframe 
+                  src={`https://ads-partners.coupang.com/widgets.html?id=${adId}&template=carousel&trackingCode=AF6109504&subId=&width=300&height=300&tsource=`}
+                  width="100%" 
+                  height="100%" 
+                  frameborder="0" 
+                  scrolling="no" 
+                  referrerpolicy="unsafe-url"
+                  title="쿠팡 파트너스 광고"
+                ></iframe>
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+              </div>
+            {/if}
             
             <!-- 모바일에서만 보이는 태그와 메타 정보 영역 -->
             <div class="w-full order-2 -mt-0.5 hidden max-sm:block">
-              <div class="flex flex-wrap gap-1 mb-2">
-                {#each ["AD", "개발자", "노트북", "컴퓨터", "쿠팡"] as tag}
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    class={cn(
-                      "px-3 py-[0.3rem] h-auto font-normal text-xs transition-all",
-                      "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
-                    )}
-                  >
-                    {tag}
-                  </Button>
-                {/each}
-              </div>
+              {#if $viewMode === 'detailed'}
+                <div class="flex flex-wrap gap-1 mb-2">
+                  {#each ["AD", "개발자", "노트북", "컴퓨터", "쿠팡"] as tag}
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      class={cn(
+                        "px-3 py-[0.3rem] h-auto font-normal text-xs transition-all",
+                        "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800"
+                      )}
+                    >
+                      {tag}
+                    </Button>
+                  {/each}
+                </div>
+              {/if}
 
               <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
                 <div class="flex items-center hover:text-blue-500 transition-colors">

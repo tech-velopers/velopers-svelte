@@ -125,6 +125,16 @@
     goto(`/?tags=${tag}`);
   }
 
+  // 연관 게시글 클릭 핸들러 추가
+  function handleRelatedPostClick(relatedPost: any) {
+    logger.logClick('RELATED_POST', relatedPost.id, relatedPost.title, {
+      from: 'post_detail',
+      techBlogName: relatedPost.techBlogName,
+      currentPostId: post?.id,
+      currentPostTitle: post?.title
+    });
+  }
+
   // 검색 관련 함수들
   const searchWithSelected = () => {};
   const onSearch = () => {};
@@ -295,7 +305,8 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
             {#each data.relatedPosts as relatedPost (relatedPost.id)}
               <a href={`/post/${relatedPost.id}`} 
-                 class="flex flex-col bg-card text-card-foreground rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden dark:ring-1 dark:ring-gray-800 group">
+                 class="flex flex-col bg-card text-card-foreground rounded-lg border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden dark:ring-1 dark:ring-gray-800 group"
+                 on:click={() => handleRelatedPostClick(relatedPost)}>
                 <div class="w-full h-32 sm:h-36 relative flex-shrink-0">
                   <img 
                     src={relatedPost.imageUrl ? relatedPost.imageUrl : `/icons/${$techBlogMap[relatedPost.techBlogName]?.icon}`}
