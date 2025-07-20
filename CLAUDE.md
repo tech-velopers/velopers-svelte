@@ -52,6 +52,7 @@ npm run check
 - `src/lib/config.ts`에서 API 설정 관리
 - 직접 백엔드 호출 금지: `config.ts`의 `API_ENDPOINTS` 상수 활용
 - 서버 사이드 데이터 로딩 시 `+page.server.ts` 사용
+- **AI 검색**: `API_ENDPOINTS.aiEmbedding` 사용하여 AI 기반 유사도 검색 지원
 
 ## 주요 기술 스택
 
@@ -71,6 +72,7 @@ src/
 │   ├── +layout.svelte     # 전역 레이아웃
 │   ├── +page.svelte       # 홈 페이지
 │   ├── about/+page.svelte # 정적 페이지들
+│   ├── ai-search/+page.svelte # AI 검색 결과 페이지
 │   ├── all-blogs/+page.svelte
 │   ├── all-tags/+page.svelte
 │   ├── blog/[slug]/+page.svelte    # 동적 라우팅
@@ -125,11 +127,20 @@ static/                    # 정적 파일 (이미지, 아이콘 등)
 
 ### API 통신 상세
 - **프록시 필수**: SvelteKit API 라우트 (`/api/*`)를 통한 프록시 방식만 사용
-- **클라이언트 호출**: `fetch('/api/...')` 형태로만 호출
-- **환경별 설정**: API URL은 `config.ts`에서 관리
+- **config.ts 필수 사용**: 모든 API 호출은 `API_ENDPOINTS` 상수 사용 필수
+- **클라이언트 호출**: `import { API_ENDPOINTS } from '$lib/config'` 후 `API_ENDPOINTS.posts` 형태로만 호출
+- **환경별 설정**: API URL은 `config.ts`에서 중앙 관리
 - **에러 처리**: 로딩 상태 관리 필수
-- **올바른 예시**: `const response = await fetch('/api/posts');`
-- **잘못된 예시**: 직접 백엔드 URL 호출 금지
+- **올바른 예시**: 
+  ```typescript
+  import { API_ENDPOINTS } from '$lib/config';
+  const response = await fetch(API_ENDPOINTS.posts);
+  const aiResponse = await fetch(`${API_ENDPOINTS.aiEmbedding}?query=${query}`);
+  ```
+- **잘못된 예시**: 
+  - 직접 백엔드 URL 호출: `fetch('https://server.velopers.kr/api/posts')`
+  - 하드코딩된 경로: `fetch('/api/posts')`
+  - config.ts 미사용: 모든 API 경로는 `API_ENDPOINTS`에서 가져와야 함
 
 ### 사용자 활동 로깅 (ActivityLogger)
 - **필수 적용**: 모든 컴포넌트에서 `ActivityLogger` 임포트 및 사용
@@ -204,8 +215,10 @@ function handleClick() {
 
 ### 2. API 통신 표준
 - 반드시 `/api/*` 프록시 경로만 사용
-- 직접 백엔드 호출 절대 금지
+- **config.ts의 API_ENDPOINTS 필수 사용**: 모든 API 호출은 `API_ENDPOINTS` 상수를 통해서만
+- 직접 백엔드 호출 및 하드코딩된 API 경로 절대 금지
 - 서버 사이드 데이터 로딩은 `+page.server.ts` 활용
+- 새로운 API 엔드포인트 추가 시 반드시 `config.ts`의 `API_ENDPOINTS`에 먼저 정의
 
 ### 3. 사용자 활동 추적
 - 모든 사용자 상호작용에 ActivityLogger 적용 필수

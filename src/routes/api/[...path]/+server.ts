@@ -1,6 +1,5 @@
 import type { RequestHandler } from './$types';
-
-const API_BASE_URL = 'https://tech-blog-hub.vercel.app';
+import { API_BASE_URL } from '$lib/config';
 
 export const GET: RequestHandler = async ({ params, url, request }) => {
   const path = params.path;

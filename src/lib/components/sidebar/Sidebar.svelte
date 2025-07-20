@@ -59,11 +59,11 @@
     <button
       use:builder.action
       {...builder}
-      class="fixed right-3 bottom-3 lg:right-4 lg:bottom-4 lg:hidden z-50 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 lg:px-4 lg:py-3 rounded-full shadow-lg flex items-center gap-2"
+      class="fixed right-3 bottom-3 lg:right-4 lg:bottom-4 lg:hidden z-50 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-full shadow-lg flex items-center gap-1.5"
       aria-label="검색 메뉴 열기"
     >
-      <span class="text-sm font-medium">검색</span>
-      <Search class="h-6 w-6" />
+      <span class="text-xs font-medium">필터 검색</span>
+      <Search class="h-4 w-4" />
     </button>
   </Dialog.Trigger>
 

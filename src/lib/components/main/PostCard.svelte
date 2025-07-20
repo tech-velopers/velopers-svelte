@@ -6,7 +6,7 @@
     import {onMount} from "svelte";
     import {goto} from '$app/navigation';
     import {visitedPosts, markPostAsVisited} from '$lib/stores/visitedPosts';
-    import {Eye} from 'lucide-svelte';
+    import {Eye, Sparkles, Star} from 'lucide-svelte';
     import {cn} from '$lib/utils';
     import {Button} from "$lib/components/ui/button";
     import logger from '$lib/utils/ActivityLogger';
@@ -26,6 +26,8 @@
         createdAt: number[];
         viewCnt?: number;
         twoLineSummary?: string;
+        gptSummary?: string;
+        score?: number | null;
     };
 
     export let toggleTag: (tag: string) => void;
@@ -35,6 +37,7 @@
     export let loadedImages: Set<string>;
     export let showBlogToggle: boolean = true;
     export let viewMode: ViewMode = 'detailed';
+    export let showAISummary: boolean = false;
 
     let imageLoaded = false;
 
@@ -133,7 +136,35 @@
           )}
         >{post.title}</h2>
         {#if viewMode === 'detailed'}
-          {#if post.twoLineSummary}
+          {#if showAISummary && post.gptSummary}
+            <!-- AI 요약 표시 -->
+            <div class={cn(
+              "mb-3 p-3 rounded-lg border-l-4 border-purple-400 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-500",
+              isVisited ? "opacity-70" : ""
+            )}>
+              <div class="flex items-center gap-2 mb-2">
+                <Sparkles class="h-4 w-4 text-purple-500" />
+                <span class="text-sm font-medium text-purple-700 dark:text-purple-300">AI 요약</span>
+                {#if post.score}
+                  <div class="flex items-center gap-1">
+                    <Star class="h-3 w-3 text-yellow-500 fill-current" />
+                    <span class="text-xs text-gray-600 dark:text-gray-400">{post.score.toFixed(1)}</span>
+                  </div>
+                {/if}
+              </div>
+              <div class={cn(
+                "text-xs sm:text-sm prose prose-sm max-w-none",
+                "prose-headings:text-gray-900 dark:prose-headings:text-white",
+                "prose-p:text-gray-700 dark:prose-p:text-gray-300",
+                "prose-li:text-gray-700 dark:prose-li:text-gray-300",
+                isVisited 
+                  ? "text-[#9ca3af] dark:text-[#6b7280]" 
+                  : "text-gray-700 dark:text-gray-300"
+              )}>
+                {@html post.gptSummary}
+              </div>
+            </div>
+          {:else if post.twoLineSummary}
             <p class={cn(
               "mb-0 sm:mb-3 text-xs sm:text-sm flex items-center gap-1",
               isVisited 

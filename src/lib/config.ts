@@ -15,4 +15,5 @@ export const API_ENDPOINTS = {
     techBlogs: '/api/techBlogs',
     weeklyPosts: '/api/posts/weekly',
     weeklyPostsByCategory: '/api/posts/weekly/category',
+    aiEmbedding: '/api/ai/embedding',
 } as const; 
