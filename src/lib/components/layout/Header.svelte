@@ -132,7 +132,7 @@
               on:keydown={handleKeydown}
               on:compositionstart={handleCompositionStart}
               on:compositionend={handleCompositionEnd}
-              placeholder="AI에게 무엇이든 물어보세요..."
+              placeholder="AI로 관련된 게시글을 찾아보세요..."
               class="w-full pl-8 sm:pl-10 pr-16 sm:pr-20 py-2 sm:py-2.5 rounded-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-0 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-0 transition-all"
             />
             
