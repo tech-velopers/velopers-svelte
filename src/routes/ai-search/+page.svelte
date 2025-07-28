@@ -2,7 +2,8 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import PostCard from '$lib/components/main/PostCard.svelte';
-  import { Sparkles, Search, ArrowLeft } from 'lucide-svelte';
+  import CitationAnswer from '$lib/components/ai/CitationAnswer.svelte';
+  import { Sparkles, Search, ArrowLeft, Bot, FileText } from 'lucide-svelte';
   import { goto } from '$app/navigation';
   import logger from '$lib/utils/ActivityLogger';
   import { API_ENDPOINTS, getApiUrl } from '$lib/config';
@@ -23,11 +24,30 @@
     score: number | null;
   }
 
+  interface CitationInfo {
+    text: string;
+    quote: string;
+    fileName: string;
+    postId: number;
+    startIndex: number;
+    endIndex: number;
+  }
+
+  interface ComprehensiveSearchResponse {
+    comprehensiveAnswer: string;
+    citations: CitationInfo[];
+    relatedPosts: AISearchPost[];
+  }
+
   let isLoading = false;
+  let isComprehensiveLoading = false;
   let searchResults: AISearchPost[] = [];
+  let comprehensiveResult: ComprehensiveSearchResponse | null = null;
   let query = '';
   let error = '';
+  let comprehensiveError = '';
   let loadedImages = new Set<string>();
+  let searchMode: 'embedding' | 'comprehensive' = 'comprehensive';
 
   // URL 파라미터 변경을 감지하여 새로운 검색 수행
   $: {
@@ -37,13 +57,15 @@
     // 쿼리가 변경되었을 때만 새로운 검색 수행
     if (newQuery && newQuery !== query) {
       query = newQuery;
-      performAISearch(query);
+      performSearches(query);
     } else if (newQuery && !query) {
       // 초기 로드 시
       query = newQuery;
-      performAISearch(query);
+      performSearches(query);
     }
   }
+
+
 
   onMount(() => {
     logger.logActivity({
@@ -55,9 +77,17 @@
     });
   });
 
-  async function performAISearch(searchQuery: string) {
+  async function performSearches(searchQuery: string) {
     if (!searchQuery.trim()) return;
 
+    // 병렬로 두 검색을 수행
+    await Promise.all([
+      performEmbeddingSearch(searchQuery),
+      performComprehensiveSearch(searchQuery)
+    ]);
+  }
+
+  async function performEmbeddingSearch(searchQuery: string) {
     isLoading = true;
     error = '';
     
@@ -107,6 +137,56 @@
     }
   }
 
+  async function performComprehensiveSearch(searchQuery: string) {
+    isComprehensiveLoading = true;
+    comprehensiveError = '';
+    
+    try {
+      await logger.logActivity({
+          activityType: 'SEARCH',
+          targetType: 'AI_COMPREHENSIVE_SEARCH',
+          searchQuery: searchQuery,
+          extraData: {
+              from: 'ai_search_page',
+              searchType: 'comprehensive'
+          }
+      });
+
+      const response = await fetch(getApiUrl(`${API_ENDPOINTS.aiComprehensiveSearch}?query=${encodeURIComponent(searchQuery)}`));
+      
+      if (!response.ok) {
+        throw new Error('종합 답변 생성에 실패했습니다.');
+      }
+      
+      const result = await response.json();
+      comprehensiveResult = result;
+      
+      await logger.logActivity({
+          activityType: 'SEARCH',
+          targetType: 'AI_COMPREHENSIVE_SEARCH_COMPLETED',
+          searchQuery: searchQuery,
+          extraData: {
+              from: 'ai_search_page',
+              citationCount: result.citations?.length || 0
+          }
+      });
+    } catch (err) {
+      comprehensiveError = err instanceof Error ? err.message : '종합 답변 생성 중 오류가 발생했습니다.';
+      
+      await logger.logActivity({
+          activityType: 'ERROR',
+          targetType: 'AI_COMPREHENSIVE_SEARCH_FAILED',
+          searchQuery: searchQuery,
+          extraData: {
+              from: 'ai_search_page',
+              error: comprehensiveError
+          }
+      });
+    } finally {
+      isComprehensiveLoading = false;
+    }
+  }
+
   function handleBackClick() {
     logger.logClick('BACK_BUTTON', undefined, 'AI 검색 결과에서 뒤로가기', {
       from: 'ai_search_page'
@@ -125,6 +205,15 @@
 
   function handleBlogToggle(blog: { name: string; avatar: string }) {
     // AI 검색 결과에서는 블로그 토글 기능 비활성화
+  }
+
+  function handleCitationClick(event: CustomEvent<{ postId: number }>) {
+    const { postId } = event.detail;
+    
+    logger.logClick('CITATION_CLICK', postId, `Citation으로 포스트 ${postId} 이동`, {
+      from: 'ai_search_page',
+      postId: postId
+    });
   }
 </script>
 
@@ -163,50 +252,93 @@
   </div>
 
   <!-- 로딩 상태 -->
-  {#if isLoading}
+  {#if isLoading || isComprehensiveLoading}
     <div class="flex flex-col items-center justify-center py-16">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mb-4"></div>
-      <p class="text-gray-600 dark:text-gray-300">AI가 관련 게시글을 찾고 있습니다...</p>
+      <p class="text-gray-600 dark:text-gray-300">
+        {#if isComprehensiveLoading}
+          AI가 종합 답변을 생성하고 있습니다... 좀 오래 걸려요...
+        {:else}
+          AI가 관련 게시글을 찾고 있습니다...
+        {/if}
+      </p>
     </div>
   {/if}
 
   <!-- 에러 상태 -->
-  {#if error}
-    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
-      <div class="flex items-center gap-2">
-        <div class="text-red-500">
-          <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
+  {#if error || comprehensiveError}
+    <div class="space-y-4 mb-6">
+      {#if comprehensiveError}
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <div class="flex items-center gap-2">
+            <div class="text-red-500">
+              <Bot class="h-5 w-5" />
+            </div>
+            <h3 class="text-red-800 dark:text-red-200 font-medium">종합 답변 생성 오류</h3>
+          </div>
+          <p class="text-red-700 dark:text-red-300 mt-2">{comprehensiveError}</p>
         </div>
-        <h3 class="text-red-800 dark:text-red-200 font-medium">검색 오류</h3>
-      </div>
-      <p class="text-red-700 dark:text-red-300 mt-2">{error}</p>
+      {/if}
+      
+      {#if error}
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <div class="flex items-center gap-2">
+            <div class="text-red-500">
+              <Search class="h-5 w-5" />
+            </div>
+            <h3 class="text-red-800 dark:text-red-200 font-medium">검색 오류</h3>
+          </div>
+          <p class="text-red-700 dark:text-red-300 mt-2">{error}</p>
+        </div>
+      {/if}
     </div>
   {/if}
 
-  <!-- 검색 결과 -->
-  {#if !isLoading && !error}
-    {#if searchResults.length > 0}
-      <div class="mb-6">
-        <p class="text-gray-600 dark:text-gray-300">
-          <span class="font-medium text-purple-600 dark:text-purple-400">{searchResults.length}개</span>의 관련 게시글을 찾았습니다
-        </p>
-      </div>
+  
 
-      <div class="space-y-4">
-        {#each searchResults as post (post.id)}
-          <PostCard 
-            {post} 
-            toggleTag={handleTagToggle}
-            toggleBlog={handleBlogToggle}
-            {loadedImages}
-            showBlogToggle={false}
-            viewMode="detailed"
-            showAISummary={false}
-          />
-        {/each}
-      </div>
+  <!-- 검색 결과 -->
+  {#if (!isLoading && !isComprehensiveLoading) && (!error && !comprehensiveError)}
+    {#if comprehensiveResult || searchResults.length > 0}
+              <!-- 종합 답변 섹션 -->
+        {#if comprehensiveResult}
+          <div class="mb-8">
+            <CitationAnswer
+              comprehensiveAnswer={comprehensiveResult.comprehensiveAnswer}
+              citations={comprehensiveResult.citations}
+              relatedPosts={comprehensiveResult.relatedPosts}
+              on:citationClick={handleCitationClick}
+            />
+          </div>
+        {/if}
+
+      <!-- 관련 게시글 섹션 -->
+      {#if searchResults.length > 0}
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-4">
+            <FileText class="h-5 w-5 text-gray-600 dark:text-gray-300" />
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">관련 게시글</h3>
+          </div>
+          <p class="text-gray-600 dark:text-gray-300 mb-6">
+            <span class="font-medium text-purple-600 dark:text-purple-400">{searchResults.length}개</span>의 관련 게시글을 찾았습니다
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          {#each searchResults as post (post.id)}
+            <div class="transition-all duration-500">
+              <PostCard 
+                {post} 
+                toggleTag={handleTagToggle}
+                toggleBlog={handleBlogToggle}
+                {loadedImages}
+                showBlogToggle={false}
+                viewMode="detailed"
+                showAISummary={false}
+              />
+            </div>
+          {/each}
+        </div>
+      {/if}
     {:else if query}
       <div class="text-center py-16">
         <Sparkles class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
@@ -228,3 +360,4 @@
     {/if}
   {/if}
 </div>
+

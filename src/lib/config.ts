@@ -16,4 +16,5 @@ export const API_ENDPOINTS = {
     weeklyPosts: '/api/posts/weekly',
     weeklyPostsByCategory: '/api/posts/weekly/category',
     aiEmbedding: '/api/ai/embedding',
+    aiComprehensiveSearch: '/api/ai/comprehensive-search',
 } as const; 
