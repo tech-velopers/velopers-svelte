@@ -195,18 +195,18 @@
 
   <!-- Google AdSense 광고 -->
   {#if showTopAd}
-    <div class="relative bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
+    <div class="relative isolate bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
       <button
-        class="absolute right-2 top-2 inline-flex items-center justify-center rounded-md p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+        class="absolute right-2 top-2 z-[9999] inline-flex items-center justify-center rounded-md p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
         aria-label="광고 닫기"
         on:click={closeTopAdForOneDay}
       >
         <X class="w-4 h-4" />
       </button>
-      <div class="h-[90px] overflow-hidden flex justify-center items-center">
+      <div class="relative z-0 h-[90px] overflow-hidden flex justify-center items-center">
         <!-- 수평 포스트 광고 -->
         <ins class="adsbygoogle"
-             style="display:block;width:100%;height:90px"
+             style="display:block;width:100%;height:90px;position:relative;z-index:0;"
              data-ad-client="ca-pub-2560054260004649"
              data-ad-slot="5725112112"></ins>
       </div>
