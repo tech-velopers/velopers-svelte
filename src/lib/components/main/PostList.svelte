@@ -2,7 +2,8 @@
   import PostCard from './PostCard.svelte';
   import Pagination from './Pagination.svelte';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
-  import { List, Grid3x3 } from "lucide-svelte";
+  import { List, Grid3x3, X } from "lucide-svelte";
+  import { browser } from '$app/environment';
   import logger from '$lib/utils/ActivityLogger';
   import { onMount } from 'svelte';
   import { Button } from "$lib/components/ui/button";
@@ -17,6 +18,18 @@
   export let toggleBlog: (blog: { name: string; avatar: string; }) => void;
   export let loadedImages: Set<string>;
   export let loading = false;
+  let showTopAd = true;
+  // 브라우저에서 초기 렌더 전에 숨김 여부 결정하여 깜빡임 최소화
+  if (browser) {
+    try {
+      const hiddenUntil = localStorage.getItem('hideTopHorizontalAdUntil');
+      if (hiddenUntil && Date.now() < Number(hiddenUntil)) {
+        showTopAd = false;
+      }
+    } catch (e) {
+      // noop
+    }
+  }
   
   // 광고를 표시할 인덱스를 저장할 변수들
   let firstAdIndex: number;
@@ -47,8 +60,18 @@
     return adTitles[randomIndex];
   }
   
-  // 컴포넌트가 마운트될 때 랜덤 인덱스 설정
+  // 컴포넌트가 마운트될 때 랜덤 인덱스 설정 및 상단 광고 표시 여부 복원
   onMount(() => {
+    // 상단 가로형 광고 노출 제어 (24시간 숨김)
+    try {
+      const hiddenUntil = localStorage.getItem('hideTopHorizontalAdUntil');
+      if (hiddenUntil && Date.now() < Number(hiddenUntil)) {
+        showTopAd = false;
+      }
+    } catch (e) {
+      // noop
+    }
+
     // Google AdSense 스크립트 로드
     if (typeof window !== 'undefined') {
       const script = document.createElement('script');
@@ -110,6 +133,22 @@
     });
   }
 
+  function closeTopAdForOneDay() {
+    showTopAd = false;
+    try {
+      const oneDayMs = 24 * 60 * 60 * 1000;
+      const until = Date.now() + oneDayMs;
+      localStorage.setItem('hideTopHorizontalAdUntil', String(until));
+    } catch (e) {
+      // noop
+    }
+    logger.logClick('POST_AD_CLOSE', undefined, 'top_horizontal', {
+      from: 'post_list',
+      position: 'top_horizontal',
+      durationDays: 1
+    });
+  }
+
   function handleViewModeToggle() {
     viewMode.toggleMode();
     logger.logClick('VIEW_MODE_TOGGLE', undefined, $viewMode, {
@@ -155,15 +194,24 @@
   </div>
 
   <!-- Google AdSense 광고 -->
-  <div class="bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
-    <div class="h-[90px] overflow-hidden flex justify-center items-center">
-      <!-- 수평 포스트 광고 -->
-      <ins class="adsbygoogle"
-           style="display:block;width:100%;height:90px"
-           data-ad-client="ca-pub-2560054260004649"
-           data-ad-slot="5725112112"></ins>
+  {#if showTopAd}
+    <div class="relative bg-card text-card-foreground p-3 sm:p-4 md:p-5 rounded-lg border shadow-sm dark:ring-1 dark:ring-gray-800">
+      <button
+        class="absolute right-2 top-2 inline-flex items-center justify-center rounded-md p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+        aria-label="광고 닫기"
+        on:click={closeTopAdForOneDay}
+      >
+        <X class="w-4 h-4" />
+      </button>
+      <div class="h-[90px] overflow-hidden flex justify-center items-center">
+        <!-- 수평 포스트 광고 -->
+        <ins class="adsbygoogle"
+             style="display:block;width:100%;height:90px"
+             data-ad-client="ca-pub-2560054260004649"
+             data-ad-slot="5725112112"></ins>
+      </div>
     </div>
-  </div>
+  {/if}
 
 
   {#if loading}
