@@ -2,9 +2,7 @@
   import PostCard from './PostCard.svelte';
   import Pagination from './Pagination.svelte';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
-  import * as Alert from "$lib/components/ui/alert";
-  import { MousePointer, ArrowRight, List, Grid3x3 } from "lucide-svelte";
-  import { goto } from "$app/navigation";
+  import { List, Grid3x3 } from "lucide-svelte";
   import logger from '$lib/utils/ActivityLogger';
   import { onMount } from 'svelte';
   import { Button } from "$lib/components/ui/button";
@@ -167,15 +165,6 @@
     </div>
   </div>
 
-  <Alert.Root class="mb-4">
-    <MousePointer class="h-4 w-4" />
-    <Alert.Title class="flex items-center justify-between">
-      <span>포스트 페이지에서 제목을 클릭해보세요!</span>
-    </Alert.Title>
-    <Alert.Description>
-      이제 원문 보기 버튼이 아니라 제목을 클릭하면 바로 원문으로 이동합니다.
-    </Alert.Description>
-  </Alert.Root>
 
   {#if loading}
     {#each Array(5) as _}
