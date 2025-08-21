@@ -5,7 +5,7 @@
   import { goto } from '$app/navigation';
   import Skeleton from "$lib/components/ui/skeleton/skeleton.svelte";
   import * as Alert from "$lib/components/ui/alert/index.js";
-  import { ExternalLink, Undo2, Share2, Calendar, FileText, Briefcase, Grid2x2, Eye, Info } from 'lucide-svelte';
+  import { ExternalLink, Undo2, Share2, Calendar, FileText, Grid2x2, Eye, Info } from 'lucide-svelte';
   import { toast } from "svelte-sonner";
   import MainLayout from "$lib/components/layout/MainLayout.svelte";
   import PostCard from "$lib/components/main/PostCard.svelte";
@@ -253,21 +253,7 @@
     }
   }
 
-  // 채용정보 페이지 열기
-  function openJobInfo() {
-    if (blog?.techBlogName) {
-      logger.logActivity({
-        activityType: 'CLICK',
-        targetType: 'JOB_INFO',
-        targetId: blog.id,
-        extraData: {
-          blogName: blog.techBlogName,
-          from: 'blog_detail'
-        }
-      });
-      window.open(`https://www.jobkorea.co.kr/Search/?stext=${encodeURIComponent(blog.techBlogName)}`, '_blank', 'noopener,noreferrer');
-    }
-  }
+  // 채용정보 기능 제거됨
 
   // 모든 블로그 페이지로 이동하는 함수
   function navigateToAllBlogs() {
@@ -388,15 +374,6 @@
                 >
                   <Share2 class="mr-1.5 h-4 w-4" />
                   <span>공유하기</span>
-                </button>
-                
-                <button 
-                  class="px-3 py-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:hover:border-blue-800 rounded-md transition-colors duration-300 flex items-center justify-center text-xs md:text-sm whitespace-nowrap border border-gray-300 dark:border-gray-700 flex-1 text-gray-600 dark:text-gray-300"
-                  on:click={openJobInfo}
-                  tabindex="0"
-                >
-                  <Briefcase class="mr-1.5 h-4 w-4" />
-                  <span>채용정보</span>
                 </button>
               </div>
             </div>
